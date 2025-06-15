@@ -543,9 +543,9 @@ body.contact .main-title.loaded span:nth-child(7):hover { color: #00D2FF; } /* t
 }
 
 /* Mobile styles */
-@media (max-width: 650px) {
+@media (max-width: 1200px) {
     body {
-        font-size: 1.22rem; /* Increased mobile font size for better readability */
+        font-size: 1.22rem; /* Mobile/tablet font size */
     }
     
     .nav {
