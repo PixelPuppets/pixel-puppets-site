@@ -477,7 +477,7 @@ body.contact .main-title span:nth-child(7):hover { color: #00D2FF; } /* t */
 /* Mobile styles */
 @media (max-width: 650px) {
     body {
-        font-size: 1.05rem; /* Larger mobile font */
+        font-size: 1.15rem; /* Even larger mobile font */
     }
     
     .nav {
@@ -610,7 +610,7 @@ body.contact .main-title span:nth-child(7):hover { color: #00D2FF; } /* t */
     }
     
     .content {
-        font-size: 1.1rem; /* Larger mobile content font */
+        font-size: 1.2rem; /* Even larger mobile content font */
         padding: 0 2.5rem; /* Match container spacing */
         line-height: 1.6; /* Better line height */
     }
