@@ -199,6 +199,7 @@ body.home .nav-logo-mobile {
     font-weight: 500;
     position: relative;
     transition: all 0.3s ease;
+    font-size: 1.1rem;
 }
 
 .nav-links a::after {
