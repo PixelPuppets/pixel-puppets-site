@@ -505,7 +505,8 @@ body.home .main-title {
     
     .nav-logo-mobile {
         display: block;
-        height: 19px; /* 20% smaller from 24px */
+        height: 24px; /* Slightly bigger */
+        margin-left: 0.5rem;
     }
     
     .main {
