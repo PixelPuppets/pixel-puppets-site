@@ -150,7 +150,6 @@ body.contact a {
     display: block;
     margin: 0;
     padding: 0;
-    vertical-align: middle;
 }
 
 .nav-logo-mobile {
@@ -159,7 +158,6 @@ body.contact a {
     display: none;
     margin: 0;
     padding: 0;
-    vertical-align: middle;
 }
 
 /* Hide logo on home page only */
