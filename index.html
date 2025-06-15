@@ -27,6 +27,11 @@
                 </picture>
             </a>
         </div>
+        <div class="nav-burger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
         <div class="nav-links">
             <a href="about.html">About</a>
             <a href="contact.html">Contact</a>
@@ -37,13 +42,16 @@
         <div class="container">
             <h1 class="main-title">
                 <span class="title-line">
-                    <span class="square-outline">{</span><span class="s-demo-slab">P</span><span class="sh1-slab-serif">i</span><span class="square-outline">x</span><span class="s-slab-serif">e</span><span class="circle">l</span>
+                    <span class="square-outline">{</span><span class="s-demo-slab">P</span><span class="sh1-slab-serif">Ĩ</span><span class="square-outline">x</span><span class="s-slab-serif">e</span><span class="circle">l</span>
                 </span>
                 <span class="title-line">
-                    <span class="sh2-slab-serif">P</span><span class="scr-slab-serif">u</span><span class="circle">p</span><span class="ho-slab-serif">p</span><span class="square-circle">e</span><span class="t-slab-serif">t</span><span class="ho-unicase">s</span><span class="ho-slab-serif">}</span>
+                    <span class="sh2-slab-serif">P</span><span class="scr-slab-serif">ů</span><span class="circle">p</span><span class="ho-slab-serif">p</span><span class="square-circle">ē</span><span class="t-slab-serif">T</span><span class="ho-unicase">Ş</span><span class="ho-slab-serif">}</span>
                 </span>
             </h1>
-            <p class="main-tagline">A PLAYFUL POWER UP FOR ANYONE TIRED OF ADULTING...</p>
+            <p class="main-tagline">
+                <span class="tagline-line">A PLAYFUL POWER UP FOR</span>
+                <span class="tagline-line">ANYONE TIRED OF ADULTING...</span>
+            </p>
             <a href="mailto:hello@pixelpuppets.co" class="main-button">GET IN TOUCH</a>
         </div>
     </main>
@@ -51,5 +59,23 @@
     <footer class="footer">
         <p>&copy; 2024 Pixel Puppets Ltd. Company No. 14521270. All Rights Reserved.</p>
     </footer>
+
+    <script>
+        const burger = document.querySelector('.nav-burger');
+        const navLinks = document.querySelector('.nav-links');
+        
+        burger.addEventListener('click', () => {
+            burger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+        
+        // Close menu when clicking a link
+        navLinks.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+                burger.classList.remove('active');
+                navLinks.classList.remove('active');
+            }
+        });
+    </script>
 </body>
 </html>

@@ -23,6 +23,11 @@
                 </picture>
             </a>
         </div>
+        <div class="nav-burger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
         <div class="nav-links">
             <a href="about.html">About</a>
             <a href="contact.html">Contact</a>
@@ -42,5 +47,22 @@
     <footer class="footer">
         <p>&copy; 2024 Pixel Puppets Ltd. Company No. 14521270. All Rights Reserved.</p>
     </footer>
+    <script>
+        const burger = document.querySelector('.nav-burger');
+        const navLinks = document.querySelector('.nav-links');
+        
+        burger.addEventListener('click', () => {
+            burger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+        
+        // Close menu when clicking a link
+        navLinks.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+                burger.classList.remove('active');
+                navLinks.classList.remove('active');
+            }
+        });
+    </script>
 </body>
 </html>
