@@ -87,19 +87,6 @@ body {
     display: flex;
     flex-direction: column;
     font-size: 1.15rem;
-    opacity: 0;
-    animation: fadeIn 0.5s ease-in-out forwards;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 /* Container utility */
@@ -135,12 +122,15 @@ body.contact a {
 
 /* Navigation */
 .nav {
-    background-color: #F5F7FA;
+    background-color: transparent;
     padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     min-height: 62px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 .nav-brand {
@@ -678,4 +668,23 @@ body.contact .main-title.loaded span:nth-child(7):hover { color: #00D2FF; } /* t
     .content {
         max-width: 800px;
     }
+}
+
+/* Logo fade in/out animation */
+.nav-logo, .nav-logo-mobile {
+    opacity: 0;
+    transition: opacity 0.7s cubic-bezier(0.4,0,0.2,1);
+}
+
+body.home .nav-logo.visible, body.home .nav-logo-mobile.visible {
+    opacity: 1;
+}
+
+body:not(.home) .nav-logo.visible, body:not(.home) .nav-logo-mobile.visible {
+    opacity: 1;
+}
+
+.nav-logo.fading-out, .nav-logo-mobile.fading-out {
+    opacity: 0;
+    transition: opacity 0.15s cubic-bezier(0.4,0,0.2,1);
 }

@@ -1,0 +1,8 @@
+/* ...existing code... */
+nav {
+  position: sticky;
+  top: 0;
+  background: white; /* Optional: ensures nav doesn't become transparent */
+  z-index: 1000;     /* Optional: keeps nav above other elements */
+}
+/* ...existing code... */

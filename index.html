@@ -63,12 +63,21 @@
     <script>
         const burger = document.querySelector('.nav-burger');
         const navLinks = document.querySelector('.nav-links');
-        
+        const logo = document.querySelector('.nav-logo');
+        const logoMobile = document.querySelector('.nav-logo-mobile');
+        const homeLink = document.querySelector('.nav-brand a[href="index.html"]');
+
+        // Fade in logo on load
+        window.addEventListener('DOMContentLoaded', () => {
+            if (logo) logo.classList.add('visible');
+            if (logoMobile) logoMobile.classList.add('visible');
+        });
+
         burger.addEventListener('click', () => {
             burger.classList.toggle('active');
             navLinks.classList.toggle('active');
         });
-        
+
         // Close menu when clicking a link
         navLinks.addEventListener('click', (e) => {
             if (e.target.tagName === 'A') {
@@ -76,7 +85,20 @@
                 navLinks.classList.remove('active');
             }
         });
-        
+
+        // Fade out logo when home is pressed
+        if (homeLink) {
+            homeLink.addEventListener('click', (e) => {
+                if (logo) logo.classList.add('fading-out');
+                if (logoMobile) logoMobile.classList.add('fading-out');
+                // Optionally delay navigation for fade out effect
+                setTimeout(() => {
+                    window.location = homeLink.getAttribute('href');
+                }, 600);
+                e.preventDefault();
+            });
+        }
+
         // Enable hover effects after entrance animation completes
         setTimeout(() => {
             const title = document.querySelector('.main-title');

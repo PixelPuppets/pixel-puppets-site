@@ -39,7 +39,7 @@
             <h1 class="main-title">
                 <span class="square-outline">C</span><span class="sh1-slab-serif">o</span><span class="circle">n</span><span class="t-slab-serif">t</span><span class="s-slab-serif">a</span><span class="scr-slab-serif">c</span><span class="ho-slab-serif">t</span>
             </h1>
-            <p>All enquiries welcome, except time travel schemes, pyramid schemes, or anything involving cursed marionettes.</p>
+            <p>All enquiries welcome. If you would like to collaborate, or if you are a venue interested in hosting Pixel Puppets, drop us a line and we will share more details.</p>
             <p><a href="mailto:hello@pixelpuppets.co">hello@pixelpuppets.co</a></p>
         </div>
     </main>
@@ -50,12 +50,36 @@
     <script>
         const burger = document.querySelector('.nav-burger');
         const navLinks = document.querySelector('.nav-links');
-        
+        const logo = document.querySelector('.nav-logo');
+        const logoMobile = document.querySelector('.nav-logo-mobile');
+        const homeLink = document.querySelector('.nav-brand a[href="index.html"]');
+
+        // Fade in logo on load if coming from home
+        window.addEventListener('DOMContentLoaded', () => {
+            const fromHome = sessionStorage.getItem('fromHome');
+            if (fromHome === 'true' || document.body.classList.contains('home')) {
+                // Ensure transition is enabled
+                if (logo) logo.style.transition = '';
+                if (logoMobile) logoMobile.style.transition = '';
+                setTimeout(() => {
+                    if (logo) logo.classList.add('visible');
+                    if (logoMobile) logoMobile.classList.add('visible');
+                }, 10); // allow browser to register opacity:0 first
+                sessionStorage.removeItem('fromHome');
+            } else {
+                if (logo) logo.classList.add('visible');
+                if (logoMobile) logoMobile.classList.add('visible');
+                // Remove transition for instant appearance
+                if (logo) logo.style.transition = 'none';
+                if (logoMobile) logoMobile.style.transition = 'none';
+            }
+        });
+
         burger.addEventListener('click', () => {
             burger.classList.toggle('active');
             navLinks.classList.toggle('active');
         });
-        
+
         // Close menu when clicking a link
         navLinks.addEventListener('click', (e) => {
             if (e.target.tagName === 'A') {
@@ -63,7 +87,29 @@
                 navLinks.classList.remove('active');
             }
         });
-        
+
+        // Fade out logo when home is pressed
+        if (homeLink) {
+            homeLink.addEventListener('click', (e) => {
+                if (logo) {
+                    logo.classList.remove('visible');
+                    logo.classList.add('fading-out');
+                    logo.style.transition = 'opacity 0.15s cubic-bezier(0.4,0,0.2,1)';
+                }
+                if (logoMobile) {
+                    logoMobile.classList.remove('visible');
+                    logoMobile.classList.add('fading-out');
+                    logoMobile.style.transition = 'opacity 0.15s cubic-bezier(0.4,0,0.2,1)';
+                }
+                // Set flag for next page
+                sessionStorage.setItem('fromHome', 'true');
+                setTimeout(() => {
+                    window.location = homeLink.getAttribute('href');
+                }, 160); // match the CSS fade-out duration
+                e.preventDefault();
+            });
+        }
+
         // Enable hover effects after entrance animation completes
         setTimeout(() => {
             const title = document.querySelector('.main-title');
