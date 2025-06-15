@@ -256,7 +256,7 @@ body.home .main-title {
 .main-title {
     font-size: 97px; /* Fixed pixel size for pixel fonts */
     font-weight: normal; /* Pixel fonts have their own weight */
-    margin-bottom: 2rem;
+    margin-bottom: 5rem;
     color: #333;
     letter-spacing: 0; /* Let the font handle spacing */
     text-transform: uppercase;
@@ -303,6 +303,66 @@ body.home .main-title {
     image-rendering: crisp-edges !important;
 }
 
+/* Individual character glitch hover effect - all pages */
+.main-title span:hover {
+    animation: charGlitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+    cursor: pointer;
+}
+
+
+/* Individual character hover colors - only on home page */
+body.home .title-line:nth-child(1) span:nth-child(1):hover { color: #1DB41E; } /* { */
+body.home .title-line:nth-child(1) span:nth-child(2):hover { color: #D001FF; } /* P */
+body.home .title-line:nth-child(1) span:nth-child(3):hover { color: #E5E522; } /* Ĩ */
+body.home .title-line:nth-child(1) span:nth-child(4):hover { color: #FF6E00; } /* x */
+body.home .title-line:nth-child(1) span:nth-child(5):hover { color: #00D2FF; } /* e */
+body.home .title-line:nth-child(1) span:nth-child(6):hover { color: #1DB41E; } /* l */
+
+body.home .title-line:nth-child(2) span:nth-child(1):hover { color: #3737C8; } /* P */
+body.home .title-line:nth-child(2) span:nth-child(2):hover { color: #FF0000; } /* ů */
+body.home .title-line:nth-child(2) span:nth-child(3):hover { color: #E5E522; } /* p */
+body.home .title-line:nth-child(2) span:nth-child(4):hover { color: #1DB41E; } /* p */
+body.home .title-line:nth-child(2) span:nth-child(5):hover { color: #D001FF; } /* ē */
+body.home .title-line:nth-child(2) span:nth-child(6):hover { color: #00D2FF; } /* T */
+body.home .title-line:nth-child(2) span:nth-child(7):hover { color: #FF6E00; } /* Ş */
+body.home .title-line:nth-child(2) span:nth-child(8):hover { color: #3737C8; } /* } */
+
+/* Random character hover colors for About and Contact pages */
+body.about .main-title span:nth-child(1):hover { color: #FF6E00; } /* A */
+body.about .main-title span:nth-child(2):hover { color: #1DB41E; } /* b */
+body.about .main-title span:nth-child(3):hover { color: #D001FF; } /* o */
+body.about .main-title span:nth-child(4):hover { color: #00D2FF; } /* u */
+body.about .main-title span:nth-child(5):hover { color: #E5E522; } /* t */
+
+body.contact .main-title span:nth-child(1):hover { color: #3737C8; } /* C */
+body.contact .main-title span:nth-child(2):hover { color: #FF0000; } /* o */
+body.contact .main-title span:nth-child(3):hover { color: #1DB41E; } /* n */
+body.contact .main-title span:nth-child(4):hover { color: #FF6E00; } /* t */
+body.contact .main-title span:nth-child(5):hover { color: #E5E522; } /* a */
+body.contact .main-title span:nth-child(6):hover { color: #D001FF; } /* c */
+body.contact .main-title span:nth-child(7):hover { color: #00D2FF; } /* t */
+
+@keyframes charGlitch {
+    0% {
+        transform: translate(0);
+    }
+    20% {
+        transform: translate(-2px, 2px);
+    }
+    40% {
+        transform: translate(-2px, -2px);
+    }
+    60% {
+        transform: translate(2px, 2px);
+    }
+    80% {
+        transform: translate(2px, -2px);
+    }
+    100% {
+        transform: translate(0);
+    }
+}
+
 /* Individual character font classes */
 .main-title .square-outline { font-family: 'SquareOutline', monospace; }
 .main-title .s-demo-slab { font-family: 'S_Demo_Slab', monospace; }
@@ -316,10 +376,11 @@ body.home .main-title {
 .main-title .t-slab-serif { font-family: 'T_Slab_Serif', monospace; }
 .main-title .ho-unicase { font-family: 'HO_Unicase', monospace; }
 
+
 .main-tagline {
     font-size: 1.2rem;
     color: #333;
-    margin-bottom: 2.5rem;
+    margin-bottom: 6rem;
     letter-spacing: 1px;
     font-weight: 400;
 }
@@ -341,11 +402,10 @@ body.home .main-title {
     color: white;
     padding: 1rem 2.5rem;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 500;
     letter-spacing: 1px;
     border-radius: 50px;
     transition: background-color 0.3s ease;
-    animation: wiggle 6s ease-in-out infinite;
 }
 
 @keyframes wiggle {
@@ -360,7 +420,6 @@ body.home .main-title {
 
 .main-button:hover {
     background-color: #555;
-    animation: glitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
 }
 
 @keyframes glitch {
@@ -457,6 +516,13 @@ body.home .main-title {
         opacity: 0;
         transform: translateY(-10px);
         transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
     }
     
     .nav-links.active a {
@@ -515,7 +581,7 @@ body.home .main-title {
     
     .main-title {
         font-size: 66px; /* 10% larger from 60px */
-        margin-bottom: 2.5rem; /* More space before tagline */
+        margin-bottom: 5rem; /* More space before tagline */
     }
     
     .title-line {
@@ -531,7 +597,7 @@ body.home .main-title {
     
     .main-tagline {
         font-size: 1.2rem; /* Smaller mobile tagline */
-        margin-bottom: 2.5rem; /* More space before button */
+        margin-bottom: 6rem; /* More space before button */
     }
     
     .main-button {
@@ -555,7 +621,11 @@ body.home .main-title {
     
     .footer {
         padding: 1.6rem; /* 20% smaller from 2rem */
-        font-size: 0.72rem; /* 20% smaller from 0.9rem */
+        font-size: 0.83rem; /* 15% larger from 0.72rem */
+    }
+    
+    .mobile-break {
+        display: block;
     }
 }
 

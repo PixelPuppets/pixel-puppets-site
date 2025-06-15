@@ -45,7 +45,7 @@
     </main>
 
     <footer class="footer">
-        <p>&copy; 2024 Pixel Puppets Ltd. Company No. 14521270. All Rights Reserved.</p>
+        <p>&copy; 2024 Pixel Puppets Ltd. Company No. 14521270. <span class="mobile-break">All Rights Reserved.</span></p>
     </footer>
     <script>
         const burger = document.querySelector('.nav-burger');
@@ -64,39 +64,6 @@
             }
         });
         
-        // Page transition effects
-        document.addEventListener('DOMContentLoaded', () => {
-            const links = document.querySelectorAll('a[href^="/"]:not([href*="mailto"]), a[href$=".html"]');
-            
-            links.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    const href = link.getAttribute('href');
-                    
-                    if (href && !href.includes('mailto:')) {
-                        e.preventDefault();
-                        
-                        document.body.style.animation = 'fadeOut 0.3s ease-in-out forwards';
-                        
-                        setTimeout(() => {
-                            window.location.href = href;
-                        }, 300);
-                    }
-                });
-            });
-        });
     </script>
-    
-    <style>
-        @keyframes fadeOut {
-            from {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            to {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-        }
-    </style>
 </body>
 </html>
