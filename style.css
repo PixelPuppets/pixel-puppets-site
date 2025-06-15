@@ -217,10 +217,13 @@ body.home .nav-logo-mobile {
     width: 100%;
 }
 
-/* Active page navigation styling */
-body.about .nav-links a[href="about.html"]::after,
-body.contact .nav-links a[href="contact.html"]::after {
-    width: 100%;
+/* Active page navigation styling for desktop only */
+@media (min-width: 651px) {
+    body.about .nav-links a[href="about.html"]::after,
+    body.contact .nav-links a[href="contact.html"]::after {
+        width: 100%;
+        display: block;
+    }
 }
 
 /* Main content */
