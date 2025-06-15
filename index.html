@@ -77,6 +77,14 @@
             }
         });
         
+        // Enable hover effects after entrance animation completes
+        setTimeout(() => {
+            const title = document.querySelector('.main-title');
+            if (title) {
+                title.classList.add('loaded');
+            }
+        }, 1600); // Wait for all 14 characters to finish (1.4s + 0.2s buffer)
+        
     </script>
 </body>
 </html>
