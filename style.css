@@ -163,7 +163,7 @@ body.contact a {
 }
 
 .nav-logo-mobile {
-    height: 24px;
+    height: 26.4px; /* 10% bigger than 24px */
     width: auto;
     display: none;
     margin: 0;
@@ -639,7 +639,7 @@ body.contact .main-title.loaded span:nth-child(7):hover { color: #00D2FF; } /* t
     
     .nav-logo-mobile {
         display: block;
-        height: 24px; /* Slightly bigger */
+        height: 26.4px; /* 10% bigger than 24px */
         margin-left: 0.5rem;
     }
     
@@ -722,3 +722,25 @@ body:not(.home) .nav-logo.visible, body:not(.home) .nav-logo-mobile.visible {
     opacity: 0;
     transition: opacity 0.15s cubic-bezier(0.4,0,0.2,1);
 }
+
+/* Fade-in animation for body text paragraphs on About and Contact pages */
+@keyframes fadeInBodyText {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+body.about .container p, body.contact .container p {
+    opacity: 0;
+    animation: fadeInBodyText 0.7s cubic-bezier(0.4,0,0.2,1) forwards;
+    animation-delay: 0.3s;
+}
+
+body.about .container p:nth-of-type(2) { animation-delay: 0.5s; }
+body.about .container p:nth-of-type(3) { animation-delay: 0.7s; }
+body.contact .container p:nth-of-type(2) { animation-delay: 0.5s; }
