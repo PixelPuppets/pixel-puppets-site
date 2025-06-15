@@ -447,7 +447,8 @@ body.contact .main-title.loaded span:nth-child(7):hover { color: #00D2FF; } /* t
     font-weight: 500;
     letter-spacing: 1px;
     border-radius: 50px;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    transform: translate(0);
 }
 
 @keyframes wiggle {
@@ -462,6 +463,7 @@ body.contact .main-title.loaded span:nth-child(7):hover { color: #00D2FF; } /* t
 
 .main-button:hover {
     background-color: #555;
+    animation: glitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
 }
 
 @keyframes glitch {
