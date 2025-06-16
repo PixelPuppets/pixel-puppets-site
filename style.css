@@ -95,7 +95,7 @@ a {
 }
 
 a:hover, a:focus {
-    color: #000;
+    color: #111;
     text-decoration: underline;
 }
 
@@ -127,7 +127,7 @@ body.contact p {
 
 /* Make email link black on contact page */
 body.contact a {
-    color: #333;
+    color: #111;
 }
 
 /* Navigation */
