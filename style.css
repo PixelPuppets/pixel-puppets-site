@@ -698,7 +698,7 @@ body.contact .main-title.loaded span:nth-child(7):hover { color: #00D2FF; } /* t
     }
     
     .mobile-break {
-        display: block;
+        display: inline;
     }
 }
 
