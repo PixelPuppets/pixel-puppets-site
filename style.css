@@ -749,3 +749,38 @@ body.about .container p, body.contact .container p {
 body.about .container p:nth-of-type(2) { animation-delay: 0.5s; }
 body.about .container p:nth-of-type(3) { animation-delay: 0.7s; }
 body.contact .container p:nth-of-type(2) { animation-delay: 0.5s; }
+
+/* Preloader styles */
+#preloader.loader {
+  --preloader-bg: #F5F7FA;
+  --preloader-color: #111;
+  --preloader-size: 14vh;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--preloader-bg);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.4s;
+}
+#preloader .preloader-brace {
+  font-family: Consolas, Menlo, Monaco, monospace;
+  font-weight: bold;
+  font-size: var(--preloader-size);
+  color: var(--preloader-color);
+  opacity: 0.8;
+  display: inline-block;
+  animation: preloader-pulse 0.4s alternate infinite ease-in-out;
+}
+#preloader .preloader-brace:nth-child(2) {
+  animation-delay: 0.4s;
+}
+@keyframes preloader-pulse {
+  to {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+}
