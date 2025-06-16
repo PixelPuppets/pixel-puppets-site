@@ -14,6 +14,9 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="home">
+    <div id="preloader" class="loader">
+      <span class="preloader-brace">{</span><span class="preloader-brace">}</span>
+    </div>
     <nav class="nav">
         <div class="nav-brand">
             <a href="index.html">
@@ -57,27 +60,19 @@
     </main>
 
     <footer class="footer">
-        <p>&copy; 2024 Pixel Puppets Ltd. Company No. 14521270. <span class="mobile-break">All Rights Reserved.</span></p>
+        <p>&copy; 2024 Pixel Puppets Ltd. Company No. 14521270. <span class="mobile-break">All Rights Reserved.</span><br>
+        <span class="footer-address">Registered Office: 70-71 Cornish Place, Cornish Street, Sheffield, S6 3AF, England</span></p>
     </footer>
 
     <script>
         const burger = document.querySelector('.nav-burger');
         const navLinks = document.querySelector('.nav-links');
-        const logo = document.querySelector('.nav-logo');
-        const logoMobile = document.querySelector('.nav-logo-mobile');
-        const homeLink = document.querySelector('.nav-brand a[href="index.html"]');
-
-        // Fade in logo on load
-        window.addEventListener('DOMContentLoaded', () => {
-            if (logo) logo.classList.add('visible');
-            if (logoMobile) logoMobile.classList.add('visible');
-        });
-
+        
         burger.addEventListener('click', () => {
             burger.classList.toggle('active');
             navLinks.classList.toggle('active');
         });
-
+        
         // Close menu when clicking a link
         navLinks.addEventListener('click', (e) => {
             if (e.target.tagName === 'A') {
@@ -85,20 +80,7 @@
                 navLinks.classList.remove('active');
             }
         });
-
-        // Fade out logo when home is pressed
-        if (homeLink) {
-            homeLink.addEventListener('click', (e) => {
-                if (logo) logo.classList.add('fading-out');
-                if (logoMobile) logoMobile.classList.add('fading-out');
-                // Optionally delay navigation for fade out effect
-                setTimeout(() => {
-                    window.location = homeLink.getAttribute('href');
-                }, 600);
-                e.preventDefault();
-            });
-        }
-
+        
         // Enable hover effects after entrance animation completes
         setTimeout(() => {
             const title = document.querySelector('.main-title');
@@ -106,7 +88,15 @@
                 title.classList.add('loaded');
             }
         }, 1600); // Wait for all 14 characters to finish (1.4s + 0.2s buffer)
-        
+
+        window.addEventListener('load', () => {
+          const preloader = document.getElementById('preloader');
+          if (preloader) {
+            preloader.style.opacity = '0';
+            preloader.style.pointerEvents = 'none';
+            setTimeout(() => preloader.style.display = 'none', 400);
+          }
+        });
     </script>
 </body>
 </html>
