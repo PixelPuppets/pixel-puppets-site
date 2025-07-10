@@ -160,6 +160,7 @@ body.contact a {
     display: block;
     margin: 0;
     padding: 0;
+    transition: opacity 0.2s ease;
 }
 
 .nav-logo-mobile {
@@ -168,6 +169,7 @@ body.contact a {
     display: none;
     margin: 0;
     padding: 0;
+    transition: opacity 0.2s ease;
 }
 
 /* Hide logo on home page only */
@@ -748,6 +750,11 @@ body.contact .main-title.loaded span:nth-child(7):hover { color: #00D2FF; } /* t
     .nav-brand a::after {
         background-image: url('assets/images/logo-mobile-rollover.webp');
     }
+}
+
+.nav-brand a:hover .nav-logo,
+.nav-brand a:hover .nav-logo-mobile {
+    opacity: 0;
 }
 
 .nav-brand a:hover::after {
