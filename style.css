@@ -777,6 +777,50 @@ body.contact .main-title.loaded span:nth-child(7):hover { color: #00D2FF; } /* t
     }
 }
 
+/* ---------- TV channel-change page transition ----------
+   Canvas-rendered binary B&W noise plus scanline overlay. Hard cut on,
+   quick fade out on landing. Driven by assets/js/site-fx.js. */
+.tv-static-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 99999;
+    opacity: 0;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+}
+.tv-static-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100000;
+    opacity: 0;
+    background:
+        repeating-linear-gradient(
+            0deg,
+            rgba(0, 0, 0, 0.55) 0px,
+            rgba(0, 0, 0, 0.55) 2px,
+            transparent 2px,
+            transparent 4px
+        );
+    mix-blend-mode: multiply;
+}
+.tv-static-canvas.active,
+.tv-static-overlay.active {
+    opacity: 1;
+}
+.tv-static-canvas.fading-out,
+.tv-static-overlay.fading-out {
+    animation: tvFadeOut 0.11s linear forwards;
+}
+@keyframes tvFadeOut {
+    to {
+        opacity: 0;
+    }
+}
+
 .nav-brand a:hover .nav-logo-hover,
 .nav-brand a:hover .nav-logo-mobile-hover {
     opacity: 1;
