@@ -5,6 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="About Pixel Puppets - Learn more about our playful approach">
     <title>About - Pixel Puppets</title>
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pixelpuppets.co/about.html">
+    <meta property="og:title" content="About - Pixel Puppets">
+    <meta property="og:description" content="A live performance format built around real-time digital puppetry, surreal comedy, and audience interaction.">
+    <meta property="og:image" content="https://pixelpuppets.co/assets/images/og-image.jpg">
+    <meta property="og:image:width" content="1125">
+    <meta property="og:image:height" content="1135">
+    <meta property="og:site_name" content="Pixel Puppets">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://pixelpuppets.co/about.html">
+    <meta name="twitter:title" content="About - Pixel Puppets">
+    <meta name="twitter:description" content="A live performance format built around real-time digital puppetry, surreal comedy, and audience interaction.">
+    <meta name="twitter:image" content="https://pixelpuppets.co/assets/images/og-image.jpg">
+
     <link rel="icon" type="image/webp" href="assets/images/favicon.webp">
     <link rel="alternate icon" type="image/png" href="assets/images/favicon.png">
     <link rel="preload" href="fonts/LEDpixel-SquareOutline.otf" as="font" type="font/otf" crossorigin>
@@ -53,12 +71,24 @@
             <h1 class="main-title">
                 <span class="s-demo-slab">A</span><span class="circle">b</span><span class="ho-slab-serif">o</span><span class="scr-slab-serif">u</span><span class="t-slab-serif">t</span>
             </h1>
-            <p><strong>Pixel Puppets is a live performance format built around real-time digital puppetry and audience interaction.</strong></p>
-            <p>It draws on the language of familiar children’s television, then twists it. The worlds look bright, familiar, and dependable. Underneath, they run on the logic of a failing workplace, a hostile service economy, and a quietly fraying adult life. The format moves between storybook framing, live camera language, game logic, and broadcast-style interruptions.</p>
-            <p>At the centre is a live act of puppetry. Puppeteers drive the characters in real time, and the screen becomes a space where live performance is translated, warped, and shared with the audience. The audience do not watch from the outside. They are inside the system.</p>
-            <p>The first story in development is <em>Shamazon Matt: City Run</em>, a twenty-minute R&amp;D piece exploring the format in practice. A village postman and his robo cat are sent on an out-of-area delivery into a cheerfully hostile city.</p>
+            <p><strong>Pixel Puppets is a live performance format built around real-time digital puppetry, surreal comedy, and audience interaction.</strong></p>
+
+            <h3>How it works</h3>
+            <p>At the centre is a live act of puppetry. Puppeteers drive characters in real time, and the screen becomes a space where live performance is translated and warped. The audience does not simply watch from the outside. Their reactions, choices, and presence become part of how the performance unfolds.</p>
+
+            <h3>Tone</h3>
+            <p>Pixel Puppets draws on the aesthetic of familiar children’s television, then twists it for adult audiences. The worlds look bright, familiar, and dependable. Underneath, they run on the logic of a failing workplace, a hostile service economy, and a quietly fraying adult life. The format blends storybook framing, live camera language, game logic, broadcast-style interruptions, and surreal comedy.</p>
+
+            <h3>Currently in Production</h3>
+            <p>The first story in development is a twenty-minute R&amp;D piece exploring the format in practice. It follows a village postman and his robo cat on a strange, comic delivery into a cheerfully hostile city.</p>
+
+            <h3>Supporters</h3>
             <p>Pixel Puppets was developed through the BFI Immersive Fiction Lab. The project is now in funded research and development, supported by Arts Council England and Immersive Arts UK’s Experiment strand.</p>
-            <p>Pixel Puppets is created by Ben Carlin, Artistic Director, and Joe Duggan, Producer. Ben has worked across virtual production, XR, and live performance for over a decade. Joe is Head of Digital at the National Youth Theatre and led the UK’s first large-scale VR theatre production.</p>
+
+            <h3>Team</h3>
+            <p>Pixel Puppets is created by Ben Carlin, Artistic Director, and Joe Duggan, Producer. Ben has worked across virtual production, XR, and live performance for over a decade. Joe works across digital production and live performance, and pioneered the UK’s first large-scale VR theatre production.</p>
+
+            <h3>Partnerships</h3>
             <p>If you are a venue, festival, programmer, or funder interested in talking further about Pixel Puppets, we would love to hear from you. Please <a href="mailto:hello@pixelpuppets.co"><strong>get in touch</strong></a>.</p>
         </div>
     </main>
@@ -72,6 +102,8 @@
         const navLinks = document.querySelector('.nav-links');
         const logo = document.querySelector('.nav-logo');
         const logoMobile = document.querySelector('.nav-logo-mobile');
+        const logoHover = document.querySelector('.nav-logo-hover');
+        const logoMobileHover = document.querySelector('.nav-logo-mobile-hover');
         const homeLink = document.querySelector('.nav-brand a[href="index.html"]');
 
         // Fade in logo on load if coming from home
@@ -120,6 +152,16 @@
                     logoMobile.classList.remove('visible');
                     logoMobile.classList.add('fading-out');
                     logoMobile.style.transition = 'opacity 0.15s cubic-bezier(0.4,0,0.2,1)';
+                }
+                // Also fade out the coloured hover versions so they don't flash
+                // visible while the outline version is fading away.
+                if (logoHover) {
+                    logoHover.style.transition = 'opacity 0.15s cubic-bezier(0.4,0,0.2,1)';
+                    logoHover.style.opacity = '0';
+                }
+                if (logoMobileHover) {
+                    logoMobileHover.style.transition = 'opacity 0.15s cubic-bezier(0.4,0,0.2,1)';
+                    logoMobileHover.style.opacity = '0';
                 }
                 // Set flag for next page
                 sessionStorage.setItem('fromHome', 'true');

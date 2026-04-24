@@ -5,6 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Contact Pixel Puppets - Get in touch with us">
     <title>Contact - Pixel Puppets</title>
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pixelpuppets.co/contact.html">
+    <meta property="og:title" content="Contact - Pixel Puppets">
+    <meta property="og:description" content="Get in touch with Pixel Puppets.">
+    <meta property="og:image" content="https://pixelpuppets.co/assets/images/og-image.jpg">
+    <meta property="og:image:width" content="1125">
+    <meta property="og:image:height" content="1135">
+    <meta property="og:site_name" content="Pixel Puppets">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://pixelpuppets.co/contact.html">
+    <meta name="twitter:title" content="Contact - Pixel Puppets">
+    <meta name="twitter:description" content="Get in touch with Pixel Puppets.">
+    <meta name="twitter:image" content="https://pixelpuppets.co/assets/images/og-image.jpg">
+
     <link rel="icon" type="image/webp" href="assets/images/favicon.webp">
     <link rel="alternate icon" type="image/png" href="assets/images/favicon.png">
     <link rel="preload" href="assets/images/logo-rollover.webp" as="image">
@@ -62,6 +80,8 @@
         const navLinks = document.querySelector('.nav-links');
         const logo = document.querySelector('.nav-logo');
         const logoMobile = document.querySelector('.nav-logo-mobile');
+        const logoHover = document.querySelector('.nav-logo-hover');
+        const logoMobileHover = document.querySelector('.nav-logo-mobile-hover');
         const homeLink = document.querySelector('.nav-brand a[href="index.html"]');
 
         // Fade in logo on load if coming from home
@@ -110,6 +130,16 @@
                     logoMobile.classList.remove('visible');
                     logoMobile.classList.add('fading-out');
                     logoMobile.style.transition = 'opacity 0.15s cubic-bezier(0.4,0,0.2,1)';
+                }
+                // Also fade out the coloured hover versions so they don't flash
+                // visible while the outline version is fading away.
+                if (logoHover) {
+                    logoHover.style.transition = 'opacity 0.15s cubic-bezier(0.4,0,0.2,1)';
+                    logoHover.style.opacity = '0';
+                }
+                if (logoMobileHover) {
+                    logoMobileHover.style.transition = 'opacity 0.15s cubic-bezier(0.4,0,0.2,1)';
+                    logoMobileHover.style.opacity = '0';
                 }
                 // Set flag for next page
                 sessionStorage.setItem('fromHome', 'true');

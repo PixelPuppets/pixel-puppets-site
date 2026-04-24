@@ -125,6 +125,16 @@ body.contact p {
     margin-bottom: 2rem;
 }
 
+/* Section subheadings on About page */
+body.about h3 {
+    font-family: 'EuclidCircularB', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 0.75rem 0;
+}
+
 /* Make email link black on contact page */
 body.contact a {
     color: #111;
@@ -174,7 +184,9 @@ body.contact a {
 
 /* Hide logo on home page only */
 body.home .nav-logo,
-body.home .nav-logo-mobile {
+body.home .nav-logo-mobile,
+body.home .nav-logo-hover,
+body.home .nav-logo-mobile-hover {
     display: none;
 }
 
@@ -752,6 +764,19 @@ body.contact .main-title.loaded span:nth-child(7):hover { color: #00D2FF; } /* t
     display: none;
 }
 
+/* Mobile: flip the hover displays so the correct one is active.
+   Must come AFTER the unconditional display rules above, otherwise
+   source order means the desktop hover stays `display: block` on
+   mobile and the mobile hover stays `display: none`. */
+@media (max-width: 1200px) {
+    .nav-logo-hover {
+        display: none;
+    }
+    .nav-logo-mobile-hover {
+        display: block;
+    }
+}
+
 .nav-brand a:hover .nav-logo-hover,
 .nav-brand a:hover .nav-logo-mobile-hover {
     opacity: 1;
@@ -782,7 +807,8 @@ body:not(.home) .nav-logo.visible, body:not(.home) .nav-logo-mobile.visible {
     }
 }
 
-body.about .container p, body.contact .container p {
+body.about .container p, body.contact .container p,
+body.about .container h3 {
     opacity: 0;
     animation: fadeInBodyText 0.7s cubic-bezier(0.4,0,0.2,1) forwards;
     animation-delay: 0.3s;
