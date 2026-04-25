@@ -55,17 +55,29 @@
     }
   }
 
-  // Arriving from a transition: render static for a beat, then fade out.
+  // Arriving from a transition: cover the page with static FIRST, then
+  // reveal body content. The inline head script has set
+  // html.pp-tv-arriving so body content is hidden until we say otherwise.
+  // Also bypass the home-page preloader which would otherwise produce a
+  // ~500ms freeze of bouncing dots after the static fades.
   if (sessionStorage.getItem('__pp_tv__')) {
     sessionStorage.removeItem('__pp_tv__');
+    const preloader = document.getElementById('preloader');
+    if (preloader) preloader.style.display = 'none';
     startStatic();
-    canvas.classList.add('active', 'fading-out');
-    scanlines.classList.add('active', 'fading-out');
+    canvas.classList.add('active');
+    scanlines.classList.add('active');
+    requestAnimationFrame(() => {
+      // Static is now drawn on top. Safe to reveal body content underneath.
+      document.documentElement.classList.remove('pp-tv-arriving');
+      canvas.classList.add('fading-out');
+      scanlines.classList.add('fading-out');
+    });
     setTimeout(() => {
       canvas.classList.remove('active', 'fading-out');
       scanlines.classList.remove('active', 'fading-out');
       stopStatic();
-    }, 130);
+    }, 100);
   }
 
   // Intercept internal nav-link clicks. Hard cut to static, brief beat,
@@ -85,7 +97,7 @@
         scanlines.classList.add('active');
         setTimeout(() => {
           window.location.href = href;
-        }, 70);
+        }, 50);
       },
       true
     );
