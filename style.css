@@ -781,18 +781,6 @@ body.contact .main-title.loaded span:nth-child(7):hover { color: #00D2FF; } /* t
    Canvas-rendered binary B&W noise plus scanline overlay. Hard cut on,
    quick fade out on landing. Driven by assets/js/site-fx.js. */
 
-/* When arriving from a transition, hide page content until the static
-   overlay is drawn on top — otherwise there's a brief flash of unstatic'd
-   page content before the deferred script runs. The inline head script
-   sets this class synchronously before any paint. The deferred script
-   removes it once the static is visible. */
-html.pp-tv-arriving {
-    background: #000;
-}
-html.pp-tv-arriving body > *:not(.tv-static-canvas):not(.tv-static-overlay) {
-    visibility: hidden;
-}
-
 .tv-static-canvas {
     position: fixed;
     inset: 0;

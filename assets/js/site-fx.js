@@ -25,54 +25,64 @@
     document.body.appendChild(scanlines);
   }
 
-  let rafId = null;
+  // Pre-generated static frames cycled at low rate. Cheaper than
+  // generating noise per frame, especially on mobile.
+  const STATIC_FRAMES = 6;
+  let staticTimerId = null;
+
+  function buildStaticFrames(w, h) {
+    const frames = [];
+    for (let n = 0; n < STATIC_FRAMES; n++) {
+      const buf = new Uint8ClampedArray(w * h * 4);
+      for (let i = 0; i < buf.length; i += 4) {
+        const v = Math.random() < 0.5 ? 0 : 255;
+        buf[i] = buf[i + 1] = buf[i + 2] = v;
+        buf[i + 3] = 255;
+      }
+      frames.push(new ImageData(buf, w, h));
+    }
+    return frames;
+  }
 
   function startStatic() {
-    // Render at 1/3 viewport resolution then scale up via image-rendering:
-    // pixelated. Gives chunky CRT-style noise and stays cheap on mobile.
-    const w = (canvas.width = Math.max(1, Math.floor(window.innerWidth / 3)));
-    const h = (canvas.height = Math.max(1, Math.floor(window.innerHeight / 3)));
+    // Render at 1/4 viewport resolution then scale up via image-rendering:
+    // pixelated. Chunky CRT noise that stays cheap on mobile.
+    const w = (canvas.width = Math.max(1, Math.floor(window.innerWidth / 4)));
+    const h = (canvas.height = Math.max(1, Math.floor(window.innerHeight / 4)));
     const ctx = canvas.getContext('2d');
-    const imgData = ctx.createImageData(w, h);
-    const data = imgData.data;
-    function frame() {
-      const len = data.length;
-      for (let i = 0; i < len; i += 4) {
-        const v = Math.random() < 0.5 ? 0 : 255;
-        data[i] = data[i + 1] = data[i + 2] = v;
-        data[i + 3] = 255;
-      }
-      ctx.putImageData(imgData, 0, 0);
-      rafId = requestAnimationFrame(frame);
+    const frames = buildStaticFrames(w, h);
+    let idx = 0;
+    function tick() {
+      ctx.putImageData(frames[idx % STATIC_FRAMES], 0, 0);
+      idx++;
+      // ~33fps — fast enough to read as scrambling, slow enough to stay
+      // smooth on mobile.
+      staticTimerId = setTimeout(tick, 30);
     }
-    frame();
+    tick();
   }
 
   function stopStatic() {
-    if (rafId) {
-      cancelAnimationFrame(rafId);
-      rafId = null;
+    if (staticTimerId) {
+      clearTimeout(staticTimerId);
+      staticTimerId = null;
     }
   }
 
-  // Arriving from a transition: cover the page with static FIRST, then
-  // reveal body content. The inline head script has set
-  // html.pp-tv-arriving so body content is hidden until we say otherwise.
-  // Also bypass the home-page preloader which would otherwise produce a
-  // ~500ms freeze of bouncing dots after the static fades.
+  // Arriving from a transition: bypass the home-page preloader (which
+  // would otherwise produce a ~500ms freeze of bouncing dots) and play
+  // a brief static accent. We don't try to hide body content during the
+  // JS-startup gap any more — on mobile that gap can be 200-400ms which
+  // makes the page feel like it's freezing on a black screen. Letting
+  // the page render normally and treating the static as a quick accent
+  // is much smoother.
   if (sessionStorage.getItem('__pp_tv__')) {
     sessionStorage.removeItem('__pp_tv__');
     const preloader = document.getElementById('preloader');
     if (preloader) preloader.style.display = 'none';
     startStatic();
-    canvas.classList.add('active');
-    scanlines.classList.add('active');
-    requestAnimationFrame(() => {
-      // Static is now drawn on top. Safe to reveal body content underneath.
-      document.documentElement.classList.remove('pp-tv-arriving');
-      canvas.classList.add('fading-out');
-      scanlines.classList.add('fading-out');
-    });
+    canvas.classList.add('active', 'fading-out');
+    scanlines.classList.add('active', 'fading-out');
     setTimeout(() => {
       canvas.classList.remove('active', 'fading-out');
       scanlines.classList.remove('active', 'fading-out');
