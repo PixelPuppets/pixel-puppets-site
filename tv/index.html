@@ -1,0 +1,2050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pixel Puppets — Desktop Mockup</title>
+
+<style>
+@font-face {
+  font-family: 'LEDpixel';
+  src: url('assets/fonts/LEDpixel-S_SlabSerif.otf') format('opentype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Euclid';
+  src: url('assets/fonts/EuclidCircularB-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Euclid';
+  src: url('assets/fonts/EuclidCircularB-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-display: swap;
+}
+
+:root {
+  --bg-cream: #f1e6d3;
+  --bg-cream-deeper: #e6d8c0;
+  --headline-red: #C22321;
+  --headline-red-shadow: #000000;
+  --tv-bezel: #d8c8ac;
+  --tv-bezel-shadow: #b39c7c;
+  --tv-screen: #1a1413;
+  --wood-dark: #9a7656;
+  --wood-mid: #b88e6a;
+  --ink: #1a1410;
+  --ink-soft: #4a3d33;
+  --power-red: #c83a30;
+  --led-green: #5fbf6a;
+  --led-amber: #EFC863;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg-cream);
+  font-family: 'Euclid', 'Helvetica Neue', sans-serif;
+  color: var(--ink);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(255, 248, 230, 0.6), transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(180, 140, 100, 0.15), transparent 60%);
+}
+
+.page {
+  /* Locked to the TV's max width. Container-query scope so every text
+     element / margin / gap inside the page uses cqw and scales in lockstep
+     with the TV when the viewport narrows. */
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 28px 24px 48px;
+  container-type: inline-size;
+}
+
+/* ─── Top bar ────────────────────────────────────────────── */
+.topbar {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1.5cqw;
+  min-height: 6cqw;
+}
+.topbar .spacer { display: none; }
+
+.headline {
+  font-family: 'LEDpixel', monospace;
+  /* cqw scales with the .page container (which matches the TV width).
+     clamp() pins a sensible minimum on very narrow viewports. */
+  font-size: clamp(28px, 9.4cqw, 88px);
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: var(--headline-red);
+  text-shadow:
+    0.32cqw 0.32cqw 0 var(--headline-red-shadow),
+    0.64cqw 0.64cqw 0 rgba(0, 0, 0, 0.35);
+  line-height: 1;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.socials {
+  display: flex;
+  gap: 10px;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.socials a {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-cream-deeper);
+  border: 1px solid rgba(26, 20, 16, 0.18);
+  border-radius: 5px;
+  color: var(--ink);
+  text-decoration: none;
+  transition: transform 0.15s ease;
+}
+.socials a:hover { transform: translateY(-2px); }
+.socials img {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+/* ─── Sub-tagline ─────────────────────────────────────────── */
+.tagline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 1.4cqw, 16px);
+  margin-bottom: 0.6cqw;
+  font-family: 'Euclid', sans-serif;
+  font-weight: 700;
+  font-size: clamp(9px, 1.4cqw, 15px);
+  letter-spacing: 0.26em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+/* Vertical-only stretch on the strap text so it reads taller without
+   eating horizontal space on the row. */
+.tagline .strap-text {
+  display: inline-block;
+  transform: scaleY(1.15);
+  transform-origin: 50% 50%;
+}
+.tagline .dot {
+  width: 0.65cqw;
+  height: 0.65cqw;
+  min-width: 4px;
+  min-height: 4px;
+  background: var(--ink);
+  border-radius: 50%;
+}
+.tagline .rule {
+  /* Grow either side of the text and reach to just inside the TV
+     corner edges. Three stacked lines (red / blue / yellow) sit tight
+     together with hairline gaps for a vintage colour-bar feel. */
+  flex: 1 1 auto;
+  min-width: 30px;
+  max-width: 12cqw;
+  height: 8px;
+  background: linear-gradient(
+    to bottom,
+    #D92A1A 0 2px,
+    transparent 2px 3px,
+    #5191AE 3px 5px,
+    transparent 5px 6px,
+    #EFC863 6px 8px
+  );
+}
+
+/* ─── TV ──────────────────────────────────────────────────── */
+.tv {
+  /* Wrapper for the TV housing. PNG is now cropped tight to the TV body
+     so no negative-margin compensation needed. */
+  position: relative;
+  margin-bottom: 2.6cqw;
+}
+
+/* TV housing — the only direct child of .tv now. Holds the screen, the
+   chassis PNG, and the absolute-positioned controls overlaid on top. */
+.tv-housing {
+  position: relative;
+  aspect-ratio: 1344 / 892;
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  /* Container-query scope so all on-chassis controls can size in cqi
+     units and scale with the TV width automatically. */
+  container-type: inline-size;
+  filter: drop-shadow(0 24px 36px rgba(60, 40, 20, 0.35))
+          drop-shadow(0 6px 10px rgba(60, 40, 20, 0.18));
+}
+.tv-housing .tv-chassis {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+  user-select: none;
+}
+/* Screen area positioned to fit the transparent cutout in the PNG.
+   Coordinates derived from the PNG: cutout is 8.18%-74.03% horizontally,
+   10.31%-75.44% vertically, of the 1344×892 source image. */
+.tv-housing .screen-area {
+  position: absolute;
+  left: 8.18%;
+  top: 10.31%;
+  width: 65.85%;
+  height: 65.13%;
+  z-index: 1;
+  overflow: hidden;
+  background: #000;
+}
+
+/* ─── Boundary-mapping mode ─────────────────────────────────
+   When body has .boundary-mode, hide the on-chassis controls
+   so the boundary boxes can be positioned without visual noise. */
+body.boundary-mode .channel-panel,
+body.boundary-mode .knob-row { display: none !important; }
+
+/* ─── Corner-warp mode ──────────────────────────────────────
+   Toggle via window.cw(). When body has .corner-warp, four red
+   dots appear at the corners of the channel-panel. Drag to warp
+   each corner independently — JS computes a matrix3d transform
+   that maps the panel's rectangle to the dragged quad. */
+.corner-handle {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ff2a2a;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  cursor: move;
+  z-index: 30;
+  transform: translate(-50%, -50%);
+  opacity: 0.5;
+  display: none;
+}
+.corner-handle:hover { opacity: 1; }
+body.corner-warp .corner-handle { display: block; }
+.corner-handle::after {
+  content: attr(data-label);
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font: 700 9px/1 ui-monospace, monospace;
+  color: #c40000;
+  background: white;
+  padding: 2px 4px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.boundary-box {
+  position: absolute;
+  border: 3px dashed #ff2a2a;
+  background: rgba(255, 42, 42, 0.14);
+  z-index: 20;
+  cursor: move;
+  min-width: 40px;
+  min-height: 28px;
+  user-select: none;
+  box-sizing: border-box;
+  display: none;
+}
+body.boundary-mode .boundary-box { display: block; }
+
+/* Custom resize corner — clearly visible, dedicated cursor */
+.boundary-box .boundary-resize {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 26px;
+  height: 26px;
+  background:
+    linear-gradient(135deg, transparent 50%, #c40000 50%);
+  border-bottom-right-radius: 2px;
+  cursor: nwse-resize;
+  z-index: 25;
+}
+.boundary-box .boundary-resize::after {
+  content: '';
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid white;
+  border-bottom: 2px solid white;
+}
+
+.boundary-box .boundary-label {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  font: 700 11px/1.3 'Euclid', sans-serif;
+  color: #c40000;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 4px 7px;
+  border-radius: 3px;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.boundary-box .boundary-readout {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  font: 600 10px/1.3 ui-monospace, 'SF Mono', Menlo, monospace;
+  color: #c40000;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 3px 6px;
+  border-radius: 3px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ─── Screen ──────────────────────────────────────────────── */
+/* (.screen-wrap and .screen are unused now that the TV PNG carries the
+   bezel; .tv-housing .screen-area replaces them. Keeping fallback rules
+   in case the elements are still present.) */
+.screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--tv-screen);
+  overflow: hidden;
+}
+.screen img.show,
+.screen video.show {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  filter: contrast(1.05) saturate(1.1);
+  display: block;
+  transition: filter 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.screen video.show.dial-active {
+  transition: none;
+}
+.screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.45) 100%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px);
+  pointer-events: none;
+  z-index: 2;
+}
+.screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 30%);
+  border-radius: 14px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.now-playing {
+  position: absolute;
+  top: 10%;
+  left: 3%;
+  z-index: 5;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.9cqi;
+  font-family: 'Euclid', sans-serif;
+  /* Card removed — text + flashing dot sit directly on the screen image,
+     no shadow / stroke. Locked-in placement from the badge tweak session. */
+  transform:
+    translate(0.5cqi, -1.5cqi)
+    rotate(0deg)
+    scale(1);
+  transform-origin: 0 0;
+}
+.now-playing .dot {
+  width: 1.15cqi;
+  height: 1.15cqi;
+  border-radius: 50%;
+  background: var(--power-red);
+  box-shadow: 0 0 8px var(--power-red);
+  animation: pulse 1.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+.now-playing .text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+}
+.now-playing .label {
+  font-weight: 700;
+  font-size: 1.45cqi;
+  color: var(--led-amber);
+  letter-spacing: 0.18em;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.now-playing .episode {
+  font-weight: 500;
+  font-size: 1.45cqi;
+  color: rgba(255, 248, 220, 0.85);
+  letter-spacing: 0.14em;
+}
+
+.show-overlay {
+  position: absolute;
+  bottom: 16%;
+  left: 3%;
+  z-index: 5;
+  max-width: 58%;
+  padding: 1.6cqi 2cqi 1.8cqi;
+  background: linear-gradient(180deg,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.78) 100%);
+  border-radius: 6px;
+  border-left: 3px solid rgba(255, 220, 90, 0.6);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  transition: opacity 0.18s ease;
+}
+.show-overlay.fading,
+.show-title.fading { opacity: 0; }
+.show-title { transition: opacity 0.18s ease; }
+/* Show title — sits OUTSIDE the dark description card, directly on the
+   video. Yellow + chunky with a hard black shadow so it punches through
+   bright frames. */
+.show-title {
+  position: absolute;
+  bottom: 46%;
+  left: 3%;
+  z-index: 6;
+  margin: 0;
+  font-family: 'LEDpixel', monospace;
+  color: #EFC863;
+  font-size: 5.4cqi;
+  font-weight: 700;
+  line-height: 0.88;
+  letter-spacing: 0.04em;
+  /* Softer than pure black — desaturated dark navy reads as shadow without
+     screaming against the warm yellow. 4-cardinal outline + hard offset. */
+  text-shadow:
+    -0.18cqi -0.18cqi 0 #262F37,
+     0.18cqi -0.18cqi 0 #262F37,
+    -0.18cqi  0.18cqi 0 #262F37,
+     0.18cqi  0.18cqi 0 #262F37,
+     0.42cqi  0.42cqi 0 #262F37,
+     0.65cqi  0.65cqi 0 rgba(38, 47, 55, 0.45);
+  pointer-events: none;
+  user-select: none;
+}
+.show-overlay .desc {
+  font-family: 'Euclid', sans-serif;
+  font-weight: 500;
+  font-size: 1.7cqi;
+  line-height: 1.5;
+  color: #fff8d8;
+}
+
+.show-overlay .desc p { margin: 0 0 7px; }
+.show-overlay .desc p:last-child { margin-bottom: 0; }
+.show-overlay .desc a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(255, 248, 216, 0.55);
+}
+.show-overlay .desc a:hover {
+  text-decoration-color: #fff8d8;
+}
+
+/* TV-static flicker overlay — fires on channel change */
+.static-noise {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95   0 0 0 0 0.93   0 0 0 0 0.85   0 0 0 2 -0.9'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 220% 220%;
+}
+.static-noise.active {
+  animation: static-flicker 0.7s steps(14) forwards;
+}
+@keyframes static-flicker {
+  0%   { opacity: 0;    background-position:   0%   0%; transform: scale(1);    }
+  6%   { opacity: 1;    background-position:  47%  23%; transform: scale(1.02); }
+  14%  { opacity: 0.85; background-position: -19%  61%; transform: scale(1);    }
+  22%  { opacity: 1;    background-position:  82% -22%; transform: scale(1.04); }
+  30%  { opacity: 0.6;  background-position: -38%  41%; transform: scale(1);    }
+  40%  { opacity: 0.98; background-position:  35%   5%; transform: scale(1.02); }
+  50%  { opacity: 0.45; background-position: -29% -14%; transform: scale(1);    }
+  60%  { opacity: 0.92; background-position:  17%  28%; transform: scale(1.03); }
+  72%  { opacity: 0.5;  background-position: -52%  18%; transform: scale(1);    }
+  84%  { opacity: 0.7;  background-position:  62% -38%; transform: scale(1.01); }
+  100% { opacity: 0;    background-position:   0%   0%; transform: scale(1);    }
+}
+
+.player-controls {
+  position: absolute;
+  bottom: 6%;
+  left: 5%;
+  right: 5%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 5;
+  font-family: 'Euclid', sans-serif;
+  color: #fff8d8;
+}
+.player-controls .play-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 248, 220, 0.15);
+  border: 1px solid rgba(255, 248, 220, 0.4);
+  color: #fff8d8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.12s ease;
+}
+.player-controls .play-btn:hover { background: rgba(255, 248, 220, 0.28); }
+.player-controls .scrub {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 248, 220, 0.2);
+  border-radius: 2px;
+  position: relative;
+  cursor: pointer;
+}
+.player-controls .scrub .fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0%;
+  background: var(--power-red);
+  border-radius: 2px;
+  pointer-events: none;
+}
+.player-controls .scrub .knob-handle {
+  position: absolute;
+  left: 0%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background: #fff8d8;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+}
+.player-controls .time {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+}
+.player-controls .icon-cluster {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  opacity: 0.85;
+}
+.player-controls .fullscreen-btn,
+.player-controls .cc-btn {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  padding: 2px 4px;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.player-controls .fullscreen-btn { font-size: 14px; }
+.player-controls .cc-btn {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+.player-controls .cc-btn.on {
+  background: rgba(255, 248, 220, 0.18);
+  color: #fff8d8;
+  opacity: 1;
+}
+.player-controls .cc-btn.off {
+  opacity: 0.55;
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+.player-controls .fullscreen-btn:hover,
+.player-controls .cc-btn:hover {
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+/* When CC is toggled off, hide the show title + description card together.
+   The top-left ON-AIR badge stays. */
+body.captions-off .show-overlay,
+body.captions-off .show-title { display: none; }
+
+/* In-browser fullscreen: a body class flips .screen-area to fixed viewport
+   and hides the chassis / on-screen chrome. Stays inside the browser tab
+   (no native Fullscreen API), so the OS browser bar remains visible. */
+.exit-fs-btn {
+  display: none;
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  font-size: 22px;
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2147483647;
+  font-family: -apple-system, system-ui, sans-serif;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.exit-fs-btn:hover {
+  background: rgba(0, 0, 0, 0.85);
+  transform: scale(1.05);
+}
+body.fullscreen-mode {
+  overflow: hidden;
+}
+/* Drop the chassis drop-shadow (which creates a stacking context) so the
+   .screen-area's z-index actually paints above page content. Same for any
+   transform / filter on ancestors. */
+body.fullscreen-mode .tv-housing {
+  filter: none;
+}
+body.fullscreen-mode .tv,
+body.fullscreen-mode .tv-housing {
+  position: static;
+}
+body.fullscreen-mode .screen-area {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  z-index: 9998;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+body.fullscreen-mode .screen-area video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  filter: none;
+}
+body.fullscreen-mode .screen-area .now-playing,
+body.fullscreen-mode .screen-area .show-title,
+body.fullscreen-mode .screen-area .show-overlay,
+body.fullscreen-mode .screen-area .static-noise,
+body.fullscreen-mode .screen-area .player-controls {
+  display: none !important;
+}
+body.fullscreen-mode .screen-area::before {
+  display: none;
+}
+body.fullscreen-mode .exit-fs-btn {
+  display: flex;
+}
+
+/* ─── Channel select ──────────────────────────────────────── */
+/* Now sits as an absolute overlay on the TV's right-side panel,
+   above the speaker grille rendered into the chassis PNG. No background
+   of its own — the TV plastic shows through. */
+.channel-panel {
+  /* Bounds + skew. Pulled slightly left so the card has a little more
+     breathing room from the chassis right edge. */
+  position: absolute;
+  left: 78%;
+  top: 7.77%;
+  right: 5.3%;
+  bottom: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45cqi;
+  z-index: 3;
+  /* Near-black recessed card behind the buttons */
+  padding: 1cqi 0.85cqi;
+  border-radius: 0.6cqi;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 220, 170, 0.08), transparent 70%),
+    linear-gradient(180deg, #38271a 0%, #322216 60%, #2b1d12 100%);
+  box-shadow:
+    /* Deep beveled recess — the card sits sunken into the chassis with
+       a noticeable lip around all four edges. */
+    inset 0 4px 6px rgba(0, 0, 0, 0.7),          /* top edge deep recess shadow */
+    inset 3px 0 5px rgba(0, 0, 0, 0.55),         /* left edge recess shadow */
+    inset 0 -3px 4px rgba(255, 240, 200, 0.18),  /* bottom inner lip catches light */
+    inset -2px 0 3px rgba(255, 240, 200, 0.1),   /* right inner lip subtle highlight */
+    inset 0 0 0 1px rgba(0, 0, 0, 0.65),         /* crisp outline */
+    /* Outer rim — top highlight + bottom shadow suggest the recess depth */
+    0 1px 0 rgba(255, 240, 200, 0.28),
+    0 -1px 0 rgba(0, 0, 0, 0.35);
+  /* Per-corner warp dialled in via the corner-warp tool (cw() / cwRead()).
+     Subtle perspective tilt so the card follows the chassis 3D plane. */
+  transform: matrix3d(0.977346, 0,         0, 2e-05,
+                       0.0156673, 1.01282, 0, 2.04e-05,
+                       0,        0,        1, 0,
+                       0,        0,        0, 1);
+  transform-origin: 0 0;
+}
+.channel-panel .channel-btn { white-space: nowrap; }
+
+/* "Supported by" sticker — slapped onto the chassis below the channel
+   panel, on the empty right-side plastic. Slight rotation + drop shadow
+   so it reads as a real sticker rather than a flat layer. */
+.supported-sticker {
+  position: absolute;
+  left: 78.5%;
+  top: 62%;
+  width: 15.9%;        /* matches the channel-panel column width */
+  height: auto;        /* preserves the sticker's natural 1061:535 aspect */
+  z-index: 3;
+  display: block;
+  pointer-events: none;
+  /* Locked-in placement from the live tweak session. */
+  transform:
+    translate(0.4cqi, 0.6cqi)
+    rotate(-0.3deg)
+    scale(1.07);
+  transform-origin: 50% 50%;
+  filter:
+    drop-shadow(0 1px 0 rgba(255, 240, 200, 0.18))
+    drop-shadow(0 2px 4px rgba(20, 12, 6, 0.45));
+}
+body.boundary-mode .supported-sticker { display: none !important; }
+
+/* Lottery logo nested over the sticker. Lives in its own layer so it can
+   be moved/scaled/rotated independently — the placement widget below
+   targets --logo-x / --logo-y / --logo-rotate / --logo-scale. */
+.sticker-logo {
+  position: absolute;
+  left: 80%;
+  top: 67%;
+  width: 12%;
+  height: auto;
+  z-index: 4;
+  display: block;
+  pointer-events: none;
+  transform:
+    translate(var(--logo-x, 0cqi), var(--logo-y, 0cqi))
+    rotate(var(--logo-rotate, -0.3deg))
+    scale(var(--logo-scale, 1));
+  transform-origin: 50% 50%;
+}
+body.boundary-mode .sticker-logo { display: none !important; }
+
+.channel-header {
+  font-family: 'Euclid', sans-serif;
+  font-weight: 700;
+  font-size: 0.78cqi;
+  letter-spacing: 0.2em;
+  color: rgba(255, 240, 200, 0.92);
+  text-align: center;
+  padding-bottom: 0.4cqi;
+  white-space: nowrap;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+}
+.channel-btn {
+  /* Three-column grid so the LED, label, and arrow sit in fixed positions
+     across all buttons — arrows align flush right regardless of label text. */
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.7cqi;
+  text-align: left;
+  /* Warm tan plastic with subtle SVG noise grain + light/wear blobs over a
+     vertical bevel gradient. Dark-brown shadows give the chunky 3D feel. */
+  background:
+    /* Fine grain noise — warm beige tint */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 60'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='2.4' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.72  0 0 0 0 0.6  0 0 0 0 0.44  0 0 0 0.22 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"),
+    /* Top-edge highlight */
+    radial-gradient(ellipse at 30% -10%, rgba(255, 240, 210, 0.5), transparent 55%),
+    /* Bottom-right wear shadow */
+    radial-gradient(ellipse at 75% 110%, rgba(105, 80, 42, 0.32), transparent 60%),
+    /* Base bevel: lighter top → mid (with #BA9D75) → mid → darker bottom */
+    linear-gradient(180deg, #cbac82 0%, #ba9d75 30%, #b79971 60%, #9a7c54 100%);
+  background-blend-mode: overlay, normal, normal, normal;
+  border: none;
+  border-radius: 0.5cqi;
+  padding: 1.3cqi 0.8cqi;
+  font-family: 'Euclid', sans-serif;
+  font-weight: 700;
+  font-size: 1.064cqi;
+  letter-spacing: 0.1em;
+  color: #2a1f15;
+  cursor: pointer;
+  box-shadow:
+    /* Light from upper-right: chunky dark left sidewall, subtle top
+       highlight, hint of bottom dark edge so you read three faces of the
+       extruded button. Right edge barely lit. */
+    inset 3.5px 0 0 rgba(75, 50, 22, 0.6),
+    inset 0 1.5px 0 rgba(255, 245, 215, 0.5),
+    inset -1px 0 0 rgba(255, 245, 215, 0.18),
+    inset 0 -1.5px 0 rgba(85, 60, 30, 0.4),
+    inset 0 0 0 1px rgba(85, 60, 30, 0.28),
+    /* Drop shadow falls down-left away from the right-side light */
+    -1px 2px 0 rgba(50, 32, 15, 0.36),
+    -1px 4px 8px rgba(50, 32, 15, 0.34);
+  transform: translateY(0);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.channel-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow:
+    inset 3.5px 0 0 rgba(75, 50, 22, 0.6),
+    inset 0 1.5px 0 rgba(255, 245, 215, 0.6),
+    inset -1px 0 0 rgba(255, 245, 215, 0.22),
+    inset 0 -1.5px 0 rgba(85, 60, 30, 0.4),
+    inset 0 0 0 1px rgba(85, 60, 30, 0.32),
+    -1px 3px 0 rgba(50, 32, 15, 0.38),
+    -1px 6px 12px rgba(50, 32, 15, 0.4);
+}
+.channel-btn:active {
+  transform: translate(0, 2px);
+  box-shadow:
+    inset 3.5px 0 0 rgba(75, 50, 22, 0.45),
+    inset 0 1.5px 3px rgba(85, 60, 30, 0.4),
+    inset 0 0 0 1px rgba(85, 60, 30, 0.35),
+    0 1px 2px rgba(50, 32, 15, 0.25);
+}
+.channel-btn .led {
+  width: 1.5cqi;
+  height: 1.5cqi;
+  border-radius: 0.35cqi;
+  flex-shrink: 0;
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1.5px 0 rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.18),
+    0 1px 1px rgba(0, 0, 0, 0.25);
+}
+.channel-btn .arrow {
+  font-size: 1.2cqi;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+.channel-btn[data-color="red"]    .led { background: #d54e3a; }
+.channel-btn[data-color="orange"] .led { background: #e58e3a; }
+.channel-btn[data-color="yellow"] .led { background: #ecc940; }
+.channel-btn[data-color="green"]  .led { background: #6ea84f; }
+.channel-btn[data-color="blue"]   .led { background: #4d7cb8; }
+.channel-btn[data-color="purple"] .led { background: #7f5d9a; }
+.channel-btn[data-color="white"]  .led { background: #fff; border: 1px solid rgba(0,0,0,0.2); }
+
+.channel-footer {
+  margin-top: 0.7cqi;
+  padding: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5cqi;
+}
+.channel-footer .social {
+  width: 2.6cqi;
+  height: 2.6cqi;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Padding-left compensates for the dark left sidewall (inset 3.5px) so
+     the icon sits visually centred on the button's top face. */
+  padding-left: 0.35cqi;
+  box-sizing: border-box;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='2.4' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.72  0 0 0 0 0.6  0 0 0 0 0.44  0 0 0 0.22 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"),
+    radial-gradient(ellipse at 30% -10%, rgba(255, 240, 210, 0.5), transparent 55%),
+    radial-gradient(ellipse at 75% 110%, rgba(105, 80, 42, 0.32), transparent 60%),
+    linear-gradient(180deg, #cbac82 0%, #ba9d75 30%, #b79971 60%, #9a7c54 100%);
+  background-blend-mode: overlay, normal, normal, normal;
+  border: none;
+  border-radius: 0.55cqi;
+  text-decoration: none;
+  box-shadow:
+    inset 3.5px 0 0 rgba(75, 50, 22, 0.6),
+    inset 0 1.5px 0 rgba(255, 245, 215, 0.5),
+    inset -1px 0 0 rgba(255, 245, 215, 0.18),
+    inset 0 -1.5px 0 rgba(85, 60, 30, 0.4),
+    inset 0 0 0 1px rgba(85, 60, 30, 0.28),
+    -1px 2px 0 rgba(50, 32, 15, 0.36),
+    -1px 4px 8px rgba(50, 32, 15, 0.34);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.channel-footer .social:hover {
+  transform: translate(-1px, -1px);
+  box-shadow:
+    inset 3.5px 0 0 rgba(75, 50, 22, 0.6),
+    inset 0 1.5px 0 rgba(255, 245, 215, 0.6),
+    inset -1px 0 0 rgba(255, 245, 215, 0.22),
+    inset 0 -1.5px 0 rgba(85, 60, 30, 0.4),
+    inset 0 0 0 1px rgba(85, 60, 30, 0.32),
+    -1px 3px 0 rgba(50, 32, 15, 0.38),
+    -1px 6px 12px rgba(50, 32, 15, 0.4);
+}
+.channel-footer .social:active {
+  transform: translate(0, 2px);
+  box-shadow:
+    inset 3.5px 0 0 rgba(75, 50, 22, 0.45),
+    inset 0 1.5px 3px rgba(85, 60, 30, 0.4),
+    inset 0 0 0 1px rgba(85, 60, 30, 0.35),
+    0 1px 2px rgba(50, 32, 15, 0.25);
+}
+.channel-footer .social img {
+  width: 1.2cqi;
+  height: 1.2cqi;
+  display: block;
+}
+
+/* ─── Knob row ─────────────────────────────────────────────── */
+/* Now sits as an absolute overlay on the TV's bottom front bezel,
+   below the screen. No background of its own — the TV plastic
+   shows through. */
+.knob-row {
+  /* Bounds from boundary-mode measurement, converted to the cropped frame. */
+  position: absolute;
+  left: 4.32%;
+  top: 80.36%;
+  right: 18.81%;
+  bottom: 9.72%;
+  display: grid;
+  grid-template-columns: auto auto auto auto auto auto;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1cqi;
+  z-index: 3;
+}
+
+.knob {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35cqi;
+  font-family: 'Euclid', sans-serif;
+  font-weight: 700;
+  font-size: 0.7cqi;
+  letter-spacing: 0.22em;
+  color: #2a1f15;
+  text-shadow: 0 1px 0 rgba(255, 240, 210, 0.5);
+}
+
+/* Dial knob — label-on-top + side-markers + tick-marked ring */
+.knob.is-dial { gap: 0.25cqi; }
+.knob.is-dial .dial-label,
+.colour-system .dial-label {
+  font-size: 0.78cqi;
+  letter-spacing: 0.2em;
+  color: #2a1f15;
+  text-shadow: 0 1px 0 rgba(255, 240, 210, 0.5);
+  font-weight: 700;
+  /* Nudge the label down a touch so it sits closer to the dial without
+     shifting the dial itself. */
+  position: relative;
+  top: 0.35cqi;
+}
+/* The weather-select stack is shorter than the dial knobs, so when the
+   row centres them vertically the WEATHER SELECT label ends up sitting
+   ~6px below the VOLUME/BRIGHTNESS/CONTRAST labels. Lift it back up. */
+.colour-system .dial-label { top: -0.3cqi; }
+.knob.is-dial .dial-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+}
+/* Pull markers inward toward the dial. Word markers (MIN/MAX) get a softer
+   tuck because the letters are wider; symbols (− / +) tuck in a touch more. */
+.knob.is-dial .dial-row > .dial-marker:first-child { margin-right: -0.3cqi; }
+.knob.is-dial .dial-row > .dial-marker:last-child  { margin-left:  -0.3cqi; }
+.knob.is-dial .dial-row > .dial-marker.symbol:first-child { margin-right: -0.5cqi; }
+.knob.is-dial .dial-row > .dial-marker.symbol:last-child  { margin-left:  -0.5cqi; }
+.knob.is-dial .dial-marker { padding-bottom: 0.3cqi; }
+.knob.is-dial .dial-marker.symbol { padding-bottom: 0.2cqi; }
+.knob.is-dial .dial-marker {
+  font-size: 0.66cqi;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #4a3d33;
+  text-shadow: 0 1px 0 rgba(255, 240, 210, 0.45);
+  line-height: 1;
+  min-width: 1.08cqi;
+  text-align: center;
+}
+.knob.is-dial .dial-marker.symbol { font-size: 1.02cqi; }
+.knob.is-dial .dial-wrap {
+  position: relative;
+  width: 4.6cqi;
+  height: 4.6cqi;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Tick ring around the dial — notches around the top arc with a gap at the
+   underside. Two-layer mask: an annular ring × a wedge that excludes the
+   bottom 80°, composited with intersect so only their overlap shows ticks. */
+.knob.is-dial .dial-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from 7.5deg,
+    rgba(35, 22, 10, 0.72) 0deg 1deg,
+    transparent 1deg 15deg
+  );
+  -webkit-mask:
+    radial-gradient(circle at center,
+      transparent 22.5px,
+      black 23.5px,
+      black 27px,
+      transparent 28px),
+    conic-gradient(from 230deg,
+      transparent 0deg 80deg,
+      black 80deg 360deg);
+  -webkit-mask-composite: source-in;
+          mask:
+    radial-gradient(circle at center,
+      transparent 22.5px,
+      black 23.5px,
+      black 27px,
+      transparent 28px),
+    conic-gradient(from 230deg,
+      transparent 0deg 80deg,
+      black 80deg 360deg);
+          mask-composite: intersect;
+  pointer-events: none;
+}
+
+/* The dial — proper 80s appliance knob with chrome bezel, knurled edge, indicator */
+.knob .dial {
+  width: 3.45cqi;
+  height: 3.45cqi;
+  border-radius: 50%;
+  position: relative;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  transition: filter 0.12s ease;
+  /* Chrome bezel ring + drop shadow + ground shadow */
+  background:
+    /* Ridge highlight */
+    radial-gradient(circle at 50% 50%, transparent 60%, rgba(255, 255, 255, 0.18) 67%, rgba(0, 0, 0, 0.4) 72%, transparent 80%),
+    /* Outer ring (chrome) */
+    radial-gradient(circle at 30% 25%, #d8d0c0 0%, #8a7e68 60%, #4a4035 100%);
+  box-shadow:
+    0 2px 3px rgba(40, 25, 10, 0.55),
+    0 6px 12px rgba(40, 25, 10, 0.3),
+    inset 0 1px 0 rgba(255, 248, 220, 0.7),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.2);
+}
+.knob .dial:active { cursor: grabbing; filter: brightness(1.05); }
+.knob .dial.springing {
+  transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+/* Inner black face — domed with light from top-left */
+.knob .dial::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background:
+    /* Knurled grip ridges around the rim */
+    repeating-conic-gradient(from 0deg, rgba(255, 255, 255, 0.06) 0deg 4deg, rgba(0, 0, 0, 0.35) 4deg 8deg),
+    /* Domed black plastic */
+    radial-gradient(circle at 32% 28%, #5a4f44 0%, #1d1612 45%, #000 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.18),
+    inset 0 -2px 2px rgba(0, 0, 0, 0.6);
+}
+/* Indicator line — slight glow */
+.knob .dial::after {
+  content: '';
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 11px;
+  background: linear-gradient(180deg, #fff8d8, #d8c890);
+  border-radius: 2px;
+  box-shadow:
+    0 0 3px rgba(255, 248, 216, 0.6),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+
+/* POWER LED — three-layer build for a real glow:
+   (1) the gel dome itself with a hot core via stacked radial-gradients,
+   (2) a tight hot ring + chrome bezel via box-shadow stack,
+   (3) a separate ::before atmospheric halo with blur + mix-blend-mode
+       so the light visibly spills onto the warm chassis around it,
+   (4) ::after dome specular reflection,
+   (5) opacity-only pulse on the halo (cheap to animate). */
+.knob .lamp {
+  width: 1.5cqi;
+  height: 1.5cqi;
+  border-radius: 50%;
+  position: relative;
+  background:
+    /* Hot white-ish core skewed toward the top */
+    radial-gradient(circle at 40% 32%,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(255, 230, 210, 0.85) 8%,
+      rgba(255, 170, 150, 0.55) 22%,
+      transparent 45%),
+    /* Lit dome — bright pink-red core fading to the dark rim */
+    radial-gradient(circle at 50% 55%,
+      #ff9080 0%,
+      #ff4d3d 32%,
+      var(--power-red) 65%,
+      #4a0f08 100%);
+  box-shadow:
+    /* Recessed chrome bezel */
+    0 0 0 2px rgba(40, 25, 12, 0.55),
+    0 0 0 3px rgba(255, 240, 210, 0.4),
+    /* Whisper of bloom right at the LED — enough to read as lit */
+    0 0 2px rgba(255, 200, 180, 0.6),
+    0 0 4px rgba(255, 90, 70, 0.4),
+    /* Drop shadow on the chassis */
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1.5px rgba(255, 230, 220, 0.55);
+}
+
+/* Tiny atmospheric halo — sits right against the bezel, screen-blended so
+   it warms the chassis a touch without ever turning into a wide bloom. */
+.knob .lamp::before {
+  content: '';
+  position: absolute;
+  inset: -0.7cqi;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 80, 60, 0.45) 0%,
+    rgba(220, 40, 30, 0.18) 35%,
+    transparent 68%);
+  filter: blur(1px);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: -1;
+  animation: lamp-bloom 3s ease-in-out infinite;
+}
+
+/* Reflective sheen on the dome — sells the gel-cap curvature. */
+.knob .lamp::after {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 22%;
+  width: 40%;
+  height: 28%;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at 50% 30%,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.4) 45%,
+    transparent 100%);
+  pointer-events: none;
+}
+
+@keyframes lamp-bloom {
+  0%, 100% { opacity: 0.6;  transform: scale(1);     }
+  50%      { opacity: 0.85; transform: scale(1.03);  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .knob .lamp::before { animation: none; }
+}
+.knob .lamp.green {
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.7) 0%, transparent 40%),
+    radial-gradient(circle at 50% 60%, #a8e890 0%, var(--led-green) 45%, #25652b 100%);
+  box-shadow:
+    0 0 0 2px rgba(40, 25, 12, 0.45),
+    0 0 0 3px rgba(255, 240, 210, 0.35),
+    0 0 14px rgba(95, 191, 106, 0.7),
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    inset 0 -2px 2px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(220, 255, 200, 0.4);
+}
+
+/* Player input sockets — RCA-style recessed jacks with a coloured ring,
+   chrome outer bezel, and a deep black hole in the middle. Reads as
+   "controller plugs in here" alongside the PLAYER 1 / PLAYER 2 labels. */
+.knob .socket {
+  width: 2cqi;
+  height: 2cqi;
+  border-radius: 50%;
+  position: relative;
+  /* Coloured outer ring (set per-variant via background-color) +
+     dark hole. The deep recess is built from layered box-shadows. */
+  background: var(--socket-ring, #b54032);
+  box-shadow:
+    /* Chrome bezel outside the coloured ring */
+    0 0 0 1px rgba(40, 25, 12, 0.6),
+    0 0 0 2px rgba(220, 200, 170, 0.55),
+    0 0 0 3px rgba(40, 25, 12, 0.55),
+    /* Drop shadow on the chassis */
+    0 1px 2px rgba(0, 0, 0, 0.45),
+    /* Inner highlight on the ring */
+    inset 0 1px 1px rgba(255, 255, 255, 0.35),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.4);
+}
+.knob .socket::before {
+  /* The dark hole — deeply recessed, with a subtle inner shadow so it
+     reads as a real cavity rather than a flat dot. */
+  content: '';
+  position: absolute;
+  inset: 22%;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 50% 30%, #1a1208 0%, #050302 70%, #000 100%);
+  box-shadow:
+    inset 0 2px 3px rgba(0, 0, 0, 0.95),
+    inset 0 -1px 1px rgba(120, 90, 60, 0.25);
+}
+.knob .socket::after {
+  /* Tiny pin glint deep in the hole — the metallic centre contact. */
+  content: '';
+  position: absolute;
+  top: 52%;
+  left: 50%;
+  width: 14%;
+  height: 14%;
+  margin: -7% 0 0 -7%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 35%,
+      rgba(220, 200, 170, 0.55) 0%,
+      rgba(110, 85, 50, 0.4) 55%,
+      transparent 100%);
+}
+.knob .socket.socket-red    { --socket-ring: #b54032; }
+.knob .socket.socket-yellow { --socket-ring: #d4a234; }
+.knob .socket.socket-white  { --socket-ring: #d8c8b0; }
+
+.knob .label-row {
+  display: flex;
+  gap: 12px;
+  font-size: 7px;
+  letter-spacing: 0.18em;
+  margin-top: 2px;
+}
+.knob .label-row span { color: #4a3d33; }
+
+/* Weather-select: label on top (matches VOLUME / BRIGHTNESS / CONTRAST),
+   three coloured LED squares below in a recessed plate. */
+.colour-system {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25cqi;
+  font-family: 'Euclid', sans-serif;
+}
+.colour-system .lights {
+  display: flex;
+  gap: 6px;
+  padding: 5px 7px;
+  background: linear-gradient(180deg, #2a1f15, #1a120a);
+  border-radius: 5px;
+  box-shadow:
+    inset 0 2px 3px rgba(0, 0, 0, 0.7),
+    0 1px 0 rgba(255, 240, 210, 0.35);
+}
+.colour-system .lights span {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  position: relative;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 2px rgba(0, 0, 0, 0.4),
+    0 0 14px currentColor,
+    0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+.colour-system .lights span::before {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  right: 1px;
+  height: 45%;
+  border-radius: 2px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.05) 60%, transparent 100%);
+}
+/* Grey = fog, blue = rain, yellow = sun. Glow colour is a softened
+   tint of the LED so the recessed plate picks up faint coloured light. */
+.colour-system .lights span:nth-child(1) { background: #9a9a9a; color: rgba(154, 154, 154, 0.45); }
+.colour-system .lights span:nth-child(2) { background: #5191AE; color: rgba(81, 145, 174, 0.6); }
+.colour-system .lights span:nth-child(3) { background: #EFC863; color: rgba(239, 200, 99, 0.6); }
+
+/* Speaker grille — embossed slot effect */
+.speaker-grille {
+  width: 120px;
+  height: 32px;
+  background:
+    repeating-linear-gradient(0deg,
+      rgba(0, 0, 0, 0.85) 0 1px,
+      rgba(40, 28, 18, 0.4) 1px 2px,
+      rgba(110, 87, 64, 0.9) 2px 4px),
+    linear-gradient(180deg, #6e5740, #4a3d2c);
+  border-radius: 4px;
+  box-shadow:
+    inset 0 2px 3px rgba(0, 0, 0, 0.6),
+    inset 0 -1px 0 rgba(255, 240, 210, 0.2),
+    0 1px 0 rgba(255, 240, 210, 0.35);
+}
+
+.power-cluster {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  /* Pull the PLAYER 1 / PLAYER 2 pair inward from the right edge. */
+  margin-right: 3cqi;
+  /* Nudge the whole pair (sockets + labels) down a touch so they sit
+     a hair lower on the bezel. */
+  position: relative;
+  top: 0.4cqi;
+}
+/* Extra breathing room between the player sockets and their labels so
+   the PLAYER 1 / PLAYER 2 text sits clearly below the jacks. */
+.power-cluster .knob { gap: 0.7cqi; }
+
+/* ─── Studio intro (sits on cream) ────────────────────────── */
+.intro {
+  text-align: center;
+  font-family: 'Euclid', sans-serif;
+  font-size: clamp(11px, 1.4cqw, 14px);
+  font-weight: 500;
+  line-height: 1.65;
+  color: var(--ink);
+  max-width: 60cqw;
+  margin: 3.4cqw auto 0;
+  letter-spacing: 0.02em;
+}
+.colophon {
+  text-align: center;
+  font-family: 'Euclid', sans-serif;
+  font-size: clamp(9px, 1.18cqw, 12px);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: rgba(60, 47, 35, 0.55);
+  margin: 1.5cqw auto 0;
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <h1 class="headline">PIXEL PUPPETS</h1>
+  </header>
+
+  <!-- Tagline -->
+  <div class="tagline">
+    <div class="rule"></div>
+    <span class="dot"></span>
+    <span class="strap-text">A PLAYFUL POWER-UP FOR ANYONE TIRED OF ADULTING</span>
+    <span class="dot"></span>
+    <div class="rule"></div>
+  </div>
+
+  <!-- The TV -->
+  <section class="tv">
+    <!-- Everything lives inside the TV housing now: video shows through the
+         screen cutout, the chassis PNG sits on top, and the channel buttons
+         + knob row are absolute-positioned overlays on the chassis itself. -->
+    <div class="tv-housing">
+
+      <!-- Screen content (behind the chassis, visible through the cutout) -->
+      <div class="screen-area screen">
+        <video class="show" id="screenVideo"
+               src="assets/episode-01-web.mp4"
+               poster="assets/tv-content.jpeg"
+               autoplay muted loop playsinline></video>
+
+        <div class="now-playing" id="nowPlaying">
+          <span class="dot"></span>
+          <div class="text">
+            <div class="label"><span id="nowPlayingLabel">ON AIR SOON</span></div>
+            <div class="episode" id="nowPlayingEpisode">PILOT PREVIEW</div>
+          </div>
+        </div>
+
+        <h2 class="show-title" id="overlayTitle">PIXEL<br>PUPPETS</h2>
+        <div class="show-overlay" id="showOverlay">
+          <div class="desc" id="overlayDesc">
+            <p>A live performance format built around real-time digital puppetry, surreal comedy, and audience interaction.</p>
+          </div>
+        </div>
+
+        <div class="static-noise" id="staticNoise"></div>
+
+        <div class="player-controls">
+          <button class="play-btn" id="playBtn" aria-label="Play / Pause">▶</button>
+          <div class="scrub" id="scrub">
+            <div class="fill" id="scrubFill"></div>
+            <div class="knob-handle" id="scrubHandle"></div>
+          </div>
+          <div class="time" id="timeDisplay">0:00 / 0:00</div>
+          <div class="icon-cluster">
+            <button class="cc-btn on" id="ccBtn" aria-label="Toggle captions" aria-pressed="true">CC</button>
+            <button class="fullscreen-btn" id="fullscreenBtn" aria-label="Fullscreen">⛶</button>
+          </div>
+        </div>
+        <!-- Visible only while the screen is in fullscreen — provides an
+             explicit close affordance in addition to native Esc. -->
+        <button class="exit-fs-btn" id="exitFsBtn" aria-label="Exit fullscreen" type="button">✕</button>
+
+      </div>
+
+      <!-- The chassis PNG sits between the screen content and the controls.
+           It hides anything outside the screen cutout while the controls
+           layered above it remain visible and clickable. -->
+      <img class="tv-chassis" src="assets/tv-chassis.png" alt="" aria-hidden="true">
+
+      <!-- Channel select — overlaid on the upper-right side panel of the TV -->
+      <aside class="channel-panel">
+        <div class="channel-header">— CHANNEL SELECT —</div>
+        <button class="channel-btn" data-color="red"     data-channel="home"><span class="led"></span>HOME<span class="arrow">▶</span></button>
+        <button class="channel-btn" data-color="orange"  data-channel="how"><span class="led"></span>HOW IT WORKS<span class="arrow">▶</span></button>
+        <button class="channel-btn" data-color="yellow"  data-channel="production"><span class="led"></span>R&amp;D<span class="arrow">▶</span></button>
+        <button class="channel-btn" data-color="green"   data-channel="supporters"><span class="led"></span>SUPPORTERS<span class="arrow">▶</span></button>
+        <button class="channel-btn" data-color="blue"    data-channel="team"><span class="led"></span>TEAM<span class="arrow">▶</span></button>
+        <button class="channel-btn" data-color="purple"  data-channel="contact"><span class="led"></span>CONTACT<span class="arrow">▶</span></button>
+        <div class="channel-footer">
+          <a class="social" href="#" title="YouTube"><img src="assets/youtube-black.svg" alt="YouTube"></a>
+          <a class="social" href="#" title="Instagram"><img src="assets/instagram-black.svg" alt="Instagram"></a>
+          <a class="social" href="#" title="TikTok"><img src="assets/tiktok-black.svg" alt="TikTok"></a>
+          <a class="social" href="#" title="Vimeo"><img src="assets/vimeo-black.svg" alt="Vimeo"></a>
+        </div>
+      </aside>
+
+      <!-- Supported-by sticker — slapped on the chassis under the channel buttons -->
+      <img class="supported-sticker" src="assets/sticker-supported-by.png" alt="Supported by">
+      <!-- The Lottery logo, sitting inside the sticker. Position dialled in
+           via the placement widget below. -->
+      <img class="sticker-logo" src="assets/lottery-logo-white.png" alt="The National Lottery">
+
+      <!-- Knob row — overlaid on the bottom bezel of the TV -->
+      <div class="knob-row">
+        <div class="knob">
+          <div class="lamp"></div>
+          POWER
+        </div>
+        <div class="knob is-dial">
+          <div class="dial-label">VOLUME</div>
+          <div class="dial-row">
+            <span class="dial-marker">MIN</span>
+            <div class="dial-wrap"><div class="dial"></div></div>
+            <span class="dial-marker">MAX</span>
+          </div>
+        </div>
+        <div class="colour-system">
+          <div class="dial-label">WEATHER SELECT</div>
+          <div class="lights"><span></span><span></span><span></span></div>
+        </div>
+        <div class="knob is-dial">
+          <div class="dial-label">BRIGHTNESS</div>
+          <div class="dial-row">
+            <span class="dial-marker symbol">−</span>
+            <div class="dial-wrap"><div class="dial" data-effect="brightness"></div></div>
+            <span class="dial-marker symbol">+</span>
+          </div>
+        </div>
+        <div class="knob is-dial">
+          <div class="dial-label">CONTRAST</div>
+          <div class="dial-row">
+            <span class="dial-marker symbol">−</span>
+            <div class="dial-wrap"><div class="dial" data-effect="contrast"></div></div>
+            <span class="dial-marker symbol">+</span>
+          </div>
+        </div>
+        <div class="power-cluster">
+          <div class="knob">
+            <div class="socket socket-red"></div>
+            PLAYER 1
+          </div>
+          <div class="knob">
+            <div class="socket socket-yellow"></div>
+            PLAYER 2
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="intro">
+    Live digital puppet shows by artistic director Ben Carlin and producer Joe Duggan,<br>
+    blending storytelling, technology and audience interaction.
+  </p>
+  <p class="colophon">© 2026 Pixel Puppets · Made in the UK</p>
+
+</div>
+
+<script>
+// ─── Channel content + static-flicker switcher ────────────────────────────
+// Each button maps to a channel object; clicking fires the static overlay,
+// swaps the on-screen text, and updates the NOW PLAYING strap. Video keeps
+// playing throughout (it's the channel feed, not the channel content).
+(() => {
+  const CHANNELS = {
+    home: {
+      strap: 'ON AIR SOON',
+      episode: 'PILOT PREVIEW',
+      title: 'PIXEL<br>PUPPETS',
+      body: '<p>A live performance format built around real-time digital puppetry, surreal comedy, and audience interaction.</p>',
+    },
+    how: {
+      strap: 'CH. 02',
+      episode: 'HOW IT WORKS',
+      body: '<p>A new kind of live event sitting between theatre, cinema and game stream. Real puppeteers on stage drive digital characters across a cinematic screen, while the audience shapes how each show unfolds. Plays in cinemas and theatres alike.</p>',
+    },
+    production: {
+      strap: 'CH. 03',
+      episode: 'R&D',
+      body: '<p>A 20-minute vertical slice in early R&D. Still figuring out the story, where the comedy lives, and how much of each performance comes from the performer on stage versus the puppet on screen.</p>',
+    },
+    supporters: {
+      strap: 'CH. 04',
+      episode: 'SUPPORTERS',
+      body: '<p>Developed through the BFI Immersive Fiction Lab. Now in funded research and development, supported by Arts Council England and Immersive Arts UK’s Experiment strand.</p>',
+    },
+    team: {
+      strap: 'CH. 05',
+      episode: 'TEAM',
+      body: '<p>Created by Ben Carlin (Artistic Director) and Joe Duggan (Producer), with Daniel Bacchus on lead development and <a href="https://www.variousartists.studio" target="_blank" rel="noopener">Various Artists Studio</a> on characters and animation.</p>',
+    },
+    contact: {
+      strap: 'CH. 06',
+      episode: 'CONTACT',
+      body: '<p>Venue, festival, programmer or funder interested in talking further about Pixel Puppets? Drop us a line at <a href="mailto:hello@pixelpuppets.co">hello@pixelpuppets.co</a></p>',
+    },
+  };
+
+  const noise = document.getElementById('staticNoise');
+  const overlay = document.getElementById('showOverlay');
+  const titleEl = document.getElementById('overlayTitle');
+  const descEl = document.getElementById('overlayDesc');
+  const strapEl = document.getElementById('nowPlayingLabel');
+  const epEl = document.getElementById('nowPlayingEpisode');
+  let currentChannel = 'home';
+
+  const switchTo = (key) => {
+    if (key === currentChannel) return;
+    const c = CHANNELS[key];
+    if (!c) return;
+    currentChannel = key;
+
+    // Fire the static-flicker animation (forces restart by removing then adding)
+    noise.classList.remove('active');
+    void noise.offsetWidth; // force reflow so the animation restarts cleanly
+    noise.classList.add('active');
+
+    // Hide content briefly, then swap and reveal mid-flicker
+    overlay.classList.add('fading');
+    titleEl.classList.add('fading');
+    setTimeout(() => {
+      if (c.title) {
+        titleEl.innerHTML = c.title;
+        titleEl.style.display = '';
+      } else {
+        titleEl.style.display = 'none';
+      }
+      descEl.innerHTML = c.body;
+      strapEl.textContent = c.strap;
+      epEl.textContent = c.episode;
+      overlay.classList.remove('fading');
+      titleEl.classList.remove('fading');
+    }, 180);
+  };
+
+  document.querySelectorAll('.channel-btn').forEach((btn) => {
+    btn.addEventListener('click', () => switchTo(btn.dataset.channel));
+  });
+})();
+
+// ─── Video player ──────────────────────────────────────────────────────────
+// Real <video> in the TV screen, with the existing player chrome wired up:
+// play/pause toggle, scrub bar reflects current time, time readout updates.
+(() => {
+  const video = document.getElementById('screenVideo');
+  const playBtn = document.getElementById('playBtn');
+  const scrub = document.getElementById('scrub');
+  const fill = document.getElementById('scrubFill');
+  const handle = document.getElementById('scrubHandle');
+  const timeDisplay = document.getElementById('timeDisplay');
+  if (!video || !playBtn) return;
+
+  const fmt = (s) => {
+    if (!isFinite(s) || s < 0) s = 0;
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60).toString().padStart(2, '0');
+    return `${m}:${sec}`;
+  };
+
+  const updatePlayBtn = () => { playBtn.textContent = video.paused ? '▶' : '❚❚'; };
+
+  playBtn.addEventListener('click', () => {
+    if (video.paused) video.play(); else video.pause();
+  });
+  video.addEventListener('play', updatePlayBtn);
+  video.addEventListener('pause', updatePlayBtn);
+
+  video.addEventListener('timeupdate', () => {
+    const dur = video.duration || 1;
+    const pct = (video.currentTime / dur) * 100;
+    fill.style.width = pct + '%';
+    handle.style.left = pct + '%';
+    timeDisplay.textContent = `${fmt(video.currentTime)} / ${fmt(video.duration)}`;
+  });
+  video.addEventListener('loadedmetadata', () => {
+    timeDisplay.textContent = `0:00 / ${fmt(video.duration)}`;
+  });
+
+  // Click-to-seek on the scrub bar
+  const seekTo = (clientX) => {
+    const r = scrub.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+    if (isFinite(video.duration)) video.currentTime = pct * video.duration;
+  };
+  scrub.addEventListener('click', (e) => seekTo(e.clientX));
+
+  // Click anywhere on the video itself toggles play/pause
+  video.addEventListener('click', () => {
+    if (video.paused) video.play(); else video.pause();
+  });
+})();
+
+// ─── Drag-to-rotate on the dials (VOLUME, BRIGHTNESS, CONTRAST) ────────────
+// Click and drag around the dial — rotation tracks the cursor angle.
+// On release, the dial springs back to upright and any video filter
+// it was driving (brightness/contrast) eases back to default in lockstep.
+(() => {
+  const video = document.querySelector('.screen video.show');
+  // Multipliers driven by the dials. 1.0 = no change relative to the
+  // baseline CRT look already applied via CSS.
+  const dialFx = { brightness: 1, contrast: 1 };
+  const applyVideoFilter = () => {
+    if (!video) return;
+    // Compose: dial brightness × baseline contrast(1.05) × dial contrast,
+    // plus the warm saturate tint that was always there.
+    video.style.filter =
+      `brightness(${dialFx.brightness.toFixed(3)}) ` +
+      `contrast(${(1.05 * dialFx.contrast).toFixed(3)}) ` +
+      `saturate(1.1)`;
+  };
+
+  document.querySelectorAll('.knob .dial').forEach((dial) => {
+    const effect = dial.dataset.effect;  // 'brightness', 'contrast' or undefined
+    let rotation = 0;       // current applied rotation in deg
+    let startAngle = 0;     // pointer angle at mousedown, minus current rotation
+    let dragging = false;
+
+    const angleFromCentre = (clientX, clientY) => {
+      const r = dial.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      return Math.atan2(clientY - cy, clientX - cx) * 180 / Math.PI;
+    };
+
+    const onDown = (e) => {
+      dragging = true;
+      dial.classList.remove('springing'); // kill any in-flight spring
+      if (effect && video) video.classList.add('dial-active'); // disable filter transition while dragging
+      const p = e.touches ? e.touches[0] : e;
+      startAngle = angleFromCentre(p.clientX, p.clientY) - rotation;
+      e.preventDefault();
+    };
+    const onMove = (e) => {
+      if (!dragging) return;
+      const p = e.touches ? e.touches[0] : e;
+      rotation = angleFromCentre(p.clientX, p.clientY) - startAngle;
+      dial.style.transform = `rotate(${rotation.toFixed(1)}deg)`;
+      if (effect) {
+        // Asymmetric response: steep going up (silly highs at modest
+        // rotation), gentler going down so the picture dims gradually
+        // and never quite dies — a full anticlockwise turn lands ~0.25×.
+        const norm = ((rotation % 360) + 540) % 360 - 180;
+        const slope = norm >= 0 ? 60 : 240;
+        dialFx[effect] = Math.max(0.15, Math.min(5, 1 + norm / slope));
+        applyVideoFilter();
+      }
+    };
+    const onUp = () => {
+      if (!dragging) return;
+      dragging = false;
+      // Normalise rotation to the shortest path back to 0° so it doesn't
+      // unwind the long way round if the user spun several full turns.
+      rotation = ((rotation % 360) + 540) % 360 - 180;
+      dial.style.transform = `rotate(${rotation.toFixed(1)}deg)`;
+      // Force a reflow so the browser registers the current angle as the
+      // starting point of the transition, then enable the springy ease and
+      // snap back to upright.
+      void dial.offsetWidth;
+      dial.classList.add('springing');
+      rotation = 0;
+      dial.style.transform = 'rotate(0deg)';
+      // Re-enable the filter transition and ease the picture back to default
+      // in lockstep with the dial spring.
+      if (effect && video) {
+        video.classList.remove('dial-active');
+        dialFx[effect] = 1;
+        applyVideoFilter();
+      }
+    };
+    dial.addEventListener('transitionend', () => {
+      dial.classList.remove('springing');
+    });
+
+    dial.addEventListener('mousedown', onDown);
+    dial.addEventListener('touchstart', onDown, { passive: false });
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('mouseup', onUp);
+    document.addEventListener('touchend', onUp);
+  });
+})();
+
+// ─── Boundary-mapping mode ────────────────────────────────────────────────
+// Toggle with `bm()` in the console (or the helper below). Drag boxes to
+// move, drag bottom-right corner to resize. The readout updates live with
+// the box's position and size as percentages of the .tv-housing.
+(() => {
+  const housing = document.querySelector('.tv-housing');
+  if (!housing) return;
+  const boxes = document.querySelectorAll('.boundary-box');
+
+  // Each box reports percentages relative to its offsetParent so the
+  // screen-area box reads as % of screen, channel/knob boxes as % of housing.
+  const refOf = (box) => box.offsetParent || housing;
+
+  const updateReadouts = () => {
+    boxes.forEach(box => {
+      const ref = refOf(box).getBoundingClientRect();
+      const r = box.getBoundingClientRect();
+      const left = ((r.left - ref.left) / ref.width * 100).toFixed(2);
+      const top = ((r.top - ref.top) / ref.height * 100).toFixed(2);
+      const right = ((ref.right - r.right) / ref.width * 100).toFixed(2);
+      const bottom = ((ref.bottom - r.bottom) / ref.height * 100).toFixed(2);
+      const width = (r.width / ref.width * 100).toFixed(2);
+      const height = (r.height / ref.height * 100).toFixed(2);
+      box.querySelector('.boundary-readout').textContent =
+        `L${left}% R${right}% T${top}% B${bottom}%  ·  ${width}×${height}`;
+    });
+  };
+
+  // Drag to move (anywhere except the resize corner) and resize via the
+  // custom corner handle.
+  boxes.forEach(box => {
+    let dragging = false, resizing = false;
+    let startX, startY, startLeftPct, startTopPct, startWPct, startHPct;
+    const resizeHandle = box.querySelector('.boundary-resize');
+
+    // Drag handler on the box body
+    box.addEventListener('mousedown', (e) => {
+      if (e.target === resizeHandle) return; // resize is a separate path
+      const r = box.getBoundingClientRect();
+      const ref = refOf(box).getBoundingClientRect();
+      dragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      startLeftPct = (r.left - ref.left) / ref.width * 100;
+      startTopPct = (r.top - ref.top) / ref.height * 100;
+      e.preventDefault();
+    });
+
+    // Resize handler on the corner
+    resizeHandle.addEventListener('mousedown', (e) => {
+      const r = box.getBoundingClientRect();
+      const ref = refOf(box).getBoundingClientRect();
+      resizing = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      startWPct = r.width / ref.width * 100;
+      startHPct = r.height / ref.height * 100;
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!dragging && !resizing) return;
+      const ref = refOf(box).getBoundingClientRect();
+      const dx = (e.clientX - startX) / ref.width * 100;
+      const dy = (e.clientY - startY) / ref.height * 100;
+      if (dragging) {
+        box.style.left = (startLeftPct + dx) + '%';
+        box.style.top = (startTopPct + dy) + '%';
+      } else if (resizing) {
+        box.style.width = Math.max(2, startWPct + dx) + '%';
+        box.style.height = Math.max(2, startHPct + dy) + '%';
+      }
+      updateReadouts();
+    });
+
+    document.addEventListener('mouseup', () => { dragging = false; resizing = false; });
+  });
+
+  // Initial readout
+  updateReadouts();
+
+  // Skew slider wiring
+  const sy = document.getElementById('skewYSlider');
+  const sx = document.getElementById('skewXSlider');
+  const syVal = document.getElementById('skewYVal');
+  const sxVal = document.getElementById('skewXVal');
+  if (sy && sx) {
+    const apply = () => {
+      document.documentElement.style.setProperty('--skew-y', sy.value + 'deg');
+      document.documentElement.style.setProperty('--skew-x', sx.value + 'deg');
+      syVal.textContent = sy.value + '°';
+      sxVal.textContent = sx.value + '°';
+    };
+    sy.addEventListener('input', apply);
+    sx.addEventListener('input', apply);
+    apply();
+  }
+
+  // ─── Corner-warp mode ────────────────────────────────────
+  // Drag each corner independently to warp the channel-panel via matrix3d.
+  const panel = document.querySelector('.channel-panel');
+  if (panel) {
+    const cornerNames = ['tl', 'tr', 'br', 'bl'];
+    const handles = {};
+    cornerNames.forEach(c => {
+      const h = document.createElement('div');
+      h.className = 'corner-handle';
+      h.dataset.corner = c;
+      h.dataset.label = c.toUpperCase();
+      housing.appendChild(h);
+      handles[c] = h;
+    });
+
+    const offsets = { tl:{x:0,y:0}, tr:{x:0,y:0}, br:{x:0,y:0}, bl:{x:0,y:0} };
+    let savedTransform = '';
+
+    // 3x3 matrix helpers for solving the 2D perspective transform
+    const adj = m => [
+      m[4]*m[8]-m[5]*m[7], m[2]*m[7]-m[1]*m[8], m[1]*m[5]-m[2]*m[4],
+      m[5]*m[6]-m[3]*m[8], m[0]*m[8]-m[2]*m[6], m[2]*m[3]-m[0]*m[5],
+      m[3]*m[7]-m[4]*m[6], m[1]*m[6]-m[0]*m[7], m[0]*m[4]-m[1]*m[3]
+    ];
+    const multmm = (a, b) => {
+      const r = new Array(9);
+      for (let i = 0; i < 3; i++)
+        for (let j = 0; j < 3; j++) {
+          let s = 0;
+          for (let k = 0; k < 3; k++) s += a[3*i+k] * b[3*k+j];
+          r[3*i+j] = s;
+        }
+      return r;
+    };
+    const multmv = (m, v) => [
+      m[0]*v[0]+m[1]*v[1]+m[2]*v[2],
+      m[3]*v[0]+m[4]*v[1]+m[5]*v[2],
+      m[6]*v[0]+m[7]*v[1]+m[8]*v[2]
+    ];
+    const basisToPoints = p => {
+      const m = [p[0][0],p[1][0],p[2][0], p[0][1],p[1][1],p[2][1], 1,1,1];
+      const v = multmv(adj(m), [p[3][0], p[3][1], 1]);
+      return multmm(m, [v[0],0,0, 0,v[1],0, 0,0,v[2]]);
+    };
+    const quadToMatrix3d = (src, dst) => {
+      const s = basisToPoints(src);
+      const d = basisToPoints(dst);
+      const t = multmm(d, adj(s));
+      for (let i = 0; i < 9; i++) t[i] /= t[8];
+      return [
+        t[0], t[3], 0, t[6],
+        t[1], t[4], 0, t[7],
+        0,    0,    1, 0,
+        t[2], t[5], 0, t[8]
+      ];
+    };
+
+    function naturalCorners() {
+      // Read the panel's bounds *without* any matrix3d applied.
+      const cur = panel.style.transform;
+      panel.style.transform = 'none';
+      const r = panel.getBoundingClientRect();
+      const hr = housing.getBoundingClientRect();
+      panel.style.transform = cur;
+      return {
+        tl: { x: r.left - hr.left,  y: r.top    - hr.top },
+        tr: { x: r.right - hr.left, y: r.top    - hr.top },
+        br: { x: r.right - hr.left, y: r.bottom - hr.top },
+        bl: { x: r.left - hr.left,  y: r.bottom - hr.top }
+      };
+    }
+
+    function placeHandles() {
+      const nat = naturalCorners();
+      cornerNames.forEach(c => {
+        handles[c].style.left = (nat[c].x + offsets[c].x) + 'px';
+        handles[c].style.top  = (nat[c].y + offsets[c].y) + 'px';
+      });
+    }
+
+    function applyWarp() {
+      const nat = naturalCorners();
+      const w = nat.tr.x - nat.tl.x;
+      const h = nat.bl.y - nat.tl.y;
+      const src = [[0,0],[w,0],[w,h],[0,h]];
+      const dst = [
+        [offsets.tl.x, offsets.tl.y],
+        [w + offsets.tr.x, offsets.tr.y],
+        [w + offsets.br.x, h + offsets.br.y],
+        [offsets.bl.x, h + offsets.bl.y]
+      ];
+      const m = quadToMatrix3d(src, dst);
+      panel.style.transform = `matrix3d(${m.join(',')})`;
+    }
+
+    cornerNames.forEach(c => {
+      const h = handles[c];
+      h.addEventListener('mousedown', (e) => {
+        const sx = e.clientX, sy = e.clientY;
+        const start = { x: offsets[c].x, y: offsets[c].y };
+        const onMove = (e2) => {
+          offsets[c] = { x: start.x + (e2.clientX - sx), y: start.y + (e2.clientY - sy) };
+          placeHandles();
+          applyWarp();
+        };
+        const onUp = () => {
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+        };
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+        e.preventDefault();
+      });
+    });
+
+    window.cw = () => {
+      const on = !document.body.classList.contains('corner-warp');
+      if (on) {
+        // Save the existing baked-in matrix3d (from CSS) and reset to identity
+        // so the handles start at the natural rectangle corners.
+        savedTransform = getComputedStyle(panel).transform;
+        panel.style.transform = 'none';
+      } else {
+        // If no warp has been dialled in, restore the saved transform.
+        if (Object.values(offsets).every(o => o.x === 0 && o.y === 0)) {
+          panel.style.transform = '';  // fall back to CSS rule
+        }
+      }
+      document.body.classList.toggle('corner-warp');
+      placeHandles();
+    };
+    window.cwRead = () => ({
+      transform: panel.style.transform,
+      offsets: JSON.parse(JSON.stringify(offsets))
+    });
+    window.cwReset = () => {
+      cornerNames.forEach(c => { offsets[c] = {x:0,y:0}; });
+      panel.style.transform = savedTransform;
+      placeHandles();
+    };
+
+    placeHandles();
+    window.addEventListener('resize', placeHandles);
+  }
+
+  // ---- Captions toggle ----
+  // CC button toggles body.captions-off, which hides the show-overlay
+  // (the title + description card on the bottom of the screen).
+  (function captions() {
+    const btn = document.getElementById('ccBtn');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const off = document.body.classList.toggle('captions-off');
+      btn.classList.toggle('on', !off);
+      btn.classList.toggle('off', off);
+      btn.setAttribute('aria-pressed', String(!off));
+    });
+  })();
+
+  // ---- In-browser "fullscreen" toggle ----
+  // Toggles body.fullscreen-mode which flips .screen-area to fill the
+  // viewport. Stays inside the browser tab; Esc and the floating ✕ close it.
+  (function fullscreen() {
+    const btn = document.getElementById('fullscreenBtn');
+    const exitBtn = document.getElementById('exitFsBtn');
+    if (!btn) return;
+
+    const isFs = () => document.body.classList.contains('fullscreen-mode');
+    const enter = () => document.body.classList.add('fullscreen-mode');
+    const exit  = () => document.body.classList.remove('fullscreen-mode');
+
+    btn.addEventListener('click', () => { isFs() ? exit() : enter(); });
+    exitBtn?.addEventListener('click', exit);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isFs()) exit();
+    });
+  })();
+
+  // Helpers exposed on window
+  window.bm = () => document.body.classList.toggle('boundary-mode');
+  window.bmRead = () => {
+    const out = {};
+    boxes.forEach(box => {
+      const ref = refOf(box).getBoundingClientRect();
+      const r = box.getBoundingClientRect();
+      out[box.id] = {
+        ref:    refOf(box).className.split(' ').find(c => c) || refOf(box).tagName.toLowerCase(),
+        left:   +((r.left - ref.left) / ref.width * 100).toFixed(2),
+        right:  +((ref.right - r.right) / ref.width * 100).toFixed(2),
+        top:    +((r.top - ref.top) / ref.height * 100).toFixed(2),
+        bottom: +((ref.bottom - r.bottom) / ref.height * 100).toFixed(2),
+        width:  +(r.width / ref.width * 100).toFixed(2),
+        height: +(r.height / ref.height * 100).toFixed(2),
+      };
+    });
+    return out;
+  };
+})();
+</script>
+
+</body>
+</html>
