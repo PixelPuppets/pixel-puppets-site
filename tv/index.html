@@ -885,6 +885,11 @@ body.fullscreen-mode .exit-fs-btn {
   font-size: 1.2cqi;
   font-weight: 800;
   color: var(--ink-soft);
+  /* Force text-presentation on the ▶ glyph instead of iOS rendering it
+     as a colour emoji (which it does by default for U+25B6). The HTML
+     already pairs it with VS-15 (&#xFE0E;); this is the belt for the
+     braces on browsers that respect `font-variant-emoji`. */
+  font-variant-emoji: text;
 }
 .channel-btn[data-color="red"]    .led { background: #d54e3a; }
 .channel-btn[data-color="orange"] .led { background: #e58e3a; }
@@ -893,6 +898,29 @@ body.fullscreen-mode .exit-fs-btn {
 .channel-btn[data-color="blue"]   .led { background: #4d7cb8; }
 .channel-btn[data-color="purple"] .led { background: #7f5d9a; }
 .channel-btn[data-color="white"]  .led { background: #fff; border: 1px solid rgba(0,0,0,0.2); }
+
+/* Touch-device tablets/phones (iPad most notably) — slim the channel
+   buttons so the panel ends BEFORE the supported-by sticker baked into
+   the chassis, rather than overlapping it. Combo of `pointer: coarse`
+   (touch as primary input) + a width gate keeps desktops with mice
+   untouched even if their viewport is narrow. */
+@media (max-width: 1280px) and (pointer: coarse) {
+  .channel-btn {
+    padding: 0.85cqi 0.8cqi;
+    font-size: 0.95cqi;
+  }
+  .channel-btn .led {
+    width: 1.25cqi;
+    height: 1.25cqi;
+  }
+  .channel-btn .arrow {
+    font-size: 1cqi;
+  }
+  .channel-panel {
+    gap: 0.3cqi;
+    padding: 0.8cqi 0.85cqi;
+  }
+}
 
 .channel-footer {
   /* Social icons row — currently HIDDEN to shrink the channel-panel down
@@ -1643,12 +1671,12 @@ body.fullscreen-mode .exit-fs-btn {
       <!-- Channel select — overlaid on the upper-right side panel of the TV -->
       <aside class="channel-panel">
         <div class="channel-header">— CHANNEL SELECT —</div>
-        <button class="channel-btn" data-color="red"     data-channel="home"><span class="led"></span>HOME<span class="arrow">▶</span></button>
-        <button class="channel-btn" data-color="orange"  data-channel="how"><span class="led"></span>HOW IT WORKS<span class="arrow">▶</span></button>
-        <button class="channel-btn" data-color="yellow"  data-channel="production"><span class="led"></span>R&amp;D<span class="arrow">▶</span></button>
-        <button class="channel-btn" data-color="green"   data-channel="supporters"><span class="led"></span>SUPPORTERS<span class="arrow">▶</span></button>
-        <button class="channel-btn" data-color="blue"    data-channel="team"><span class="led"></span>TEAM<span class="arrow">▶</span></button>
-        <button class="channel-btn" data-color="purple"  data-channel="contact"><span class="led"></span>CONTACT<span class="arrow">▶</span></button>
+        <button class="channel-btn" data-color="red"     data-channel="home"><span class="led"></span>HOME<span class="arrow">▶&#xFE0E;</span></button>
+        <button class="channel-btn" data-color="orange"  data-channel="rehearsals"><span class="led"></span>REHEARSALS<span class="arrow">▶&#xFE0E;</span></button>
+        <button class="channel-btn" data-color="yellow"  data-channel="about"><span class="led"></span>ABOUT<span class="arrow">▶&#xFE0E;</span></button>
+        <button class="channel-btn" data-color="green"   data-channel="support"><span class="led"></span>SUPPORT<span class="arrow">▶&#xFE0E;</span></button>
+        <button class="channel-btn" data-color="blue"    data-channel="team"><span class="led"></span>TEAM<span class="arrow">▶&#xFE0E;</span></button>
+        <button class="channel-btn" data-color="purple"  data-channel="contact"><span class="led"></span>CONTACT<span class="arrow">▶&#xFE0E;</span></button>
         <div class="channel-footer">
           <a class="social" href="#" title="YouTube"><img src="assets/youtube-black.svg" alt="YouTube"></a>
           <a class="social" href="#" title="Instagram"><img src="assets/instagram-black.svg" alt="Instagram"></a>
@@ -1736,19 +1764,19 @@ body.fullscreen-mode .exit-fs-btn {
       body: '<p>A live performance format built around real-time digital puppetry, surreal comedy, and audience interaction.</p>',
       video: 'assets/episode-01-web.mp4',
     },
-    how: {
+    rehearsals: {
       strap: 'CH. 02',
-      episode: 'HOW IT WORKS',
+      episode: 'REHEARSALS',
       body: '<p>A new kind of live event sitting between theatre, cinema and game stream. Real puppeteers on stage drive digital characters across a cinematic screen, while the audience shapes how each show unfolds. Plays in cinemas and theatres alike.</p>',
     },
-    production: {
+    about: {
       strap: 'CH. 03',
-      episode: 'R&D',
+      episode: 'ABOUT',
       body: '<p>A 20-minute vertical slice in early R&D. Still figuring out the story, where the comedy lives, and how much of each performance comes from the performer on stage versus the puppet on screen.</p>',
     },
-    supporters: {
+    support: {
       strap: 'CH. 04',
-      episode: 'SUPPORTERS',
+      episode: 'SUPPORT',
       body: '<p>Developed through the BFI Immersive Fiction Lab. Now in funded research and development, supported by Arts Council England and Immersive Arts UK’s Experiment strand.</p>',
     },
     team: {
