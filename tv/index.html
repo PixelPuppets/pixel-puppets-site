@@ -801,7 +801,12 @@ body.fullscreen-mode .exit-fs-btn {
 .supported-sticker {
   position: absolute;
   left: 77%;
-  top: 52.7%;
+  top: 57%;            /* sits clear of the channel-panel CONTACT button
+                          bottom edge — the previous 52.7% read fine on
+                          desktop but tucked the sticker right under
+                          CONTACT on iPad (≈9px gap is too tight at the
+                          smaller chassis scale). 57% gives consistent
+                          breathing room across all viewports. */
   width: 19%;          /* slightly wider than the channel-panel column to fit
                           the three-logo layout without crushing the type */
   height: auto;        /* preserves the sticker's natural aspect ratio */
