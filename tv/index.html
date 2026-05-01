@@ -77,7 +77,7 @@ html, body {
   font-family: 'LEDpixel', monospace;
   /* cqw scales with the .page container (which matches the TV width).
      clamp() pins a sensible minimum on very narrow viewports. */
-  font-size: clamp(28px, 9.4cqw, 88px);
+  font-size: clamp(24px, 7.6cqw, 72px);
   letter-spacing: 0.04em;
   text-align: center;
   color: var(--headline-red);
@@ -974,6 +974,66 @@ body.boundary-mode .supported-sticker { display: none !important; }
   text-shadow: 0 1px 0 rgba(255, 240, 210, 0.5);
 }
 
+/* Power knob — label printed on the chassis above a small recessed plate
+   that holds the illuminated push-button. Matches the SOCIAL recess pattern
+   but proportioned for a single round button. */
+.knob.is-power {
+  gap: 0.25cqi;
+}
+.knob.is-power .dial-label {
+  /* Lift the label so it baselines with VOLUME / BRIGHTNESS / CONTRAST
+     across the row, matching the slider's offset trick. */
+  position: relative;
+  top: -0.45cqi;
+  font-size: 0.78cqi;
+  letter-spacing: 0.22em;
+  color: #2a1f15;
+  text-shadow: 0 1px 0 rgba(255, 240, 210, 0.5);
+  font-weight: 700;
+}
+/* Square illuminated push-button — three-layer build:
+   1) outer chunky black plastic bezel with rounded corners,
+   2) inner red translucent square lens,
+   3) central white bulb glow blooming through the red.
+   Sits directly on the chassis, no separate recess plate. */
+.knob.is-power .power-button {
+  width: 2.7cqi;
+  height: 2.7cqi;
+  border-radius: 0.4cqi;
+  position: relative;
+  /* Black rubber bezel — solid base, top-edge highlight via inset. */
+  background: #130D07;
+  box-shadow:
+    /* Drop shadow on the chassis */
+    0 1.5px 2px rgba(0, 0, 0, 0.55),
+    0 3px 6px rgba(0, 0, 0, 0.28),
+    /* Top-edge highlight on the bezel itself */
+    inset 0 1px 0 #4E473B,
+    /* Slight inner darken at the bottom for chunky plastic feel */
+    inset 0 -1px 0 rgba(0, 0, 0, 0.7),
+    /* Tiny outer glow that just kisses the chassis around the button */
+    0 0 6px rgba(255, 90, 70, 0.18),
+    0 0 12px rgba(255, 70, 55, 0.08);
+}
+/* Inner red lens — square with softened corners, set into the bezel.
+   Cream-white centre fading through orange-red, into saturated red,
+   into the darker base red at the corners, with a thin slightly-brighter
+   stroke ringing the lens against the black bezel. */
+.knob.is-power .power-button::before {
+  content: '';
+  position: absolute;
+  inset: 0.38cqi;
+  border-radius: 0.18cqi;
+  background: radial-gradient(circle at 50% 50%,
+    #F9EFCB 0%,
+    #F94E33 30%,
+    #BF0D0A 65%,
+    #720603 100%);
+  box-shadow:
+    /* Thin slightly-brighter stroke around the red lens */
+    inset 0 0 0 1px #970A07;
+}
+
 /* Dial knob — label-on-top + side-markers + tick-marked ring */
 .knob.is-dial { gap: 0.25cqi; }
 .knob.is-dial .dial-label,
@@ -1060,6 +1120,75 @@ body.boundary-mode .supported-sticker { display: none !important; }
   pointer-events: none;
 }
 
+/* Slider variant — horizontal pot like the reference, label-on-top + side-markers,
+   recessed dark track in the chassis with a chrome rectangular thumb. */
+.knob.is-slider { gap: 0.25cqi; }
+/* Lift just the VOLUME label so it baselines with BRIGHTNESS / CONTRAST,
+   leaving the slider track itself sitting where it naturally falls. */
+.knob.is-slider .dial-label {
+  position: relative;
+  top: -1.4cqi;
+}
+.knob.is-slider .slider-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.knob.is-slider .slider-row > .dial-marker:first-child { margin-right: 0.45cqi; }
+.knob.is-slider .slider-row > .dial-marker:last-child  { margin-left:  0.45cqi; }
+.knob.is-slider .dial-marker { padding-bottom: 0; }
+.knob.is-slider .slider-track {
+  position: relative;
+  width: 7.6cqi;
+  height: 0.85cqi;
+  border-radius: 0.1cqi;
+  background: linear-gradient(180deg, #150d05 0%, #251a10 55%, #160e07 100%);
+  box-shadow:
+    inset 0 1.5px 2px rgba(0, 0, 0, 0.9),
+    inset 0 -1px 0 rgba(255, 240, 210, 0.14),
+    0 1px 0 rgba(255, 240, 210, 0.45);
+}
+/* Thin sunken rail down the centre — gives the thumb something to ride in. */
+.knob.is-slider .slider-track::before {
+  content: '';
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  top: 50%;
+  height: 0.12cqi;
+  margin-top: -0.06cqi;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.9));
+  box-shadow: 0 0.5px 0 rgba(255, 240, 210, 0.12);
+}
+.knob.is-slider .slider-thumb {
+  position: absolute;
+  top: 50%;
+  /* Starts at MIN — slider is the volume control, off by default. */
+  left: 8%;
+  width: 1.3cqi;
+  height: 2.5cqi;
+  transform: translate(-50%, -50%);
+  border-radius: 0.04cqi;
+  /* Flat brushed-metal slug — cool grey gradient + vertical knurl, no bevel curves. */
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(255, 248, 220, 0.14) 0px 0.6px,
+      rgba(0, 0, 0, 0.45) 0.6px 1.5px),
+    linear-gradient(180deg, #d6cebd 0%, #a89c84 50%, #5c5040 100%);
+  box-shadow:
+    /* Drop shadow on the chassis */
+    0 1.5px 2px rgba(40, 25, 10, 0.6),
+    0 3px 5px rgba(40, 25, 10, 0.28),
+    /* Sharp top edge + sharp bottom edge — flat slab, not domed */
+    inset 0 1px 0 rgba(255, 248, 220, 0.7),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  transition: filter 0.12s ease;
+}
+.knob.is-slider .slider-thumb:active { cursor: grabbing; filter: brightness(1.05); }
+
 /* The dial — proper 80s appliance knob with chrome bezel, knurled edge, indicator */
 .knob .dial {
   width: 3.45cqi;
@@ -1131,29 +1260,31 @@ body.boundary-mode .supported-sticker { display: none !important; }
   border-radius: 50%;
   position: relative;
   background:
-    /* Hot white-ish core skewed toward the top */
-    radial-gradient(circle at 40% 32%,
+    /* Hot bulb core — bright white directly in the centre, like a small
+       lamp glowing behind translucent red plastic. */
+    radial-gradient(circle at 50% 50%,
       rgba(255, 255, 255, 1) 0%,
-      rgba(255, 230, 210, 0.85) 8%,
-      rgba(255, 170, 150, 0.55) 22%,
-      transparent 45%),
-    /* Lit dome — bright pink-red core fading to the dark rim */
-    radial-gradient(circle at 50% 55%,
-      #ff9080 0%,
-      #ff4d3d 32%,
-      var(--power-red) 65%,
-      #4a0f08 100%);
+      rgba(255, 240, 210, 0.85) 6%,
+      rgba(255, 200, 170, 0.45) 14%,
+      transparent 28%),
+    /* Translucent red lens — symmetrical fade from bright red core
+       through saturated mid-red to dark crimson at the very edge. */
+    radial-gradient(circle at 50% 50%,
+      #ff8060 0%,
+      #ff3a25 25%,
+      #c81a10 60%,
+      #6a1208 100%);
   box-shadow:
-    /* Recessed chrome bezel */
-    0 0 0 2px rgba(40, 25, 12, 0.55),
-    0 0 0 3px rgba(255, 240, 210, 0.4),
-    /* Whisper of bloom right at the LED — enough to read as lit */
-    0 0 2px rgba(255, 200, 180, 0.6),
-    0 0 4px rgba(255, 90, 70, 0.4),
-    /* Drop shadow on the chassis */
-    0 1px 2px rgba(0, 0, 0, 0.5),
-    inset 0 -2px 3px rgba(0, 0, 0, 0.5),
-    inset 0 1px 1.5px rgba(255, 230, 220, 0.55);
+    /* Slim dark-plastic bezel — subtle, not chunky */
+    0 0 0 1px rgba(15, 8, 4, 0.85),
+    /* Contained bloom touching the bezel */
+    0 0 2px rgba(255, 200, 180, 0.55),
+    0 0 4px rgba(255, 90, 70, 0.35),
+    /* Tiny outer glow that just kisses the chassis recess */
+    0 0 7px rgba(255, 100, 80, 0.2),
+    0 0 14px rgba(255, 80, 60, 0.1),
+    /* Drop shadow inside the recessed plate */
+    0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 /* Tiny atmospheric halo — sits right against the bezel, screen-blended so
@@ -1175,22 +1306,9 @@ body.boundary-mode .supported-sticker { display: none !important; }
   animation: lamp-bloom 3s ease-in-out infinite;
 }
 
-/* Reflective sheen on the dome — sells the gel-cap curvature. */
-.knob .lamp::after {
-  content: '';
-  position: absolute;
-  top: 10%;
-  left: 22%;
-  width: 40%;
-  height: 28%;
-  border-radius: 50%;
-  background: radial-gradient(
-    ellipse at 50% 30%,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.4) 45%,
-    transparent 100%);
-  pointer-events: none;
-}
+/* No specular sheen — this is a backlit indicator, not a glass marble.
+   The ::after slot stays empty so the symmetric centred glow does its
+   own thing without an offset highlight fighting it. */
 
 @keyframes lamp-bloom {
   0%, 100% { opacity: 0.6;  transform: scale(1);     }
@@ -1316,6 +1434,58 @@ body.boundary-mode .supported-sticker { display: none !important; }
   border-radius: 2px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.05) 60%, transparent 100%);
 }
+/* Social-row variant of the recessed plate — brand-coloured pills with
+   the platform icon inside. Same plate, same gel-cap finish, swapped
+   payload. */
+.colour-system .lights.social-lights { gap: 4px; padding: 4px 6px; }
+.colour-system .social-light {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -2px 2px rgba(0, 0, 0, 0.45),
+    0 0 12px currentColor,
+    0 0 0 1px rgba(0, 0, 0, 0.4);
+  transition: transform 0.12s ease;
+}
+.colour-system .social-light:hover { transform: translateY(-1px); }
+.colour-system .social-light::before {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  right: 1px;
+  height: 45%;
+  border-radius: 3px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.05) 60%, transparent 100%);
+  pointer-events: none;
+}
+.colour-system .social-light img {
+  width: 11px;
+  height: 11px;
+  display: block;
+  /* Source SVGs are black; on the cream pill they stay dark for legibility,
+     just nudged from pure black to the chassis ink so they sit warmer. */
+  filter: brightness(0) saturate(100%) invert(15%) sepia(18%) hue-rotate(345deg);
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+/* Both pills are now warm cream, matching the chassis. The 'color' value
+   feeds the soft glow under each pill via the `0 0 12px currentColor` rule
+   on .social-light. */
+.colour-system .social-light[data-platform="youtube"],
+.colour-system .social-light[data-platform="instagram"] {
+  background: #DCBE9F;
+  color: rgba(220, 190, 159, 0.55);
+}
+
 /* Grey = fog, blue = rain, yellow = sun. Glow colour is a softened
    tint of the LED so the recessed plate picks up faint coloured light. */
 .colour-system .lights span:nth-child(1) { background: #9a9a9a; color: rgba(154, 154, 154, 0.45); }
@@ -1361,7 +1531,7 @@ body.boundary-mode .supported-sticker { display: none !important; }
   font-size: clamp(11px, 1.4cqw, 14px);
   font-weight: 500;
   line-height: 1.65;
-  color: var(--ink);
+  color: #5E689B;
   max-width: 60cqw;
   margin: 3.4cqw auto 0;
   letter-spacing: 0.02em;
@@ -1473,21 +1643,28 @@ body.boundary-mode .supported-sticker { display: none !important; }
 
       <!-- Knob row — overlaid on the bottom bezel of the TV -->
       <div class="knob-row">
-        <div class="knob">
-          <div class="lamp"></div>
-          POWER
+        <div class="knob is-power">
+          <div class="dial-label">POWER</div>
+          <div class="power-button"></div>
         </div>
-        <div class="knob is-dial">
+        <div class="knob is-slider">
           <div class="dial-label">VOLUME</div>
-          <div class="dial-row">
+          <div class="slider-row">
             <span class="dial-marker">MIN</span>
-            <div class="dial-wrap"><div class="dial"></div></div>
+            <div class="slider-track"><div class="slider-thumb"></div></div>
             <span class="dial-marker">MAX</span>
           </div>
         </div>
         <div class="colour-system">
-          <div class="dial-label">WEATHER SELECT</div>
-          <div class="lights"><span></span><span></span><span></span></div>
+          <div class="dial-label">SOCIAL</div>
+          <div class="lights social-lights">
+            <a class="social-light" href="https://www.youtube.com/@pixelpuppetsuk" target="_blank" rel="noopener" title="YouTube" data-platform="youtube">
+              <img src="assets/youtube-black.svg" alt="YouTube">
+            </a>
+            <a class="social-light" href="https://www.instagram.com/pixel.puppets/" target="_blank" rel="noopener" title="Instagram" data-platform="instagram">
+              <img src="assets/instagram-black.svg" alt="Instagram">
+            </a>
+          </div>
         </div>
         <div class="knob is-dial">
           <div class="dial-label">BRIGHTNESS</div>
@@ -1763,6 +1940,70 @@ body.boundary-mode .supported-sticker { display: none !important; }
 
     dial.addEventListener('mousedown', onDown);
     dial.addEventListener('touchstart', onDown, { passive: false });
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('mouseup', onUp);
+    document.addEventListener('touchend', onUp);
+  });
+})();
+
+// ─── Drag the VOLUME slider thumb ─────────────────────────────────────────
+// Horizontal drag along the track. Starts at MIN, holds whatever position
+// the user lets go at, and drives video.volume / video.muted in lockstep.
+// (The current pilot video has no audio track, so the volume change is a
+// no-op until we re-encode with audio — but the wiring is here.)
+(() => {
+  // Map slider position (0.08 = MIN, 0.92 = MAX) → 0..1 volume.
+  const MIN_REL = 0.08, MAX_REL = 0.92;
+  const relToVol = (rel) =>
+    Math.max(0, Math.min(1, (rel - MIN_REL) / (MAX_REL - MIN_REL)));
+
+  const applyVolume = (rel) => {
+    const v = document.querySelector('.screen video.show');
+    if (!v) return;
+    const vol = relToVol(rel);
+    v.volume = vol;
+    v.muted = vol <= 0.001;
+  };
+
+  document.querySelectorAll('.slider-track').forEach((track) => {
+    const thumb = track.querySelector('.slider-thumb');
+    if (!thumb) return;
+    let dragging = false;
+    let trackRect = null;
+
+    // Initial sync — page loads with thumb at MIN, so video stays muted.
+    applyVolume(MIN_REL);
+
+    const setFromClientX = (clientX) => {
+      let rel = (clientX - trackRect.left) / trackRect.width;
+      rel = Math.max(MIN_REL, Math.min(MAX_REL, rel));
+      thumb.style.left = (rel * 100).toFixed(2) + '%';
+      applyVolume(rel);
+    };
+
+    const onDown = (e) => {
+      dragging = true;
+      trackRect = track.getBoundingClientRect();
+      const p = e.touches ? e.touches[0] : e;
+      // Click anywhere on the track jumps the thumb there.
+      setFromClientX(p.clientX);
+      e.preventDefault();
+    };
+    const onMove = (e) => {
+      if (!dragging) return;
+      const p = e.touches ? e.touches[0] : e;
+      setFromClientX(p.clientX);
+    };
+    const onUp = () => {
+      if (!dragging) return;
+      dragging = false;
+      // Hold position — no spring-back. The thumb stays where the user
+      // released it, and the volume sticks at whatever they dialled in.
+    };
+
+    track.addEventListener('mousedown', onDown);
+    track.addEventListener('touchstart', onDown, { passive: false });
     document.addEventListener('mousemove', onMove);
     document.addEventListener('touchmove', onMove, { passive: false });
     document.addEventListener('mouseup', onUp);
