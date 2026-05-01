@@ -1620,6 +1620,7 @@ body.boundary-mode .supported-sticker { display: none !important; }
         <video class="show" id="screenVideo"
                src="assets/episode-01-web.mp4"
                poster="assets/tv-content.jpeg"
+               preload="metadata"
                autoplay muted loop playsinline></video>
 
         <div class="now-playing" id="nowPlaying">
@@ -1879,6 +1880,10 @@ body.boundary-mode .supported-sticker { display: none !important; }
   const SCALE = 0.5;
   const FRAME_INTERVAL = 1000 / 24;  // 24fps — plenty for static, half the
                                      // work of 60fps without looking choppy
+  // Respect the user's motion preference. When set, paint a single static
+  // frame instead of looping so the screen still reads as "no signal" but
+  // doesn't shimmer at people who flinch at moving noise.
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let buffer32 = null;
   let idata = null;
   let rafId = null;
@@ -1920,6 +1925,11 @@ body.boundary-mode .supported-sticker { display: none !important; }
   const start = () => {
     if (rafId !== null) return;
     if (!buffer32 || canvas.width <= 2) resize();
+    if (reducedMotion.matches) {
+      // One frame, no loop — accessibility-friendly fallback.
+      generateNoise();
+      return;
+    }
     rafId = requestAnimationFrame(loop);
   };
 
