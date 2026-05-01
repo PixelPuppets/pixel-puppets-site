@@ -806,11 +806,15 @@ body.fullscreen-mode .exit-fs-btn {
                               bottom edge on smaller (iPad) viewports.
                               `top` percentage is height-relative, kept as
                               % so it always tracks housing height. */
-  width: 19cqi;            /* lock both dimensions in cqi instead of mixing
-                              %-width + auto-height. Safari's auto-height
-                              calc on absolutely-positioned <img> can drift
-                              while the chassis PNG is still loading; cqi
-                              keeps the box deterministic from first paint */
+  width: 15.5cqi;          /* dialled down from 19cqi — even with
+                              scale(0.89) the sticker was reading bigger
+                              than the channel-panel column, eating into
+                              the bezel margin. 15.5cqi × 0.89 lands at
+                              ~13.8% of housing, comfortably narrower than
+                              the 16.7%-wide panel above it. Lock both
+                              dimensions in cqi so the box is deterministic
+                              from first paint regardless of when the
+                              chassis PNG finishes streaming. */
   aspect-ratio: 1024 / 944;
   height: auto;
   z-index: 3;
