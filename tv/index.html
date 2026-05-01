@@ -490,14 +490,49 @@ body.boundary-mode .boundary-box { display: block; }
 .static-noise.active {
   animation: static-flicker 0.7s steps(14) forwards;
 }
-/* Loading state — looped flicker shown while the video is buffering, so
-   the screen reads as live tuning-in rather than a black hole. Fades out
-   when .loading is removed (on video canplay). */
-.static-noise.loading {
-  opacity: 1;
-  animation: static-loop 0.32s steps(7) infinite;
-  transition: opacity 0.45s ease;
+/* When the screen is in no-signal mode, hide the underlying video and
+   the player UI so the canvas snow has the screen as its only canvas;
+   keep the channel strap AND body overlay sitting above the snow so
+   the user can still read what the channel is about. */
+.screen.no-signal video.show,
+.screen.no-signal .show-title,
+.screen.no-signal .player-controls { display: none; }
+.screen.no-signal .now-playing {
+  z-index: 7;
+  /* Pin a soft dark pill behind the strap so the channel label stays
+     legible over the bright snow. */
+  background: rgba(8, 6, 4, 0.78);
+  border-radius: 4px;
+  padding: 6px 10px;
+  backdrop-filter: blur(2px);
 }
+.screen.no-signal .show-overlay { z-index: 7; }
+
+/* Real per-frame canvas snow — random grayscale pixels regenerated every
+   frame at half-res, then scaled up with pixelated rendering for chunky
+   CRT-grade noise. Hidden by default; only painted when no-signal is on. */
+.static-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+.screen.no-signal .static-canvas {
+  /* Soften the snow — the cream backdrop shows through at 85%, taking
+     the harshness off the noise without losing the texture. */
+  opacity: 0.15;
+}
+/* Warm off-white backdrop sitting under the canvas in no-signal mode.
+   Black bg stays as the rule for video content; cream is reserved for
+   the static-screen channels until we record video for them. */
+.screen { transition: background-color 0.35s ease; }
+.screen.no-signal { background-color: #ece6d8; }
 @keyframes static-loop {
   0%   { background-position:  12% 18%; opacity: 0.85; }
   20%  { background-position: -34% 52%; opacity: 1;    }
@@ -1595,6 +1630,7 @@ body.boundary-mode .supported-sticker { display: none !important; }
         </div>
 
         <div class="static-noise" id="staticNoise"></div>
+        <canvas class="static-canvas" id="staticCanvas"></canvas>
 
         <div class="player-controls">
           <button class="play-btn" id="playBtn" aria-label="Play / Pause">▶</button>
@@ -1710,12 +1746,15 @@ body.boundary-mode .supported-sticker { display: none !important; }
 // swaps the on-screen text, and updates the NOW PLAYING strap. Video keeps
 // playing throughout (it's the channel feed, not the channel content).
 (() => {
+  // Each channel can opt-in to a video clip; channels without one show
+  // looping TV static instead, ready to be filled in as we record more.
   const CHANNELS = {
     home: {
       strap: 'ON AIR SOON',
       episode: 'PILOT PREVIEW',
       title: 'PIXEL<br>PUPPETS',
       body: '<p>A live performance format built around real-time digital puppetry, surreal comedy, and audience interaction.</p>',
+      video: 'assets/episode-01-web.mp4',
     },
     how: {
       strap: 'CH. 02',
@@ -1776,6 +1815,36 @@ body.boundary-mode .supported-sticker { display: none !important; }
       descEl.innerHTML = c.body;
       strapEl.textContent = c.strap;
       epEl.textContent = c.episode;
+      // Swap the video feed when the channel has a clip; otherwise pause
+      // the current video and keep the no-signal canvas up so the screen
+      // reads as "no signal" until we record something for that channel.
+      // While a fresh clip is loading, keep the no-signal canvas as a
+      // preloader and only fade it out once the video can play.
+      const v = document.getElementById('screenVideo');
+      const screen = document.querySelector('.screen');
+      if (v && c.video) {
+        const sameClip = v.src.endsWith(c.video);
+        if (!sameClip) {
+          v.src = c.video;
+          v.load();
+          screen.classList.add('no-signal');
+          const onReady = () => {
+            screen.classList.remove('no-signal');
+            v.removeEventListener('canplay', onReady);
+            v.removeEventListener('loadeddata', onReady);
+            clearTimeout(timeoutId);
+          };
+          v.addEventListener('canplay', onReady);
+          v.addEventListener('loadeddata', onReady);
+          const timeoutId = setTimeout(onReady, 5000);
+        } else {
+          screen.classList.remove('no-signal');
+        }
+        v.play().catch(() => {});
+      } else if (v) {
+        v.pause();
+        screen.classList.add('no-signal');
+      }
       overlay.classList.remove('fading');
       titleEl.classList.remove('fading');
     }, 180);
@@ -1786,23 +1855,74 @@ body.boundary-mode .supported-sticker { display: none !important; }
   });
 })();
 
-// ─── Boot static — show looped TV-static until the video can play ────────
-// Read the channel as "tuning in" rather than a black hole during the
-// first few hundred ms while the MP4 streams in.
+// ─── No-signal canvas snow ────────────────────────────────────────────────
+// Real per-frame TV static. Render at half resolution so the noise has
+// chunky CRT-style grain rather than the fine-grit look of a tiled SVG,
+// then let `image-rendering: pixelated` scale it back up. Only generates
+// frames while .screen.no-signal is on, and throttles to ~30fps so it
+// doesn't burn the GPU during idle channels.
 (() => {
-  const noise = document.getElementById('staticNoise');
+  const canvas = document.getElementById('staticCanvas');
+  const screen = document.querySelector('.screen');
+  if (!canvas || !screen) return;
+  const ctx = canvas.getContext('2d');
+
+  const SCALE = 0.5;
+  let buffer32 = null;
+  let idata = null;
+
+  const resize = () => {
+    const r = canvas.getBoundingClientRect();
+    const w = Math.max(2, Math.floor(r.width  * SCALE));
+    const h = Math.max(2, Math.floor(r.height * SCALE));
+    if (canvas.width === w && canvas.height === h) return;
+    canvas.width = w;
+    canvas.height = h;
+    idata = ctx.createImageData(w, h);
+    buffer32 = new Uint32Array(idata.data.buffer);
+  };
+
+  const generateNoise = () => {
+    if (!buffer32) return;
+    const len = buffer32.length;
+    for (let i = 0; i < len; i++) {
+      const v = (Math.random() * 255) | 0;
+      buffer32[i] = 0xff000000 | (v << 16) | (v << 8) | v;
+    }
+    ctx.putImageData(idata, 0, 0);
+  };
+
+  const FRAME_INTERVAL = 1000 / 30;
+  let last = 0;
+  const loop = (now) => {
+    requestAnimationFrame(loop);
+    if (!screen.classList.contains('no-signal')) return;
+    if (canvas.width <= 2) resize();
+    if (now - last < FRAME_INTERVAL) return;
+    last = now;
+    generateNoise();
+  };
+
+  const init = () => { resize(); requestAnimationFrame(loop); };
+  if (document.readyState === 'complete') init();
+  else window.addEventListener('load', init, { once: true });
+  window.addEventListener('resize', resize);
+})();
+
+// ─── Boot static — snow on while the home channel buffers in ─────────────
+// Read the page-load as "tuning in" rather than a black hole during the
+// first few hundred ms while the MP4 streams in. Same canvas as channel
+// switches, so the preloader and the no-signal state are visually one.
+(() => {
+  const screen = document.querySelector('.screen');
   const video = document.getElementById('screenVideo');
-  if (!noise || !video) return;
-  noise.classList.add('loading');
-  const clear = () => noise.classList.remove('loading');
-  if (video.readyState >= 3) {
-    clear();
-  } else {
-    video.addEventListener('canplay', clear, { once: true });
-    video.addEventListener('loadeddata', clear, { once: true });
-    // Failsafe: hide after 5s even if events never fire (e.g. video error).
-    setTimeout(clear, 5000);
-  }
+  if (!screen || !video) return;
+  if (video.readyState >= 3) return;
+  screen.classList.add('no-signal');
+  const clear = () => screen.classList.remove('no-signal');
+  video.addEventListener('canplay', clear, { once: true });
+  video.addEventListener('loadeddata', clear, { once: true });
+  setTimeout(clear, 5000);
 })();
 
 // ─── Video player ──────────────────────────────────────────────────────────
