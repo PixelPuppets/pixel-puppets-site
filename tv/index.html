@@ -47,6 +47,10 @@ html, body {
   font-family: 'Euclid', 'Helvetica Neue', sans-serif;
   color: var(--ink);
   min-height: 100vh;
+  /* Stop iOS Safari from auto-bumping text size in landscape — that
+     pushes the channel-panel taller and the sticker overlaps it. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   background-image:
     radial-gradient(circle at 20% 10%, rgba(255, 248, 230, 0.6), transparent 50%),
     radial-gradient(circle at 80% 80%, rgba(180, 140, 100, 0.15), transparent 60%);
@@ -795,11 +799,19 @@ body.fullscreen-mode .exit-fs-btn {
    so it reads as a real sticker rather than a flat layer. */
 .supported-sticker {
   position: absolute;
-  left: 77%;
-  top: 52.7%;
-  width: 19%;          /* slightly wider than the channel-panel column to fit
-                          the three-logo layout without crushing the type */
-  height: auto;        /* preserves the sticker's natural 1061:868 aspect */
+  left: 77cqi;
+  top: 56%;                /* slightly lower than before — gives the sticker
+                              clear breathing room from the channel-panel
+                              bottom edge on smaller (iPad) viewports.
+                              `top` percentage is height-relative, kept as
+                              % so it always tracks housing height. */
+  width: 19cqi;            /* lock both dimensions in cqi instead of mixing
+                              %-width + auto-height. Safari's auto-height
+                              calc on absolutely-positioned <img> can drift
+                              while the chassis PNG is still loading; cqi
+                              keeps the box deterministic from first paint */
+  aspect-ratio: 1024 / 944;
+  height: auto;
   z-index: 3;
   display: block;
   pointer-events: none;
