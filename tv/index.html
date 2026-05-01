@@ -795,35 +795,6 @@ body.fullscreen-mode .exit-fs-btn {
 }
 .channel-panel .channel-btn { white-space: nowrap; }
 
-/* "Supported by" sticker — slapped onto the chassis below the channel
-   panel, on the empty right-side plastic. Slight rotation + drop shadow
-   so it reads as a real sticker rather than a flat layer. */
-.supported-sticker {
-  position: absolute;
-  left: 77%;
-  top: 57%;            /* sits clear of the channel-panel CONTACT button
-                          bottom edge — the previous 52.7% read fine on
-                          desktop but tucked the sticker right under
-                          CONTACT on iPad (≈9px gap is too tight at the
-                          smaller chassis scale). 57% gives consistent
-                          breathing room across all viewports. */
-  width: 19%;          /* slightly wider than the channel-panel column to fit
-                          the three-logo layout without crushing the type */
-  height: auto;        /* preserves the sticker's natural aspect ratio */
-  z-index: 3;
-  display: block;
-  pointer-events: none;
-  /* scale 0.89 = ~10% smaller than natural size at the width above. */
-  transform:
-    translate(0.4cqi, 0.6cqi)
-    rotate(-0.3deg)
-    scale(0.89);
-  transform-origin: 50% 50%;
-  filter:
-    drop-shadow(0 1px 0 rgba(255, 240, 200, 0.18))
-    drop-shadow(0 2px 4px rgba(20, 12, 6, 0.45));
-}
-body.boundary-mode .supported-sticker { display: none !important; }
 
 .channel-header {
   font-family: 'Euclid', sans-serif;
@@ -1686,11 +1657,6 @@ body.boundary-mode .supported-sticker { display: none !important; }
         </div>
       </aside>
 
-      <!-- Supported-by sticker — slapped on the chassis under the channel buttons -->
-      <img class="supported-sticker" src="assets/sticker-supported-by.png" alt="Supported by">
-      <!-- The Lottery logo, sitting inside the sticker. Position dialled in
-           via the placement widget below. -->
-
       <!-- Knob row — overlaid on the bottom bezel of the TV -->
       <div class="knob-row">
         <div class="knob is-power">
@@ -2478,57 +2444,6 @@ body.boundary-mode .supported-sticker { display: none !important; }
     });
     return out;
   };
-})();
-
-// ─── TEMP DEBUG READOUT — REMOVE AFTER iPad SCALING IS PINNED DOWN ─────
-(() => {
-  const panel = document.createElement('div');
-  panel.id = 'pp-debug';
-  panel.style.cssText = [
-    'position:fixed','top:8px','right:8px','z-index:9999',
-    'background:#0a0805','color:#f0e6d2',
-    'font:11px/1.45 -apple-system,Menlo,monospace',
-    'padding:10px 12px','border-radius:6px',
-    'box-shadow:0 4px 12px rgba(0,0,0,0.4)',
-    'max-width:260px','pointer-events:auto',
-    'border:1px solid rgba(255,240,200,0.25)',
-  ].join(';');
-  panel.innerHTML = '<div style="font-weight:700;letter-spacing:0.1em;margin-bottom:4px">DEBUG</div><div id="pp-debug-body">…</div><button id="pp-debug-close" style="margin-top:8px;background:#3a2a1a;color:#f0e6d2;border:0;padding:4px 8px;border-radius:4px;font:inherit;cursor:pointer">close</button>';
-  document.body.appendChild(panel);
-
-  document.getElementById('pp-debug-close').onclick = () => panel.remove();
-
-  const fmt = (n) => Number(n).toFixed(0);
-  const update = () => {
-    const housing = document.querySelector('.tv-housing');
-    const page    = document.querySelector('.page');
-    const sticker = document.querySelector('.supported-sticker');
-    const panelEl = document.querySelector('.channel-panel');
-    const hr = housing ? housing.getBoundingClientRect() : null;
-    const pr = page    ? page.getBoundingClientRect()    : null;
-    const sr = sticker ? sticker.getBoundingClientRect() : null;
-    const cr = panelEl ? panelEl.getBoundingClientRect() : null;
-    const vv = window.visualViewport;
-    const ua = navigator.userAgent;
-    const isIPad = /iPad/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-    const lines = [
-      `UA: ${isIPad ? 'iPad-class' : (ua.match(/(iPhone|Android|Mac|Windows)/) || ['?'])[0]}`,
-      `screen: ${screen.width}×${screen.height}  dpr ${window.devicePixelRatio}`,
-      `window.innerW: ${fmt(window.innerWidth)}`,
-      `documentElement.clientW: ${fmt(document.documentElement.clientWidth)}`,
-      vv ? `visualViewport: ${fmt(vv.width)}×${fmt(vv.height)} scale ${vv.scale.toFixed(2)}` : 'visualViewport: n/a',
-      pr ? `.page width: ${fmt(pr.width)}` : '',
-      hr ? `.tv-housing: ${fmt(hr.width)}×${fmt(hr.height)}` : '',
-      cr && hr ? `.channel-panel: ${fmt(cr.width)}px (${(cr.width/hr.width*100).toFixed(1)}%)` : '',
-      sr && hr ? `.sticker box: ${fmt(sr.width)}px (${(sr.width/hr.width*100).toFixed(1)}%)` : '',
-      sr && hr ? `.sticker visual: ${fmt(sr.width*0.89)}px (${(sr.width*0.89/hr.width*100).toFixed(1)}%)` : '',
-    ].filter(Boolean);
-    document.getElementById('pp-debug-body').textContent = lines.join('\n');
-    document.getElementById('pp-debug-body').style.whiteSpace = 'pre';
-  };
-  update();
-  window.addEventListener('resize', update);
-  window.addEventListener('orientationchange', () => setTimeout(update, 200));
 })();
 </script>
 
