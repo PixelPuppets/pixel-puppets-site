@@ -713,10 +713,12 @@ body.fullscreen-mode .exit-fs-btn {
    of its own — the TV plastic shows through. */
 .channel-panel {
   /* Bounds + skew. Pulled slightly left so the card has a little more
-     breathing room from the chassis right edge. */
+     breathing room from the chassis right edge. Top nudged up since
+     the socials footer is currently hidden, freeing room below for the
+     supported-by sticker. */
   position: absolute;
   left: 78%;
-  top: 7.77%;
+  top: 5.5%;
   right: 5.3%;
   bottom: auto;
   display: flex;
@@ -756,17 +758,18 @@ body.fullscreen-mode .exit-fs-btn {
 .supported-sticker {
   position: absolute;
   left: 77%;
-  top: 60.5%;
+  top: 52%;
   width: 19%;          /* slightly wider than the channel-panel column to fit
                           the three-logo layout without crushing the type */
   height: auto;        /* preserves the sticker's natural 1061:868 aspect */
   z-index: 3;
   display: block;
   pointer-events: none;
+  /* scale 0.85 = 15% smaller than natural size at the width above. */
   transform:
     translate(0.4cqi, 0.6cqi)
     rotate(-0.3deg)
-    scale(1);
+    scale(0.85);
   transform-origin: 50% 50%;
   filter:
     drop-shadow(0 1px 0 rgba(255, 240, 200, 0.18))
@@ -873,9 +876,15 @@ body.boundary-mode .supported-sticker { display: none !important; }
 .channel-btn[data-color="white"]  .led { background: #fff; border: 1px solid rgba(0,0,0,0.2); }
 
 .channel-footer {
+  /* Social icons row — currently HIDDEN to shrink the channel-panel down
+     so the SUPPORTED BY sticker has more room below.
+     To re-enable: change `display: none` back to `display: flex` and
+     restore the original `margin-top: 0.7cqi` / `gap: 0.5cqi` line.
+     The HTML for the footer is still in the markup, so flipping display
+     is the only step needed. */
+  display: none;
   margin-top: 0.7cqi;
   padding: 0;
-  display: flex;
   justify-content: space-between;
   gap: 0.5cqi;
 }
