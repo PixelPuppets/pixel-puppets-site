@@ -490,6 +490,22 @@ body.boundary-mode .boundary-box { display: block; }
 .static-noise.active {
   animation: static-flicker 0.7s steps(14) forwards;
 }
+/* Loading state — looped flicker shown while the video is buffering, so
+   the screen reads as live tuning-in rather than a black hole. Fades out
+   when .loading is removed (on video canplay). */
+.static-noise.loading {
+  opacity: 1;
+  animation: static-loop 0.32s steps(7) infinite;
+  transition: opacity 0.45s ease;
+}
+@keyframes static-loop {
+  0%   { background-position:  12% 18%; opacity: 0.85; }
+  20%  { background-position: -34% 52%; opacity: 1;    }
+  40%  { background-position:  68% -8%; opacity: 0.7;  }
+  60%  { background-position: -22% 33%; opacity: 0.95; }
+  80%  { background-position:  41% 71%; opacity: 0.8;  }
+  100% { background-position:  -7% -3%; opacity: 0.9;  }
+}
 @keyframes static-flicker {
   0%   { opacity: 0;    background-position:   0%   0%; transform: scale(1);    }
   6%   { opacity: 1;    background-position:  47%  23%; transform: scale(1.02); }
@@ -1603,6 +1619,25 @@ body.boundary-mode .sticker-logo { display: none !important; }
   document.querySelectorAll('.channel-btn').forEach((btn) => {
     btn.addEventListener('click', () => switchTo(btn.dataset.channel));
   });
+})();
+
+// ─── Boot static — show looped TV-static until the video can play ────────
+// Read the channel as "tuning in" rather than a black hole during the
+// first few hundred ms while the MP4 streams in.
+(() => {
+  const noise = document.getElementById('staticNoise');
+  const video = document.getElementById('screenVideo');
+  if (!noise || !video) return;
+  noise.classList.add('loading');
+  const clear = () => noise.classList.remove('loading');
+  if (video.readyState >= 3) {
+    clear();
+  } else {
+    video.addEventListener('canplay', clear, { once: true });
+    video.addEventListener('loadeddata', clear, { once: true });
+    // Failsafe: hide after 5s even if events never fire (e.g. video error).
+    setTimeout(clear, 5000);
+  }
 })();
 
 // ─── Video player ──────────────────────────────────────────────────────────
