@@ -30,7 +30,7 @@
   --headline-red-shadow: #000000;
   --tv-bezel: #d8c8ac;
   --tv-bezel-shadow: #b39c7c;
-  --tv-screen: #1a1413;
+  --tv-screen: #000;
   --wood-dark: #9a7656;
   --wood-mid: #b88e6a;
   --ink: #1a1410;
@@ -197,13 +197,16 @@ html, body {
 }
 /* Screen area positioned to fit the transparent cutout in the PNG.
    Coordinates derived from the PNG: cutout is 8.18%-74.03% horizontally,
-   10.31%-75.44% vertically, of the 1344×892 source image. */
+   10.31%-75.44% vertically. We extend the screen-area ~0.4% past the
+   cutout on every side so sub-pixel rounding never lets the body's cream
+   bg peek through the seam between the screen and the chassis bezel.
+   The overflow is hidden behind the chassis PNG (z-index 2). */
 .tv-housing .screen-area {
   position: absolute;
-  left: 8.18%;
-  top: 10.31%;
-  width: 65.85%;
-  height: 65.13%;
+  left: 7.78%;
+  top: 9.91%;
+  width: 66.65%;
+  height: 65.93%;
   z-index: 1;
   overflow: hidden;
   background: #000;
@@ -1816,10 +1819,12 @@ body.boundary-mode .supported-sticker { display: none !important; }
       strapEl.textContent = c.strap;
       epEl.textContent = c.episode;
       // Swap the video feed when the channel has a clip; otherwise pause
-      // the current video and keep the no-signal canvas up so the screen
-      // reads as "no signal" until we record something for that channel.
-      // While a fresh clip is loading, keep the no-signal canvas as a
-      // preloader and only fade it out once the video can play.
+      // the current video and keep the canvas up so the screen reads as
+      // "no signal" until we record something for that channel. While a
+      // fresh clip is loading, keep the canvas up as a preloader and
+      // only fade it out once the video is *actually* playing — listening
+      // for `playing` (and `canplay` as a fallback) rather than
+      // `loadeddata`, which fires too early.
       const v = document.getElementById('screenVideo');
       const screen = document.querySelector('.screen');
       if (v && c.video) {
@@ -1830,12 +1835,12 @@ body.boundary-mode .supported-sticker { display: none !important; }
           screen.classList.add('no-signal');
           const onReady = () => {
             screen.classList.remove('no-signal');
+            v.removeEventListener('playing', onReady);
             v.removeEventListener('canplay', onReady);
-            v.removeEventListener('loadeddata', onReady);
             clearTimeout(timeoutId);
           };
+          v.addEventListener('playing', onReady);
           v.addEventListener('canplay', onReady);
-          v.addEventListener('loadeddata', onReady);
           const timeoutId = setTimeout(onReady, 5000);
         } else {
           screen.classList.remove('no-signal');
@@ -1856,20 +1861,23 @@ body.boundary-mode .supported-sticker { display: none !important; }
 })();
 
 // ─── No-signal canvas snow ────────────────────────────────────────────────
-// Real per-frame TV static. Render at half resolution so the noise has
-// chunky CRT-style grain rather than the fine-grit look of a tiled SVG,
-// then let `image-rendering: pixelated` scale it back up. Only generates
-// frames while .screen.no-signal is on, and throttles to ~30fps so it
-// doesn't burn the GPU during idle channels.
+// Real per-frame TV static at quarter pixel-count (half-res in each axis),
+// scaled up with `image-rendering: pixelated` for CRT-grade grain. The rAF
+// loop is *only* alive while .screen.no-signal is on — a MutationObserver
+// starts/stops it on class changes so idle channels cost nothing.
 (() => {
   const canvas = document.getElementById('staticCanvas');
   const screen = document.querySelector('.screen');
   if (!canvas || !screen) return;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { alpha: false });
 
   const SCALE = 0.5;
+  const FRAME_INTERVAL = 1000 / 24;  // 24fps — plenty for static, half the
+                                     // work of 60fps without looking choppy
   let buffer32 = null;
   let idata = null;
+  let rafId = null;
+  let last = 0;
 
   const resize = () => {
     const r = canvas.getBoundingClientRect();
@@ -1892,37 +1900,60 @@ body.boundary-mode .supported-sticker { display: none !important; }
     ctx.putImageData(idata, 0, 0);
   };
 
-  const FRAME_INTERVAL = 1000 / 30;
-  let last = 0;
   const loop = (now) => {
-    requestAnimationFrame(loop);
-    if (!screen.classList.contains('no-signal')) return;
-    if (canvas.width <= 2) resize();
-    if (now - last < FRAME_INTERVAL) return;
-    last = now;
-    generateNoise();
+    if (!screen.classList.contains('no-signal')) {
+      rafId = null;       // class flipped off — stop rescheduling
+      return;
+    }
+    if (now - last >= FRAME_INTERVAL) {
+      last = now;
+      generateNoise();
+    }
+    rafId = requestAnimationFrame(loop);
   };
 
-  const init = () => { resize(); requestAnimationFrame(loop); };
-  if (document.readyState === 'complete') init();
-  else window.addEventListener('load', init, { once: true });
-  window.addEventListener('resize', resize);
+  const start = () => {
+    if (rafId !== null) return;
+    if (!buffer32 || canvas.width <= 2) resize();
+    rafId = requestAnimationFrame(loop);
+  };
+
+  // Toggle the loop in lockstep with the no-signal class.
+  new MutationObserver(() => {
+    if (screen.classList.contains('no-signal')) start();
+  }).observe(screen, { attributes: true, attributeFilter: ['class'] });
+
+  // Size the canvas immediately — don't wait for window.load (waiting on
+  // the chassis PNG + video means static can't paint for several seconds).
+  resize();
+  if (screen.classList.contains('no-signal')) start();
+  window.addEventListener('resize', () => {
+    resize();
+    if (screen.classList.contains('no-signal')) start();
+  });
 })();
 
 // ─── Boot static — snow on while the home channel buffers in ─────────────
 // Read the page-load as "tuning in" rather than a black hole during the
-// first few hundred ms while the MP4 streams in. Same canvas as channel
-// switches, so the preloader and the no-signal state are visually one.
+// first few hundred ms while the MP4 streams in. We listen for `playing`
+// (actual playback start) rather than `loadeddata` (one frame decoded),
+// because the latter fires too early and leaves the user staring at a
+// paused frame. `canplay` is kept as a fallback for the rare case where
+// autoplay can't start playback.
 (() => {
   const screen = document.querySelector('.screen');
   const video = document.getElementById('screenVideo');
   if (!screen || !video) return;
-  if (video.readyState >= 3) return;
+  // Skip the static if the video is already actually playing.
+  if (!video.paused && video.readyState >= 3) return;
   screen.classList.add('no-signal');
-  const clear = () => screen.classList.remove('no-signal');
+  const clear = () => {
+    screen.classList.remove('no-signal');
+    clearTimeout(failsafe);
+  };
+  video.addEventListener('playing', clear, { once: true });
   video.addEventListener('canplay', clear, { once: true });
-  video.addEventListener('loadeddata', clear, { once: true });
-  setTimeout(clear, 5000);
+  const failsafe = setTimeout(clear, 5000);
 })();
 
 // ─── Video player ──────────────────────────────────────────────────────────
