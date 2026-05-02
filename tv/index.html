@@ -2839,6 +2839,28 @@ body.fullscreen-mode .exit-fs-btn {
     initial = { ...defaults, ...stored };
   } catch { initial = { ...defaults }; }
 
+  // ── TV TEXT state ──────────────────────────────────────────────────
+  // Separate state + storage key for the on-screen text tweaks (now
+  // playing badge, show title, description card). Same gating, same
+  // widget UI, but persisted independently.
+  const tvDefaults = {
+    npSize: 1.45,    // cqi — Now Playing label/episode font size
+    npX: 0.5,        // cqi — translateX for the now-playing badge
+    npY: -1.5,       // cqi — translateY
+    stSize: 5.4,     // cqi — show title (PIXEL PUPPETS)
+    stX: 0,
+    stY: 0,
+    soSize: 1.7,     // cqi — show overlay description font size
+    soX: 0,
+    soY: 0,
+  };
+  const TV_STORAGE_KEY = 'pp-tv-text';
+  let tvInitial;
+  try {
+    const stored = JSON.parse(localStorage.getItem(TV_STORAGE_KEY) || '{}');
+    tvInitial = { ...tvDefaults, ...stored };
+  } catch { tvInitial = { ...tvDefaults }; }
+
   const w = document.createElement('div');
   w.id = 'btn-style-widget';
   w.innerHTML = `
@@ -2902,6 +2924,30 @@ body.fullscreen-mode .exit-fs-btn {
       <label>Y       <input type="range" min="0"   max="14"  step="0.5"  data-key="shadowY" value="${initial.shadowY}"><span class="btw-v"></span></label>
       <label>outline <input type="range" min="0"   max="3"   step="0.1"  data-key="outline" value="${initial.outline}"><span class="btw-v"></span></label>
     </div>
+
+    <div class="btw-divider"></div>
+    <div class="btw-head"><span>TV TEXT</span></div>
+
+    <div class="btw-section-label">now playing badge (ON AIR SOON / PILOT PREVIEW)</div>
+    <div class="btw-row">
+      <label>size <input type="range" min="0.6" max="3.5" step="0.05" data-key="t-npSize" value="${tvInitial.npSize}"><span class="btw-v"></span></label>
+      <label>X    <input type="range" min="-10" max="20"  step="0.1"  data-key="t-npX"    value="${tvInitial.npX}"><span class="btw-v"></span></label>
+      <label>Y    <input type="range" min="-10" max="20"  step="0.1"  data-key="t-npY"    value="${tvInitial.npY}"><span class="btw-v"></span></label>
+    </div>
+
+    <div class="btw-section-label">show title (PIXEL PUPPETS)</div>
+    <div class="btw-row">
+      <label>size <input type="range" min="2"   max="10"  step="0.1"  data-key="t-stSize" value="${tvInitial.stSize}"><span class="btw-v"></span></label>
+      <label>X    <input type="range" min="-10" max="20"  step="0.1"  data-key="t-stX"    value="${tvInitial.stX}"><span class="btw-v"></span></label>
+      <label>Y    <input type="range" min="-20" max="20"  step="0.1"  data-key="t-stY"    value="${tvInitial.stY}"><span class="btw-v"></span></label>
+    </div>
+
+    <div class="btw-section-label">show overlay (description card)</div>
+    <div class="btw-row">
+      <label>size <input type="range" min="0.8" max="4"   step="0.05" data-key="t-soSize" value="${tvInitial.soSize}"><span class="btw-v"></span></label>
+      <label>X    <input type="range" min="-10" max="20"  step="0.1"  data-key="t-soX"    value="${tvInitial.soX}"><span class="btw-v"></span></label>
+      <label>Y    <input type="range" min="-20" max="20"  step="0.1"  data-key="t-soY"    value="${tvInitial.soY}"><span class="btw-v"></span></label>
+    </div>
   `;
   Object.assign(w.style, {
     position: 'fixed', left: '0', right: '0', bottom: '0', zIndex: 9999,
@@ -2911,6 +2957,10 @@ body.fullscreen-mode .exit-fs-btn {
     boxShadow: '0 -4px 12px rgba(0,0,0,0.4)',
     borderTop: '1px solid rgba(255,240,200,0.25)',
     backdropFilter: 'blur(4px)',
+    /* Cap the height + scroll internally so adding more sections (TV
+       text, etc.) doesn't run the widget off the top of the viewport. */
+    maxHeight: '75vh',
+    overflowY: 'auto',
   });
   // Widget element is built in memory above so the input-syncing /
   // listener wiring can still query against it; only push it into the
@@ -2928,6 +2978,8 @@ body.fullscreen-mode .exit-fs-btn {
     #btn-style-widget .btw-colors label { flex-direction:column; gap:2px; align-items:flex-start; }
     #btn-style-widget .btw-colors input[type=color] { width:100%; height:24px; border:0; padding:0; background:transparent; cursor:pointer; }
     #btn-style-widget .btw-x { background:#3a2a1a; color:#f0e6d2; border:0; padding:6px 10px; border-radius:4px; font:inherit; cursor:pointer; }
+    #btn-style-widget .btw-divider { height:1px; background:rgba(255,240,200,0.18); margin:12px 0 8px; }
+    #btn-style-widget .btw-head:not(:first-child) { margin-top:0; }
   `;
   if (tuneVisible) document.head.appendChild(s);
 
@@ -3038,6 +3090,40 @@ body.fullscreen-mode .exit-fs-btn {
     panel.style.rowGap = state.gap + 'px';
     panel.style.columnGap = state.gapX + 'px';
   };
+
+  // ── TV TEXT apply pass ─────────────────────────────────────────────
+  // Inline style overrides on the existing on-screen text elements so
+  // size + position can be tweaked via the widget. Sizes are in cqi
+  // (so they keep scaling with the TV container width on resize); X/Y
+  // are translateN cqi offsets layered on top of whatever positioning
+  // the static CSS already gives the element.
+  const tvState = { ...tvInitial };
+  const applyTv = () => {
+    const np = document.querySelector('.now-playing');
+    if (np) {
+      np.style.transform = `translate(${tvState.npX}cqi, ${tvState.npY}cqi)`;
+      const lbl = np.querySelector('.label');
+      const ep = np.querySelector('.episode');
+      if (lbl) lbl.style.fontSize = tvState.npSize + 'cqi';
+      if (ep) ep.style.fontSize = tvState.npSize + 'cqi';
+    }
+    const st = document.querySelector('.show-title');
+    if (st) {
+      st.style.fontSize = tvState.stSize + 'cqi';
+      st.style.transform = `translate(${tvState.stX}cqi, ${tvState.stY}cqi)`;
+    }
+    const so = document.querySelector('.show-overlay');
+    if (so) {
+      so.style.transform = `translate(${tvState.soX}cqi, ${tvState.soY}cqi)`;
+    }
+    const desc = document.querySelector('.show-overlay .desc');
+    if (desc) desc.style.fontSize = tvState.soSize + 'cqi';
+  };
+  const TV_KEY_PREFIX = 't-';
+  const persistTv = () => {
+    try { localStorage.setItem(TV_STORAGE_KEY, JSON.stringify(tvState)); } catch {}
+  };
+
   const refreshReadouts = () => {
     w.querySelectorAll('input[type=range]').forEach(i => {
       const v = +i.value;
@@ -3045,16 +3131,26 @@ body.fullscreen-mode .exit-fs-btn {
       let text;
       if (k === 'shadow' || k === 'kerning' || k === 'ledHighlight' || k === 'btnHighlight') text = v.toFixed(2);
       else if (k === 'outline' || k === 'shadowX' || k === 'shadowY' || k === 'shadowBlur' || k === 'shadowSpreadX' || k === 'shadowSpreadY' || k === 'fontSize' || k === 'ledStroke' || k === 'ledRadius' || k === 'ledHighlightH' || k === 'vAlign') text = v.toFixed(1);
+      else if (k && k.startsWith(TV_KEY_PREFIX)) text = v.toFixed(2);
       else text = v.toString();
       i.parentElement.querySelector('.btw-v').textContent = text;
     });
   };
 
-  // Sync UI to whatever was loaded
+  // Sync UI to whatever was loaded — button-style keys live on `state`,
+  // TV-text keys are prefixed `t-` and live on `tvState`.
   w.querySelectorAll('input').forEach(input => {
-    if (state[input.dataset.key] !== undefined) input.value = state[input.dataset.key];
+    const k = input.dataset.key;
+    if (!k) return;
+    if (k.startsWith(TV_KEY_PREFIX)) {
+      const tk = k.slice(TV_KEY_PREFIX.length);
+      if (tvState[tk] !== undefined) input.value = tvState[tk];
+    } else if (state[k] !== undefined) {
+      input.value = state[k];
+    }
   });
   apply();
+  applyTv();
   refreshReadouts();
 
   const persist = () => {
@@ -3064,10 +3160,18 @@ body.fullscreen-mode .exit-fs-btn {
   w.querySelectorAll('input').forEach(input => {
     input.addEventListener('input', e => {
       const k = e.target.dataset.key;
-      state[k] = input.type === 'range' ? +e.target.value : e.target.value;
-      apply();
-      refreshReadouts();
-      persist();
+      const v = input.type === 'range' ? +e.target.value : e.target.value;
+      if (k.startsWith(TV_KEY_PREFIX)) {
+        tvState[k.slice(TV_KEY_PREFIX.length)] = v;
+        applyTv();
+        refreshReadouts();
+        persistTv();
+      } else {
+        state[k] = v;
+        apply();
+        refreshReadouts();
+        persist();
+      }
     });
   });
 
