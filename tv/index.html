@@ -2768,6 +2768,10 @@ body.fullscreen-mode .exit-fs-btn {
     // landing here with a fresh localStorage gets the same starting look
     // the page renders before JS runs.
     paddingY: 14,
+    vAlign: 2,         // px — top/bottom padding asymmetry; positive
+                       // means top has MORE padding so the content
+                       // centre shifts down (compensating for all-caps
+                       // labels riding above the line-box centre)
     gap: 2,            // px — vertical (row) gap between buttons
     gapX: 5,           // px — horizontal (column) gap between buttons
     radius: 6,
@@ -2820,8 +2824,9 @@ body.fullscreen-mode .exit-fs-btn {
       <button class="btw-x" aria-label="close">×</button>
     </div>
     <div class="btw-row">
-      <label>height <input type="range" min="6"  max="28" step="1" data-key="paddingY" value="${initial.paddingY}"><span class="btw-v"></span></label>
-      <label>radius <input type="range" min="0"  max="28" step="1" data-key="radius"   value="${initial.radius}"><span class="btw-v"></span></label>
+      <label>height <input type="range" min="6"  max="28" step="1"   data-key="paddingY" value="${initial.paddingY}"><span class="btw-v"></span></label>
+      <label>v-align<input type="range" min="-6" max="8"  step="0.5" data-key="vAlign"   value="${initial.vAlign}"><span class="btw-v"></span></label>
+      <label>radius <input type="range" min="0"  max="28" step="1"   data-key="radius"   value="${initial.radius}"><span class="btw-v"></span></label>
     </div>
     <div class="btw-row">
       <label>row gap<input type="range" min="0"  max="20" step="1" data-key="gap"  value="${initial.gap}"><span class="btw-v"></span></label>
@@ -2983,10 +2988,11 @@ body.fullscreen-mode .exit-fs-btn {
     const sh = buildShadow(state);
     updateShadowFilter(state);
     buttons.forEach(b => {
-      // Asymmetric vertical padding: 2px MORE on top, 2px LESS on bottom
-      // so the content area's centre shifts down, optically centring the
-      // all-caps label. Total button height still equals 2 × paddingY.
-      b.style.padding = `${state.paddingY + 2}px 14px ${state.paddingY - 2}px`;
+      // vAlign drives top/bottom padding asymmetry — positive value
+      // adds padding on top + subtracts on bottom, shifting the
+      // content area's centre down. Total height = 2 × paddingY
+      // regardless of vAlign.
+      b.style.padding = `${state.paddingY + state.vAlign}px 14px ${state.paddingY - state.vAlign}px`;
       b.style.borderRadius = state.radius + 'px';
       b.style.background = bg;
       b.style.backgroundBlendMode = 'overlay, normal, normal, normal';
@@ -3016,7 +3022,7 @@ body.fullscreen-mode .exit-fs-btn {
       const k = i.dataset.key;
       let text;
       if (k === 'shadow' || k === 'kerning' || k === 'ledHighlight' || k === 'btnHighlight') text = v.toFixed(2);
-      else if (k === 'outline' || k === 'shadowX' || k === 'shadowY' || k === 'shadowBlur' || k === 'shadowSpreadX' || k === 'shadowSpreadY' || k === 'fontSize' || k === 'ledStroke' || k === 'ledRadius' || k === 'ledHighlightH') text = v.toFixed(1);
+      else if (k === 'outline' || k === 'shadowX' || k === 'shadowY' || k === 'shadowBlur' || k === 'shadowSpreadX' || k === 'shadowSpreadY' || k === 'fontSize' || k === 'ledStroke' || k === 'ledRadius' || k === 'ledHighlightH' || k === 'vAlign') text = v.toFixed(1);
       else text = v.toString();
       i.parentElement.querySelector('.btw-v').textContent = text;
     });
