@@ -2844,15 +2844,18 @@ body.fullscreen-mode .exit-fs-btn {
   // playing badge, show title, description card). Same gating, same
   // widget UI, but persisted independently.
   const tvDefaults = {
-    npSize: 1.45,    // cqi — Now Playing label/episode font size
-    npX: 0.5,        // cqi — translateX for the now-playing badge
-    npY: -1.5,       // cqi — translateY
-    stSize: 5.4,     // cqi — show title (PIXEL PUPPETS)
-    stX: 0,
-    stY: 0,
-    soSize: 1.7,     // cqi — show overlay description font size
+    // Mobile-tuned values (apply pass runs only inside the
+    // `max-width:720px` matchMedia gate, so desktop is unaffected and
+    // keeps the static CSS values).
+    npSize: 2.30,    // cqi — Now Playing label/episode font size
+    npX: 0.50,       // cqi — translateX for the now-playing badge
+    npY: -4.40,      // cqi — translateY
+    stSize: 6.80,    // cqi — show title (PIXEL PUPPETS)
+    stX: 0.20,
+    stY: -8.10,
+    soSize: 2.95,    // cqi — show overlay description font size
     soX: 0,
-    soY: 0,
+    soY: 4.40,
   };
   const TV_STORAGE_KEY = 'pp-tv-text';
   let tvInitial;
