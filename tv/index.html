@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Pixel Puppets — Desktop Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@500;700;800&display=swap" rel="stylesheet">
 
 <style>
 @font-face {
@@ -129,7 +132,7 @@ html, body {
   justify-content: center;
   gap: clamp(8px, 1.4cqw, 16px);
   margin-bottom: 0.6cqw;
-  font-family: 'Euclid', sans-serif;
+  font-family: 'Gothic A1', 'Euclid', sans-serif;
   font-weight: 700;
   font-size: clamp(9px, 1.4cqw, 15px);
   letter-spacing: 0.26em;
@@ -808,13 +811,18 @@ body.fullscreen-mode .exit-fs-btn {
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
 }
 .channel-btn {
-  /* Three-column grid so the LED, label, and arrow sit in fixed positions
-     across all buttons — arrows align flush right regardless of label text. */
+  /* Three-column grid: LED, label, arrow. Label is left-aligned within
+     its 1fr middle column with the grid `gap` keeping a clear breathing
+     space between LED and label. */
+  position: relative;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 0.7cqi;
   text-align: left;
+  /* Clip the ::before highlight strip to the rounded corner shape so it
+     doesn't poke past the curve. Outset drop shadows are unaffected. */
+  overflow: hidden;
   /* Warm tan plastic with subtle SVG noise grain + light/wear blobs over a
      vertical bevel gradient. Dark-brown shadows give the chunky 3D feel. */
   background:
@@ -871,25 +879,74 @@ body.fullscreen-mode .exit-fs-btn {
     0 1px 2px rgba(50, 32, 15, 0.25);
 }
 .channel-btn .led {
+  position: relative;
   width: 1.5cqi;
   height: 1.5cqi;
-  border-radius: 0.35cqi;
+  border-radius: var(--led-radius, 2px);
   flex-shrink: 0;
-  box-shadow:
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.55),
-    inset 0 -1.5px 0 rgba(0, 0, 0, 0.28),
-    inset 0 0 0 1px rgba(0, 0, 0, 0.18),
-    0 1px 1px rgba(0, 0, 0, 0.25);
+  /* Clip the highlight pseudo to the rounded LED shape so it sits
+     inside the radius rather than poking past the curve. */
+  overflow: hidden;
+  /* Just the black stroke at this level — the highlight strip is drawn
+     by the ::before pseudo so it sits INSIDE the stroke, not over it. */
+  box-shadow: inset 0 0 0 var(--led-stroke, 1.5px) #000;
+}
+.channel-btn .led::before {
+  content: '';
+  position: absolute;
+  /* Inset on all sides by the stroke width so the pseudo fills the
+     coloured area; then the highlight is drawn as a top *border* on
+     this pseudo so it follows the inner radius (a thin background-fill
+     can't hold a corner radius bigger than its own height — the radius
+     gets clamped down and the corners look square). */
+  inset: var(--led-stroke, 1.5px);
+  border-top: var(--led-highlight-h, 1px) solid rgba(255, 255, 255, var(--led-highlight, 0.55));
+  border-top-left-radius: max(0px, calc(var(--led-radius, 2px) - var(--led-stroke, 1.5px)));
+  border-top-right-radius: max(0px, calc(var(--led-radius, 2px) - var(--led-stroke, 1.5px)));
+  pointer-events: none;
+}
+
+/* Same pattern on the button itself: ::before draws the cream top
+   highlight strip inside the outer stroke, so the black outline reads
+   as a continuous ring all the way around. The pseudo fills the inner
+   area (inset by the stroke) and the cream is drawn as a top border so
+   it follows the inner curve cleanly even when the strip is much
+   thinner than the corner radius. */
+.channel-btn::before {
+  content: '';
+  position: absolute;
+  inset: var(--btn-stroke, 0px);
+  border-top: var(--btn-highlight-h, 1px) solid rgba(255, 245, 215, var(--btn-highlight, 0.5));
+  border-top-left-radius: var(--btn-radius-top, 8px);
+  border-top-right-radius: var(--btn-radius-top, 8px);
+  pointer-events: none;
+  z-index: 0;
+}
+.channel-btn > * {
+  position: relative;
+  z-index: 1;
 }
 .channel-btn .arrow {
-  font-size: 1.2cqi;
-  font-weight: 800;
+  position: relative;
+  display: inline-block;
+  /* match LED width so the middle column centres exactly on the button */
+  width: 14px;
+  height: 14px;
   color: var(--ink-soft);
-  /* Force text-presentation on the ▶ glyph instead of iOS rendering it
-     as a colour emoji (which it does by default for U+25B6). The HTML
-     already pairs it with VS-15 (&#xFE0E;); this is the belt for the
-     braces on browsers that respect `font-variant-emoji`. */
-  font-variant-emoji: text;
+}
+/* CSS-drawn chevron: two thin lines meeting at 90°, rotated to point
+   right. Replaces the filled ▶ triangle for a lighter, more arrow-like
+   feel. Uses currentColor so it inherits the .arrow text colour. */
+.channel-btn .arrow::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-top: 1.6px solid currentColor;
+  border-right: 1.6px solid currentColor;
+  transform: translate(-65%, -50%) rotate(45deg);
 }
 .channel-btn[data-color="red"]    .led { background: #d54e3a; }
 .channel-btn[data-color="orange"] .led { background: #e58e3a; }
@@ -1592,6 +1649,199 @@ body.fullscreen-mode .exit-fs-btn {
   color: rgba(60, 47, 35, 0.55);
   margin: 1.5cqw auto 0;
 }
+
+/* ─── Mobile bezel + helpers ──────────────────────────────────────────────
+   The .tv-frame wrapper is `display: contents` on desktop so the chassis
+   PNG and screen-area still behave as direct children of .tv-housing —
+   keeps every existing absolute position rule working unchanged. The
+   mobile-only chassis PNG and mobile socials are hidden on desktop. */
+.tv-frame { display: contents; }
+.tv-chassis-mobile { display: none; }
+/* Social channel buttons (YouTube / Instagram) — only show on mobile,
+   where they sit as the 4th row of the channel-button grid. Desktop
+   uses the dedicated SOCIAL plate inside the knob row. */
+.channel-btn-social { display: none; text-decoration: none; color: inherit; }
+.channel-btn .social-icon {
+  width: 1.5cqi;
+  height: 1.5cqi;
+  flex-shrink: 0;
+  filter: brightness(0);
+  opacity: 0.85;
+}
+
+/* ─── Mobile breakpoint ───────────────────────────────────────────────────
+   Stacked column: gold-bezel TV → 2-col channel button grid → social
+   pills → footer. Knob row (POWER, VOLUME, BRIGHTNESS, CONTRAST, social
+   pills, player sockets) is dropped entirely — there's no chassis to
+   carry them. The supported-by sticker disappears with the desktop
+   chassis PNG (it's baked into that artwork). */
+@media (max-width: 720px) {
+  /* Slim the page padding so the TV uses the screen edge-to-edge.
+     Flex column + 100dvh so the colophon can be pinned to the bottom
+     of the viewport via margin-top:auto on short pages, while still
+     flowing naturally if the content overflows. */
+  .page {
+    padding: 18px 14px 32px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+
+  /* Headline scales down with viewport — already clamps at 24px,
+     no special handling needed. Tagline shrinks proportionally. */
+  .topbar { margin-bottom: 1.5cqw; }
+  .tagline {
+    font-size: clamp(6px, 1.55cqw, 8px);
+    letter-spacing: 0.18em;
+    margin-bottom: 4cqw;
+  }
+  .tagline .strap-text { transform: scaleY(1.05); }
+  .tagline .dot {
+    width: 4px; height: 4px;
+    min-width: 4px; min-height: 4px;
+  }
+
+  /* The TV housing becomes a flex column and loses its desktop aspect
+     ratio. Children stack: TV frame → channel grid → socials. The
+     chassis drop-shadow is dropped because the mobile bezel has its
+     own depth and we want the page to feel app-like, not chunky. */
+  .tv-housing {
+    aspect-ratio: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    filter: none;
+    /* container-type stays inline-size so cqi units inside still work. */
+  }
+
+  /* Turn .tv-frame into a real positioned box on mobile so the gold bezel
+     PNG and the screen-area become its absolute children. */
+  .tv-frame {
+    display: block;
+    position: relative;
+    width: 100%;
+    /* Match the bezel image's intrinsic aspect ratio (1156×875) */
+    aspect-ratio: 1156 / 875;
+    filter: drop-shadow(0 6px 12px rgba(60, 40, 20, 0.25));
+    /* Push the frame to fill more of the phone screen width. The scale
+       is a ratio so it stays "5% bigger than container width" on every
+       phone. The -5px Y nudge is a small absolute shift; reads
+       identical across phone widths. transform-origin keeps the top
+       edge anchored so the bezel grows downward into available column
+       space rather than off the top of the page. */
+    transform-origin: top center;
+    transform: translateY(-5px) scale(1.05);
+    /* Compensate for the visual overflow past the layout box so the
+       channel-panel below doesn't visually crowd the frame. */
+    margin-bottom: 18px;
+  }
+  .tv-chassis { display: none; }
+  .tv-chassis-mobile {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* Re-position the screen to fit inside the gold bezel cutout.
+     Coordinates derived visually from the PNG — the gold ring takes
+     ~9% of the width on each side and ~9% on top/bottom. */
+  .tv-frame .screen-area {
+    left: 6.1%;
+    top: 5.7%;
+    width: 87.4%;
+    height: 84%;
+    border-radius: 3.5%;
+  }
+  /* Push the body text overlay higher on mobile so it clears the play
+     button below — both used to sit close on the smaller screen. */
+  .tv-frame .screen-area .show-overlay {
+    bottom: 26%;
+  }
+
+  /* Channel panel: drop the absolute-positioned card layout and become
+     a clean 2-column grid below the TV. Strip the recessed-card chrome
+     (gradient, shadows, matrix3d warp) so the buttons read as a normal
+     mobile grid. */
+  .channel-panel {
+    position: static;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* Row gap is tighter than column gap so HOME→ABOUT stacks neatly
+       while HOME↔REHEARSALS gets a touch more breathing room. */
+    row-gap: 2px;
+    column-gap: 5px;
+    padding: 0;
+    background: none;
+    border-radius: 0;
+    box-shadow: none;
+    inset: auto;
+    /* Pull the button block up toward the TV (the bezel scale-up
+       leaves visual space below the layout box; this absorbs it). */
+    transform-origin: top center;
+    transform: translateY(-21px);
+  }
+  /* The "— CHANNEL SELECT —" header and the 4-icon socials inside the
+     panel are desktop-only ornament; hide on mobile. */
+  .channel-panel .channel-header,
+  .channel-panel .channel-footer { display: none; }
+
+  /* Channel buttons themselves keep the desktop styling (warm tan
+     plastic, LED, ▶ arrow, hover/active states) but resize for the
+     larger touch targets on mobile and tighter row gap. Static values
+     here mirror the JS widget defaults so the page renders right even
+     before the widget's apply() pass runs. */
+  .channel-btn {
+    padding: 12px 14px;
+    font-size: 9.9px;
+    letter-spacing: 0.02em;
+    border-radius: 6px;
+    gap: 10px;
+  }
+  .channel-btn .led {
+    width: 14px;
+    height: 14px;
+    /* var so the widget's --led-radius can drive this */
+    border-radius: var(--led-radius, 1.5px);
+  }
+  .channel-btn .arrow {
+    font-size: 12px;
+  }
+
+  /* Show YouTube + Instagram as the 4th row of the channel grid, in
+     the same physical-button style as the channel buttons. */
+  .channel-btn-social { display: grid; }
+  .channel-btn .social-icon {
+    width: 14px;
+    height: 14px;
+  }
+  /* Mobile-only: switch the channel buttons to Gothic A1 for a more
+     condensed, technical feel that matches the chassis labels. */
+  .channel-btn {
+    font-family: 'Gothic A1', 'Euclid', sans-serif;
+  }
+
+  /* Knob row hidden — no chassis to mount it on. */
+  .knob-row { display: none; }
+
+  /* Intro + colophon scale up a touch on mobile so they read at body
+     text sizes rather than the cqw-driven desktop-tiny. */
+  .intro {
+    font-size: 13px;
+    max-width: 90%;
+    line-height: 1.55;
+    margin: 22px auto 0;
+  }
+  .colophon {
+    font-size: 11px;
+    /* margin-top:auto pins this to the bottom of the flex page */
+    margin: auto auto 0;
+    padding-top: 24px;
+  }
+}
 </style>
 </head>
 <body>
@@ -1618,6 +1868,13 @@ body.fullscreen-mode .exit-fs-btn {
          screen cutout, the chassis PNG sits on top, and the channel buttons
          + knob row are absolute-positioned overlays on the chassis itself. -->
     <div class="tv-housing">
+
+      <!-- Frame wrapper — invisible (display:contents) on desktop so its
+           children (chassis + screen) act like direct .tv-housing children
+           and keep the existing absolute positioning. On mobile this turns
+           into a real positioned box that holds just the gold bezel + the
+           screen, while the channel buttons + socials flow below it. -->
+      <div class="tv-frame">
 
       <!-- Screen content (behind the chassis, visible through the cutout) -->
       <div class="screen-area screen">
@@ -1668,15 +1925,23 @@ body.fullscreen-mode .exit-fs-btn {
            layered above it remain visible and clickable. -->
       <img class="tv-chassis" src="assets/tv-chassis.png" alt="" aria-hidden="true">
 
+      <!-- Mobile-only bezel — gold rounded TV frame that wraps just the
+           screen on phone-sized viewports. Hidden on desktop. -->
+      <img class="tv-chassis-mobile" src="assets/tv-frame-mobile.png" alt="" aria-hidden="true">
+
+      </div><!-- /.tv-frame -->
+
       <!-- Channel select — overlaid on the upper-right side panel of the TV -->
       <aside class="channel-panel">
         <div class="channel-header">— CHANNEL SELECT —</div>
-        <button class="channel-btn" data-color="red"     data-channel="home"><span class="led"></span>HOME<span class="arrow">▶&#xFE0E;</span></button>
-        <button class="channel-btn" data-color="orange"  data-channel="rehearsals"><span class="led"></span>REHEARSALS<span class="arrow">▶&#xFE0E;</span></button>
-        <button class="channel-btn" data-color="yellow"  data-channel="about"><span class="led"></span>ABOUT<span class="arrow">▶&#xFE0E;</span></button>
-        <button class="channel-btn" data-color="green"   data-channel="support"><span class="led"></span>SUPPORT<span class="arrow">▶&#xFE0E;</span></button>
-        <button class="channel-btn" data-color="blue"    data-channel="team"><span class="led"></span>TEAM<span class="arrow">▶&#xFE0E;</span></button>
-        <button class="channel-btn" data-color="purple"  data-channel="contact"><span class="led"></span>CONTACT<span class="arrow">▶&#xFE0E;</span></button>
+        <button class="channel-btn" data-color="red"     data-channel="home"><span class="led"></span>HOME<span class="arrow"></span></button>
+        <button class="channel-btn" data-color="orange"  data-channel="rehearsals"><span class="led"></span>REHEARSALS<span class="arrow"></span></button>
+        <button class="channel-btn" data-color="yellow"  data-channel="about"><span class="led"></span>ABOUT<span class="arrow"></span></button>
+        <button class="channel-btn" data-color="green"   data-channel="support"><span class="led"></span>SUPPORT<span class="arrow"></span></button>
+        <button class="channel-btn" data-color="blue"    data-channel="team"><span class="led"></span>TEAM<span class="arrow"></span></button>
+        <button class="channel-btn" data-color="purple"  data-channel="contact"><span class="led"></span>CONTACT<span class="arrow"></span></button>
+        <a class="channel-btn channel-btn-social" data-platform="youtube" href="https://www.youtube.com/@pixelpuppetsuk" target="_blank" rel="noopener"><img class="social-icon" src="assets/youtube-black.svg" alt="">YOUTUBE<span class="arrow"></span></a>
+        <a class="channel-btn channel-btn-social" data-platform="instagram" href="https://www.instagram.com/pixel.puppets/" target="_blank" rel="noopener"><img class="social-icon" src="assets/instagram-black.svg" alt="">INSTAGRAM<span class="arrow"></span></a>
         <div class="channel-footer">
           <a class="social" href="#" title="YouTube"><img src="assets/youtube-black.svg" alt="YouTube"></a>
           <a class="social" href="#" title="Instagram"><img src="assets/instagram-black.svg" alt="Instagram"></a>
@@ -1737,6 +2002,7 @@ body.fullscreen-mode .exit-fs-btn {
           </div>
         </div>
       </div>
+
     </div>
   </section>
 
@@ -2473,6 +2739,319 @@ body.fullscreen-mode .exit-fs-btn {
     return out;
   };
 })();
+
+// ─── MOBILE BUTTON-STYLE PASS + TUNING WIDGET ───────────────────────────
+// The apply() pass ALWAYS runs on mobile so the page renders with the
+// full tuned styling (colour stops, shadow filter, CSS vars for the
+// pseudo-element highlights — none of which the static CSS can express).
+// The widget UI itself is gated: visit `?tune` once to show it (the
+// flag persists in localStorage), or `?untune` to hide. Tuned state in
+// `pp-btn-style` lives on past disable so the next tune pass resumes
+// from exactly where you left off.
+(() => {
+  if (!window.matchMedia('(max-width: 720px)').matches) return;
+  const params = new URL(location.href).searchParams;
+  if (params.has('tune')) localStorage.setItem('pp-tune', '1');
+  if (params.has('untune')) localStorage.removeItem('pp-tune');
+  const tuneVisible = localStorage.getItem('pp-tune') === '1';
+  const buttons = document.querySelectorAll('.channel-btn');
+  const panel = document.querySelector('.channel-panel');
+  if (!buttons.length || !panel) return;
+
+  const defaults = {
+    // Baseline reflects Ben's tuned values from earlier passes — anyone
+    // landing here with a fresh localStorage gets the same starting look
+    // the page renders before JS runs.
+    paddingY: 12,
+    gap: 2,            // px — vertical (row) gap between buttons
+    gapX: 5,           // px — horizontal (column) gap between buttons
+    radius: 6,
+    c1: '#cbac82', c2: '#ba9d75', c3: '#b79971', c4: '#9a7c54',
+    // Independent stop positions so you can compress the dark band into
+    // just the bottom edge (push c4stop high, c3stop close to it) and
+    // keep the top of the button a flat field of c1.
+    c2stop: 80,
+    c3stop: 85,
+    c4stop: 100,
+    shadow: 1.35,
+    shadowX: 0,        // horizontal shadow offset (0 = flat-on)
+    shadowY: 4,        // vertical shadow offset
+    shadowBlur: 9.5,   // blur radius — fuzziness vs hardness
+    // True asymmetric X / Y spread driven by an SVG feMorphology dilate
+    // filter; sx widens the shadow, sy lengthens it, independently.
+    shadowSpreadX: 0,
+    shadowSpreadY: 0,
+    outline: 0.9,      // extra true-black inset outline width in px
+    fontSize: 9.9,     // px
+    kerning: 0.02,     // em — letter-spacing
+    ledRadius: 1.5,    // px — coloured LED block corner radius
+    ledStroke: 0.9,    // px — black stroke around the LED block
+    ledHighlight: 0.55, // opacity of the top white strip on the LED
+    ledHighlightH: 1,  // px — thickness of that white strip
+    btnHighlight: 0.7, // opacity of the cream highlight strip inside the
+                       // button stroke (independent of shadow opacity)
+    c1stop: 0,         // top stop — make c1 hold solid for X% before c2
+                       // starts blending in
+  };
+  const STORAGE_KEY = 'pp-btn-style';
+  let initial;
+  try {
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    // Migrate the old single `shadowSpread` key onto the new X/Y pair so
+    // existing saves don't get reset.
+    if ('shadowSpread' in stored && !('shadowSpreadX' in stored)) {
+      stored.shadowSpreadX = stored.shadowSpread;
+      stored.shadowSpreadY = stored.shadowSpread;
+    }
+    delete stored.shadowSpread;
+    initial = { ...defaults, ...stored };
+  } catch { initial = { ...defaults }; }
+
+  const w = document.createElement('div');
+  w.id = 'btn-style-widget';
+  w.innerHTML = `
+    <div class="btw-head">
+      <span>BUTTON STYLE</span>
+      <button class="btw-x" aria-label="close">×</button>
+    </div>
+    <div class="btw-row">
+      <label>height <input type="range" min="6"  max="28" step="1" data-key="paddingY" value="${initial.paddingY}"><span class="btw-v"></span></label>
+      <label>radius <input type="range" min="0"  max="28" step="1" data-key="radius"   value="${initial.radius}"><span class="btw-v"></span></label>
+    </div>
+    <div class="btw-row">
+      <label>row gap<input type="range" min="0"  max="20" step="1" data-key="gap"  value="${initial.gap}"><span class="btw-v"></span></label>
+      <label>col gap<input type="range" min="0"  max="32" step="1" data-key="gapX" value="${initial.gapX}"><span class="btw-v"></span></label>
+    </div>
+    <div class="btw-row btw-colors">
+      <label>top    <input type="color" data-key="c1" value="${initial.c1}"></label>
+      <label>mid 1  <input type="color" data-key="c2" value="${initial.c2}"></label>
+      <label>mid 2  <input type="color" data-key="c3" value="${initial.c3}"></label>
+      <label>bottom <input type="color" data-key="c4" value="${initial.c4}"></label>
+    </div>
+    <div class="btw-section-label">colour stops (where each band kicks in)</div>
+    <div class="btw-row">
+      <label>top    <input type="range" min="0"   max="60"  step="1"    data-key="c1stop"  value="${initial.c1stop}"><span class="btw-v"></span></label>
+      <label>mid 1  <input type="range" min="0"   max="80"  step="1"    data-key="c2stop"  value="${initial.c2stop}"><span class="btw-v"></span></label>
+    </div>
+    <div class="btw-row">
+      <label>mid 2  <input type="range" min="20"  max="95"  step="1"    data-key="c3stop"  value="${initial.c3stop}"><span class="btw-v"></span></label>
+      <label>bottom <input type="range" min="60"  max="100" step="1"    data-key="c4stop"  value="${initial.c4stop}"><span class="btw-v"></span></label>
+    </div>
+    <div class="btw-section-label">type</div>
+    <div class="btw-row">
+      <label>size    <input type="range" min="8"   max="20"  step="0.1"  data-key="fontSize" value="${initial.fontSize}"><span class="btw-v"></span></label>
+      <label>kerning <input type="range" min="-0.05" max="0.4" step="0.01" data-key="kerning"  value="${initial.kerning}"><span class="btw-v"></span></label>
+    </div>
+    <div class="btw-section-label">led block</div>
+    <div class="btw-row">
+      <label>radius   <input type="range" min="0"   max="8"   step="0.5"  data-key="ledRadius"    value="${initial.ledRadius}"><span class="btw-v"></span></label>
+      <label>stroke   <input type="range" min="0"   max="3"   step="0.1"  data-key="ledStroke"    value="${initial.ledStroke}"><span class="btw-v"></span></label>
+    </div>
+    <div class="btw-row">
+      <label>highlight<input type="range" min="0"   max="1"   step="0.05" data-key="ledHighlight"  value="${initial.ledHighlight}"><span class="btw-v"></span></label>
+      <label>thickness<input type="range" min="0"   max="4"   step="0.5"  data-key="ledHighlightH" value="${initial.ledHighlightH}"><span class="btw-v"></span></label>
+    </div>
+    <div class="btw-section-label">button highlight</div>
+    <div class="btw-row">
+      <label>opacity<input type="range" min="0"   max="1"   step="0.05" data-key="btnHighlight" value="${initial.btnHighlight}"><span class="btw-v"></span></label>
+    </div>
+    <div class="btw-section-label">shadow</div>
+    <div class="btw-row">
+      <label>opacity <input type="range" min="0"   max="2"   step="0.05" data-key="shadow"     value="${initial.shadow}"><span class="btw-v"></span></label>
+      <label>blur    <input type="range" min="0"   max="30"  step="0.5"  data-key="shadowBlur" value="${initial.shadowBlur}"><span class="btw-v"></span></label>
+    </div>
+    <div class="btw-row">
+      <label>spread X<input type="range" min="0"   max="14"  step="0.5"  data-key="shadowSpreadX" value="${initial.shadowSpreadX}"><span class="btw-v"></span></label>
+      <label>spread Y<input type="range" min="0"   max="14"  step="0.5"  data-key="shadowSpreadY" value="${initial.shadowSpreadY}"><span class="btw-v"></span></label>
+    </div>
+    <div class="btw-row">
+      <label>X       <input type="range" min="-8"  max="8"   step="0.5"  data-key="shadowX" value="${initial.shadowX}"><span class="btw-v"></span></label>
+      <label>Y       <input type="range" min="0"   max="14"  step="0.5"  data-key="shadowY" value="${initial.shadowY}"><span class="btw-v"></span></label>
+      <label>outline <input type="range" min="0"   max="3"   step="0.1"  data-key="outline" value="${initial.outline}"><span class="btw-v"></span></label>
+    </div>
+  `;
+  Object.assign(w.style, {
+    position: 'fixed', left: '0', right: '0', bottom: '0', zIndex: 9999,
+    background: 'rgba(10, 8, 5, 0.94)', color: '#f0e6d2',
+    font: '11px/1.3 -apple-system,Menlo,monospace',
+    padding: '10px 12px 12px',
+    boxShadow: '0 -4px 12px rgba(0,0,0,0.4)',
+    borderTop: '1px solid rgba(255,240,200,0.25)',
+    backdropFilter: 'blur(4px)',
+  });
+  // Widget element is built in memory above so the input-syncing /
+  // listener wiring can still query against it; only push it into the
+  // DOM when the tune flag is set so end users never see it.
+  if (tuneVisible) document.body.appendChild(w);
+
+  const s = document.createElement('style');
+  s.textContent = `
+    #btn-style-widget .btw-head { display:flex; justify-content:space-between; align-items:center; font-weight:700; letter-spacing:0.1em; margin-bottom:6px; }
+    #btn-style-widget .btw-row { display:flex; gap:10px; margin:4px 0; align-items:center; }
+    #btn-style-widget .btw-row label { display:flex; align-items:center; gap:4px; flex:1; min-width:0; }
+    #btn-style-widget .btw-section-label { font-size:9px; opacity:0.55; letter-spacing:0.1em; text-transform:uppercase; margin:8px 0 -2px; }
+    #btn-style-widget .btw-row label > input[type=range] { flex:1; min-width:0; }
+    #btn-style-widget .btw-v { min-width:24px; text-align:right; font-variant-numeric:tabular-nums; }
+    #btn-style-widget .btw-colors label { flex-direction:column; gap:2px; align-items:flex-start; }
+    #btn-style-widget .btw-colors input[type=color] { width:100%; height:24px; border:0; padding:0; background:transparent; cursor:pointer; }
+    #btn-style-widget .btw-x { background:#3a2a1a; color:#f0e6d2; border:0; padding:6px 10px; border-radius:4px; font:inherit; cursor:pointer; }
+  `;
+  if (tuneVisible) document.head.appendChild(s);
+
+  // The chassis-noise SVG is the same data URL the buttons already use.
+  // Building it once keeps the apply() string short.
+  const NOISE = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 60'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='2.4' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.72  0 0 0 0 0.6  0 0 0 0 0.44  0 0 0 0.22 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")`;
+
+  const buildBg = (s) => {
+    // c1 holds solid from 0% to c1stop% before transitioning to c2 — this
+    // is the "top hold" Ben asked for so the upper portion of the button
+    // stays a flat colour band rather than starting to blend immediately.
+    const c1Tail = s.c1stop > 0 ? `, ${s.c1} ${s.c1stop}%` : '';
+    return `${NOISE},
+    radial-gradient(ellipse at 30% -10%, rgba(255, 240, 210, 0.5), transparent 55%),
+    radial-gradient(ellipse at 75% 110%, rgba(105, 80, 42, 0.32), transparent 60%),
+    linear-gradient(180deg, ${s.c1} 0%${c1Tail}, ${s.c2} ${s.c2stop}%, ${s.c3} ${s.c3stop}%, ${s.c4} ${s.c4stop}%)`;
+  };
+
+  // Drop shadow is now drawn by the SVG filter (see below) so it can
+  // take asymmetric X/Y spread — buildShadow only handles the inset
+  // bevel shadows + the optional black outline.
+  const buildShadow = (s) => {
+    const m = s.shadow;
+    const layers = [
+      `inset 0 -1.5px 0 rgba(85, 60, 30, ${(0.4*m).toFixed(2)})`,
+      `inset 0 0 0 1px rgba(85, 60, 30, ${(0.28*m).toFixed(2)})`,
+    ];
+    if (s.outline > 0) {
+      layers.push(`inset 0 0 0 ${s.outline.toFixed(1)}px rgba(0,0,0,1)`);
+    }
+    return layers.join(',\n     ');
+  };
+
+  // Inject a single shared SVG filter for the drop shadow. feMorphology
+  // dilate with `radius="sx sy"` is the only CSS-accessible primitive
+  // that can take genuinely separate X and Y spread — box-shadow has
+  // one uniform spread value. The filter region is generous so the
+  // shadow has room to fall outside the source bounds.
+  if (!document.getElementById('pp-btn-shadow-svg')) {
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.id = 'pp-btn-shadow-svg';
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('style', 'position:absolute;width:0;height:0;overflow:hidden');
+    svg.innerHTML = `
+      <defs>
+        <filter id="pp-btn-shadow" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+          <feMorphology in="SourceAlpha" operator="dilate" radius="0 0" result="spread"/>
+          <feGaussianBlur in="spread" stdDeviation="4" result="blurred"/>
+          <feOffset in="blurred" dx="0" dy="0" result="offset"/>
+          <feFlood flood-color="rgb(50, 32, 15)" flood-opacity="0.65" result="flood"/>
+          <feComposite in="flood" in2="offset" operator="in" result="shadow"/>
+          <feMerge>
+            <feMergeNode in="shadow"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+    `;
+    document.body.appendChild(svg);
+  }
+  const filterEl = document.getElementById('pp-btn-shadow');
+  const fMorph = filterEl.querySelector('feMorphology');
+  const fBlur = filterEl.querySelector('feGaussianBlur');
+  const fOffset = filterEl.querySelector('feOffset');
+  const fFlood = filterEl.querySelector('feFlood');
+  const updateShadowFilter = (s) => {
+    fMorph.setAttribute('radius', `${Math.max(0, s.shadowSpreadX).toFixed(1)} ${Math.max(0, s.shadowSpreadY).toFixed(1)}`);
+    // CSS box-shadow blur is roughly 2× SVG stdDeviation so halve it
+    // to keep the visual softness in the same ballpark as the slider's
+    // earlier behaviour.
+    fBlur.setAttribute('stdDeviation', (s.shadowBlur / 2).toFixed(2));
+    fOffset.setAttribute('dx', s.shadowX);
+    fOffset.setAttribute('dy', s.shadowY);
+    fFlood.setAttribute('flood-opacity', (0.65 * s.shadow).toFixed(3));
+  };
+
+  const state = { ...initial };
+  const apply = () => {
+    const bg = buildBg(state);
+    const sh = buildShadow(state);
+    updateShadowFilter(state);
+    buttons.forEach(b => {
+      b.style.padding = `${state.paddingY}px 14px`;
+      b.style.borderRadius = state.radius + 'px';
+      b.style.background = bg;
+      b.style.backgroundBlendMode = 'overlay, normal, normal, normal';
+      b.style.boxShadow = sh;
+      b.style.filter = 'url(#pp-btn-shadow)';
+      b.style.fontSize = state.fontSize + 'px';
+      b.style.letterSpacing = state.kerning + 'em';
+      // CSS vars drive the ::before pseudos for the highlight strip on
+      // both the button and (when present) the LED block.
+      b.style.setProperty('--btn-stroke', state.outline + 'px');
+      b.style.setProperty('--btn-highlight', state.btnHighlight);
+      b.style.setProperty('--btn-radius-top', Math.max(0, state.radius - state.outline) + 'px');
+      const led = b.querySelector('.led');
+      if (led) {
+        led.style.setProperty('--led-radius', state.ledRadius + 'px');
+        led.style.setProperty('--led-stroke', state.ledStroke + 'px');
+        led.style.setProperty('--led-highlight', state.ledHighlight);
+        led.style.setProperty('--led-highlight-h', state.ledHighlightH + 'px');
+      }
+    });
+    panel.style.rowGap = state.gap + 'px';
+    panel.style.columnGap = state.gapX + 'px';
+  };
+  const refreshReadouts = () => {
+    w.querySelectorAll('input[type=range]').forEach(i => {
+      const v = +i.value;
+      const k = i.dataset.key;
+      let text;
+      if (k === 'shadow' || k === 'kerning' || k === 'ledHighlight' || k === 'btnHighlight') text = v.toFixed(2);
+      else if (k === 'outline' || k === 'shadowX' || k === 'shadowY' || k === 'shadowBlur' || k === 'shadowSpreadX' || k === 'shadowSpreadY' || k === 'fontSize' || k === 'ledStroke' || k === 'ledRadius' || k === 'ledHighlightH') text = v.toFixed(1);
+      else text = v.toString();
+      i.parentElement.querySelector('.btw-v').textContent = text;
+    });
+  };
+
+  // Sync UI to whatever was loaded
+  w.querySelectorAll('input').forEach(input => {
+    if (state[input.dataset.key] !== undefined) input.value = state[input.dataset.key];
+  });
+  apply();
+  refreshReadouts();
+
+  const persist = () => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+  };
+
+  w.querySelectorAll('input').forEach(input => {
+    input.addEventListener('input', e => {
+      const k = e.target.dataset.key;
+      state[k] = input.type === 'range' ? +e.target.value : e.target.value;
+      apply();
+      refreshReadouts();
+      persist();
+    });
+  });
+
+  w.querySelector('.btw-x').onclick = () => {
+    document.body.style.paddingBottom = '';
+    w.remove();
+  };
+
+  // Reserve scroll space at the bottom of the page equal to the widget's
+  // height so the YouTube / Instagram buttons can be scrolled clear of
+  // it. Only needed when the widget is actually visible.
+  if (tuneVisible) {
+    const reserveSpace = () => {
+      document.body.style.paddingBottom = (w.offsetHeight + 16) + 'px';
+    };
+    reserveSpace();
+    window.addEventListener('resize', reserveSpace);
+  }
+})();
+
 </script>
 
 </body>
