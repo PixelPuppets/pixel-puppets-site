@@ -820,9 +820,12 @@ body.fullscreen-mode .exit-fs-btn {
   align-items: center;
   gap: 0.7cqi;
   text-align: left;
-  /* Clip the ::before highlight strip to the rounded corner shape so it
-     doesn't poke past the curve. Outset drop shadows are unaffected. */
-  overflow: hidden;
+  /* NOTE: no `overflow: hidden` here. Combined with `filter:` (the SVG
+     drop-shadow we apply on mobile) iOS Safari clips the filter output
+     to the element's bounding box — shadow gets cut tight against the
+     button. Highlight pseudo no longer needs overflow clipping because
+     it uses `border-top` rather than a background-fill, so the curve
+     follows the inner radius without poking past. */
   /* Warm tan plastic with subtle SVG noise grain + light/wear blobs over a
      vertical bevel gradient. Dark-brown shadows give the chunky 3D feel. */
   background:
@@ -884,11 +887,9 @@ body.fullscreen-mode .exit-fs-btn {
   height: 1.5cqi;
   border-radius: var(--led-radius, 2px);
   flex-shrink: 0;
-  /* Clip the highlight pseudo to the rounded LED shape so it sits
-     inside the radius rather than poking past the curve. */
-  overflow: hidden;
   /* Just the black stroke at this level — the highlight strip is drawn
-     by the ::before pseudo so it sits INSIDE the stroke, not over it. */
+     by the ::before pseudo (using border-top so it follows the inner
+     curve cleanly without needing overflow clipping). */
   box-shadow: inset 0 0 0 var(--led-stroke, 1.5px) #000;
 }
 .channel-btn .led::before {
