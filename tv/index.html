@@ -1796,15 +1796,21 @@ body.fullscreen-mode .exit-fs-btn {
      here mirror the JS widget defaults so the page renders right even
      before the widget's apply() pass runs. */
   .channel-btn {
-    /* More top padding than bottom shifts the content area's centre
-       down, which optically centres the all-caps labels (uppercase
-       glyphs sit above the line-box centre because the line reserves
-       descender space the letters don't use). */
-    padding: 16px 14px 12px;
+    padding: 14px 14px;
     font-size: 9.9px;
     letter-spacing: 0.02em;
     border-radius: 6px;
     gap: 10px;
+  }
+  /* Just the label gets nudged for optical centring (uppercase glyphs
+     ride above the line-box centre because the line reserves descender
+     space the letters don't use). LED block + arrow stay at the row's
+     geometric centre — only the text moves. The wrapper span is added
+     by the JS pass since the original markup has the label as a bare
+     text node. */
+  .channel-btn .ch-label {
+    display: inline-block;
+    transform: translateY(var(--label-y, 2px));
   }
   .channel-btn .led {
     width: 14px;
@@ -2763,6 +2769,21 @@ body.fullscreen-mode .exit-fs-btn {
   const panel = document.querySelector('.channel-panel');
   if (!buttons.length || !panel) return;
 
+  // Wrap the bare-text label inside each button in <span class="ch-label">
+  // so it can be translated independently of the LED + arrow (which stay
+  // at the row's geometric centre). Idempotent — safe to re-run.
+  buttons.forEach(b => {
+    if (b.querySelector('.ch-label')) return;
+    Array.from(b.childNodes).forEach(node => {
+      if (node.nodeType === 3 && node.textContent.trim()) {
+        const span = document.createElement('span');
+        span.className = 'ch-label';
+        span.textContent = node.textContent;
+        b.replaceChild(span, node);
+      }
+    });
+  });
+
   const defaults = {
     // Baseline reflects Ben's tuned values from earlier passes — anyone
     // landing here with a fresh localStorage gets the same starting look
@@ -2988,11 +3009,10 @@ body.fullscreen-mode .exit-fs-btn {
     const sh = buildShadow(state);
     updateShadowFilter(state);
     buttons.forEach(b => {
-      // vAlign drives top/bottom padding asymmetry — positive value
-      // adds padding on top + subtracts on bottom, shifting the
-      // content area's centre down. Total height = 2 × paddingY
-      // regardless of vAlign.
-      b.style.padding = `${state.paddingY + state.vAlign}px 14px ${state.paddingY - state.vAlign}px`;
+      // Padding is symmetric so the LED + arrow row stays geometrically
+      // centred. vAlign translates ONLY the text label via --label-y.
+      b.style.padding = `${state.paddingY}px 14px`;
+      b.style.setProperty('--label-y', state.vAlign + 'px');
       b.style.borderRadius = state.radius + 'px';
       b.style.background = bg;
       b.style.backgroundBlendMode = 'overlay, normal, normal, normal';
