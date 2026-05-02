@@ -1875,6 +1875,31 @@ body.fullscreen-mode .exit-fs-btn {
     margin: 0;
   }
 }
+
+/* ─── Landscape phone band ───────────────────────────────────────────
+   Phones in landscape exceed the 720px mobile breakpoint and fall
+   through to the desktop layout, but the desktop layout's text /
+   button sizes (in cqi units) end up too large in the cramped
+   landscape height. Override only what needs resizing — channel
+   buttons + on-screen text. CSS variables here have defaults that
+   match the values Ben tuned via the widget; the widget's
+   applyLandscape() pass overrides them via setProperty on :root. */
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 1100px) {
+  .channel-btn {
+    padding: var(--lp-btn-pady, 1.0cqi) 0.8cqi;
+    font-size: var(--lp-btn-fs, 0.95cqi);
+  }
+  .now-playing .label,
+  .now-playing .episode {
+    font-size: var(--lp-np-size, 1.2cqi);
+  }
+  .show-title {
+    font-size: var(--lp-st-size, 4.0cqi);
+  }
+  .show-overlay .desc {
+    font-size: var(--lp-so-size, 1.2cqi);
+  }
+}
 </style>
 </head>
 <body>
@@ -2782,7 +2807,13 @@ body.fullscreen-mode .exit-fs-btn {
 // `pp-btn-style` lives on past disable so the next tune pass resumes
 // from exactly where you left off.
 (() => {
-  if (!window.matchMedia('(max-width: 720px)').matches) return;
+  // Activate when EITHER mobile portrait OR landscape phone — landscape
+  // phone exceeds the 720px width so falls through to desktop layout,
+  // but it gets its own (smaller) tuning section so the text + buttons
+  // can be resized for the cramped landscape height.
+  const isPortraitMobile = window.matchMedia('(max-width: 720px)').matches;
+  const isLandscapePhone = window.matchMedia('(orientation: landscape) and (max-height: 500px) and (max-width: 1100px)').matches;
+  if (!isPortraitMobile && !isLandscapePhone) return;
   const params = new URL(location.href).searchParams;
   if (params.has('tune')) localStorage.setItem('pp-tune', '1');
   if (params.has('untune')) localStorage.removeItem('pp-tune');
@@ -2885,6 +2916,24 @@ body.fullscreen-mode .exit-fs-btn {
     tvInitial = { ...tvDefaults, ...stored };
   } catch { tvInitial = { ...tvDefaults }; }
 
+  // ── LANDSCAPE PHONE state ─────────────────────────────────────────
+  // Drives CSS variables that the landscape-phone media query block
+  // picks up. Variables only have effect inside that @media block, so
+  // we can safely setProperty regardless of current orientation.
+  const lpDefaults = {
+    btnHeight: 1.0,  // cqi — channel button vertical padding
+    btnFs:     0.95, // cqi — channel button label font size
+    npSize:    1.2,  // cqi — Now Playing badge font size
+    stSize:    4.0,  // cqi — Show Title (PIXEL PUPPETS) font size
+    soSize:    1.2,  // cqi — Show Overlay description font size
+  };
+  const LP_STORAGE_KEY = 'pp-landscape-style';
+  let lpInitial;
+  try {
+    const stored = JSON.parse(localStorage.getItem(LP_STORAGE_KEY) || '{}');
+    lpInitial = { ...lpDefaults, ...stored };
+  } catch { lpInitial = { ...lpDefaults }; }
+
   const w = document.createElement('div');
   w.id = 'btn-style-widget';
   w.innerHTML = `
@@ -2971,6 +3020,24 @@ body.fullscreen-mode .exit-fs-btn {
       <label>size <input type="range" min="0.8" max="4"   step="0.05" data-key="t-soSize" value="${tvInitial.soSize}"><span class="btw-v"></span></label>
       <label>X    <input type="range" min="-10" max="20"  step="0.1"  data-key="t-soX"    value="${tvInitial.soX}"><span class="btw-v"></span></label>
       <label>Y    <input type="range" min="-20" max="20"  step="0.1"  data-key="t-soY"    value="${tvInitial.soY}"><span class="btw-v"></span></label>
+    </div>
+
+    <div class="btw-divider"></div>
+    <div class="btw-head"><span>LANDSCAPE PHONE</span></div>
+
+    <div class="btw-section-label">channel buttons (right-side panel)</div>
+    <div class="btw-row">
+      <label>height<input type="range" min="0.3" max="3"   step="0.05" data-key="l-btnHeight" value="${lpInitial.btnHeight}"><span class="btw-v"></span></label>
+      <label>font  <input type="range" min="0.5" max="2.5" step="0.05" data-key="l-btnFs"     value="${lpInitial.btnFs}"><span class="btw-v"></span></label>
+    </div>
+
+    <div class="btw-section-label">screen text</div>
+    <div class="btw-row">
+      <label>now playing<input type="range" min="0.5" max="3"   step="0.05" data-key="l-npSize" value="${lpInitial.npSize}"><span class="btw-v"></span></label>
+      <label>title      <input type="range" min="2"   max="8"   step="0.1"  data-key="l-stSize" value="${lpInitial.stSize}"><span class="btw-v"></span></label>
+    </div>
+    <div class="btw-row">
+      <label>desc       <input type="range" min="0.5" max="3"   step="0.05" data-key="l-soSize" value="${lpInitial.soSize}"><span class="btw-v"></span></label>
     </div>
   `;
   Object.assign(w.style, {
@@ -3148,6 +3215,25 @@ body.fullscreen-mode .exit-fs-btn {
     try { localStorage.setItem(TV_STORAGE_KEY, JSON.stringify(tvState)); } catch {}
   };
 
+  // ── LANDSCAPE PHONE apply pass ────────────────────────────────────
+  // Sets CSS variables on :root that the @media (orientation:landscape
+  // and max-height:500px) block picks up. Variables exist regardless
+  // of orientation but only have effect inside the matching media
+  // query — safe to call from any orientation.
+  const lpState = { ...lpInitial };
+  const applyLandscape = () => {
+    const r = document.documentElement.style;
+    r.setProperty('--lp-btn-pady', lpState.btnHeight + 'cqi');
+    r.setProperty('--lp-btn-fs',   lpState.btnFs     + 'cqi');
+    r.setProperty('--lp-np-size',  lpState.npSize    + 'cqi');
+    r.setProperty('--lp-st-size',  lpState.stSize    + 'cqi');
+    r.setProperty('--lp-so-size',  lpState.soSize    + 'cqi');
+  };
+  const LP_KEY_PREFIX = 'l-';
+  const persistLp = () => {
+    try { localStorage.setItem(LP_STORAGE_KEY, JSON.stringify(lpState)); } catch {}
+  };
+
   const refreshReadouts = () => {
     w.querySelectorAll('input[type=range]').forEach(i => {
       const v = +i.value;
@@ -3155,7 +3241,7 @@ body.fullscreen-mode .exit-fs-btn {
       let text;
       if (k === 'shadow' || k === 'kerning' || k === 'ledHighlight' || k === 'btnHighlight') text = v.toFixed(2);
       else if (k === 'outline' || k === 'shadowX' || k === 'shadowY' || k === 'shadowBlur' || k === 'shadowSpreadX' || k === 'shadowSpreadY' || k === 'fontSize' || k === 'ledStroke' || k === 'ledRadius' || k === 'ledHighlightH' || k === 'vAlign') text = v.toFixed(1);
-      else if (k && k.startsWith(TV_KEY_PREFIX)) text = v.toFixed(2);
+      else if (k && (k.startsWith(TV_KEY_PREFIX) || k.startsWith(LP_KEY_PREFIX))) text = v.toFixed(2);
       else text = v.toString();
       i.parentElement.querySelector('.btw-v').textContent = text;
     });
@@ -3169,12 +3255,22 @@ body.fullscreen-mode .exit-fs-btn {
     if (k.startsWith(TV_KEY_PREFIX)) {
       const tk = k.slice(TV_KEY_PREFIX.length);
       if (tvState[tk] !== undefined) input.value = tvState[tk];
+    } else if (k.startsWith(LP_KEY_PREFIX)) {
+      const lk = k.slice(LP_KEY_PREFIX.length);
+      if (lpState[lk] !== undefined) input.value = lpState[lk];
     } else if (state[k] !== undefined) {
       input.value = state[k];
     }
   });
-  apply();
-  applyTv();
+  // Apply passes: button-style + tv-text only run if mobile portrait
+  // (otherwise they'd write inline styles overriding the desktop CSS
+  // we want to keep in landscape). Landscape always runs — its CSS
+  // vars only have effect inside the matching @media block.
+  if (isPortraitMobile) {
+    apply();
+    applyTv();
+  }
+  applyLandscape();
   refreshReadouts();
 
   const persist = () => {
@@ -3190,6 +3286,11 @@ body.fullscreen-mode .exit-fs-btn {
         applyTv();
         refreshReadouts();
         persistTv();
+      } else if (k.startsWith(LP_KEY_PREFIX)) {
+        lpState[k.slice(LP_KEY_PREFIX.length)] = v;
+        applyLandscape();
+        refreshReadouts();
+        persistLp();
       } else {
         state[k] = v;
         apply();
