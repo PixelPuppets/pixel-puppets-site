@@ -1771,9 +1771,10 @@ body.fullscreen-mode .exit-fs-btn {
     position: static;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    /* Row gap is tighter than column gap so HOME→ABOUT stacks neatly
-       while HOME↔REHEARSALS gets a touch more breathing room. */
-    row-gap: 2px;
+    /* Row + column gap tuned independently — column slightly larger
+       than row so the two-up layout reads as columns rather than a
+       blob of buttons. */
+    row-gap: 4px;
     column-gap: 5px;
     padding: 0;
     background: none;
@@ -1796,7 +1797,7 @@ body.fullscreen-mode .exit-fs-btn {
      here mirror the JS widget defaults so the page renders right even
      before the widget's apply() pass runs. */
   .channel-btn {
-    padding: 14px 14px;
+    padding: 15px 14px;
     font-size: 9.9px;
     letter-spacing: 0.02em;
     border-radius: 6px;
@@ -1810,7 +1811,7 @@ body.fullscreen-mode .exit-fs-btn {
      text node. */
   .channel-btn .ch-label {
     display: inline-block;
-    transform: translateY(var(--label-y, 2px));
+    transform: translateY(var(--label-y, 1.5px));
   }
   .channel-btn .led {
     width: 14px;
@@ -2788,12 +2789,13 @@ body.fullscreen-mode .exit-fs-btn {
     // Baseline reflects Ben's tuned values from earlier passes — anyone
     // landing here with a fresh localStorage gets the same starting look
     // the page renders before JS runs.
-    paddingY: 14,
-    vAlign: 2,         // px — top/bottom padding asymmetry; positive
-                       // means top has MORE padding so the content
-                       // centre shifts down (compensating for all-caps
-                       // labels riding above the line-box centre)
-    gap: 2,            // px — vertical (row) gap between buttons
+    paddingY: 15,
+    vAlign: 1.5,       // px — translateY applied to the .ch-label
+                       // wrapper only (LED + arrow stay at the row's
+                       // geometric centre). Positive shifts text down,
+                       // compensating for all-caps labels riding above
+                       // the line-box centre.
+    gap: 4,            // px — vertical (row) gap between buttons
     gapX: 5,           // px — horizontal (column) gap between buttons
     radius: 6,
     c1: '#cbac82', c2: '#ba9d75', c3: '#b79971', c4: '#9a7c54',
