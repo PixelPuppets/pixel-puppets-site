@@ -1796,7 +1796,10 @@ body.fullscreen-mode .exit-fs-btn {
      here mirror the JS widget defaults so the page renders right even
      before the widget's apply() pass runs. */
   .channel-btn {
-    padding: 14px 14px;
+    /* Slightly more bottom padding than top to optically centre the
+       all-caps labels — uppercase glyphs sit above the line-box centre
+       because the line reserves descender space they don't use. */
+    padding: 13px 14px 15px;
     font-size: 9.9px;
     letter-spacing: 0.02em;
     border-radius: 6px;
@@ -2979,7 +2982,10 @@ body.fullscreen-mode .exit-fs-btn {
     const sh = buildShadow(state);
     updateShadowFilter(state);
     buttons.forEach(b => {
-      b.style.padding = `${state.paddingY}px 14px`;
+      // Asymmetric vertical padding: 1px less on top, 1px more on bottom
+      // so the all-caps label is optically centred. Total button height
+      // still equals 2 × paddingY.
+      b.style.padding = `${state.paddingY - 1}px 14px ${state.paddingY + 1}px`;
       b.style.borderRadius = state.radius + 'px';
       b.style.background = bg;
       b.style.backgroundBlendMode = 'overlay, normal, normal, normal';
