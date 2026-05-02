@@ -1853,6 +1853,27 @@ body.fullscreen-mode .exit-fs-btn {
     margin: auto auto 0;
     padding-top: 24px;
   }
+
+  /* Custom fullscreen mode on mobile: the .tv-frame wrapper has a
+     filter:drop-shadow + transform:scale that creates a stacking
+     context, trapping the .screen-area's z-index:9998 inside it. As a
+     result the supposed-to-be-fullscreen overlay paints UNDERNEATH
+     siblings (.topbar, .channel-panel, .colophon) on iOS Safari. Two
+     fixes layered together: reset the stacking-context creators on
+     .tv-frame so the fixed .screen-area can escape into body's
+     stacking context AND hide the surrounding chrome so nothing else
+     can compete for top-z position. */
+  body.fullscreen-mode .topbar,
+  body.fullscreen-mode .tagline,
+  body.fullscreen-mode .channel-panel,
+  body.fullscreen-mode .colophon {
+    display: none;
+  }
+  body.fullscreen-mode .tv-frame {
+    filter: none;
+    transform: none;
+    margin: 0;
+  }
 }
 </style>
 </head>
