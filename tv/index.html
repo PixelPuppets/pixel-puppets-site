@@ -854,27 +854,19 @@ body.fullscreen-mode .exit-fs-btn {
     -1px 2px 0 rgba(50, 32, 15, 0.36),
     -1px 4px 8px rgba(50, 32, 15, 0.34);
   transform: translateY(0);
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  /* ONLY transform transitions. Was: `transform 0.1s ease, box-shadow
+     0.1s ease` — but the JS apply pass sets box-shadow inline (always
+     wins), so the box-shadow value never actually changes on hover /
+     active. The declared transition still triggers a paint cycle for
+     box-shadow though, and on iOS Safari that paint cycle clashes
+     with the SVG filter we use for the asymmetric drop shadow,
+     causing a visible flash on tap. */
+  transition: transform 0.1s ease;
+  /* Layer-promote so the SVG filter has its own composite layer. */
+  will-change: transform;
 }
-.channel-btn:hover {
-  transform: translate(-1px, -1px);
-  box-shadow:
-    inset 3.5px 0 0 rgba(75, 50, 22, 0.6),
-    inset 0 1.5px 0 rgba(255, 245, 215, 0.6),
-    inset -1px 0 0 rgba(255, 245, 215, 0.22),
-    inset 0 -1.5px 0 rgba(85, 60, 30, 0.4),
-    inset 0 0 0 1px rgba(85, 60, 30, 0.32),
-    -1px 3px 0 rgba(50, 32, 15, 0.38),
-    -1px 6px 12px rgba(50, 32, 15, 0.4);
-}
-.channel-btn:active {
-  transform: translate(0, 2px);
-  box-shadow:
-    inset 3.5px 0 0 rgba(75, 50, 22, 0.45),
-    inset 0 1.5px 3px rgba(85, 60, 30, 0.4),
-    inset 0 0 0 1px rgba(85, 60, 30, 0.35),
-    0 1px 2px rgba(50, 32, 15, 0.25);
-}
+.channel-btn:hover { transform: translate(-1px, -1px); }
+.channel-btn:active { transform: translate(0, 2px); }
 .channel-btn .led {
   position: relative;
   width: 1.5cqi;
