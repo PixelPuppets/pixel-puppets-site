@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
 <style>
 @font-face {
@@ -205,10 +206,7 @@ html, body {
 }
 /* Screen area positioned to fit the transparent cutout in the PNG.
    Coordinates derived from the PNG: cutout is 8.18%-74.03% horizontally,
-   10.31%-75.44% vertically. We extend the screen-area ~0.4% past the
-   cutout on every side so sub-pixel rounding never lets the body's cream
-   bg peek through the seam between the screen and the chassis bezel.
-   The overflow is hidden behind the chassis PNG (z-index 2). */
+   10.31%-75.44% vertically, of the 1344×892 source image. */
 .tv-housing .screen-area {
   position: absolute;
   left: 7.78%;
@@ -501,10 +499,10 @@ body.boundary-mode .boundary-box { display: block; }
 .static-noise.active {
   animation: static-flicker 0.7s steps(14) forwards;
 }
-/* When the screen is in no-signal mode, hide the underlying video and
-   the player UI so the canvas snow has the screen as its only canvas;
-   keep the channel strap AND body overlay sitting above the snow so
-   the user can still read what the channel is about. */
+/* When the screen is in no-signal mode, hide the underlying video and the
+   player UI so the canvas has the dark screen as its only canvas; keep
+   the channel strap AND body overlay sitting above the snow so the user
+   can still read what the channel is about. */
 .screen.no-signal video.show,
 .screen.no-signal .show-title,
 .screen.no-signal .player-controls { display: none; }
@@ -540,8 +538,8 @@ body.boundary-mode .boundary-box { display: block; }
   opacity: 0.15;
 }
 /* Warm off-white backdrop sitting under the canvas in no-signal mode.
-   Black bg stays as the rule for video content; cream is reserved for
-   the static-screen channels until we record video for them. */
+   Transitions in tandem with the canvas so swapping back to a video
+   doesn't snap from cream to black mid-fade. */
 .screen { transition: background-color 0.35s ease; }
 .screen.no-signal { background-color: #ece6d8; }
 @keyframes static-loop {
@@ -811,9 +809,6 @@ body.fullscreen-mode .exit-fs-btn {
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
 }
 .channel-btn {
-  /* Three-column grid: LED, label, arrow. Label is left-aligned within
-     its 1fr middle column with the grid `gap` keeping a clear breathing
-     space between LED and label. */
   position: relative;
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -824,8 +819,7 @@ body.fullscreen-mode .exit-fs-btn {
      drop-shadow we apply on mobile) iOS Safari clips the filter output
      to the element's bounding box — shadow gets cut tight against the
      button. Highlight pseudo no longer needs overflow clipping because
-     it uses `border-top` rather than a background-fill, so the curve
-     follows the inner radius without poking past. */
+     it uses `border-top` rather than a background-fill. */
   /* Warm tan plastic with subtle SVG noise grain + light/wear blobs over a
      vertical bevel gradient. Dark-brown shadows give the chunky 3D feel. */
   background:
@@ -887,9 +881,9 @@ body.fullscreen-mode .exit-fs-btn {
   height: 1.5cqi;
   border-radius: var(--led-radius, 2px);
   flex-shrink: 0;
-  /* Just the black stroke at this level — the highlight strip is drawn
-     by the ::before pseudo (using border-top so it follows the inner
-     curve cleanly without needing overflow clipping). */
+  /* No overflow:hidden — would cause iOS Safari to clip the parent
+     button's SVG filter shadow. Highlight uses border-top approach
+     which doesn't need overflow clipping. */
   box-shadow: inset 0 0 0 var(--led-stroke, 1.5px) #000;
 }
 .channel-btn .led::before {
@@ -906,13 +900,6 @@ body.fullscreen-mode .exit-fs-btn {
   border-top-right-radius: max(0px, calc(var(--led-radius, 2px) - var(--led-stroke, 1.5px)));
   pointer-events: none;
 }
-
-/* Same pattern on the button itself: ::before draws the cream top
-   highlight strip inside the outer stroke, so the black outline reads
-   as a continuous ring all the way around. The pseudo fills the inner
-   area (inset by the stroke) and the cream is drawn as a top border so
-   it follows the inner curve cleanly even when the strip is much
-   thinner than the corner radius. */
 .channel-btn::before {
   content: '';
   position: absolute;
@@ -930,14 +917,10 @@ body.fullscreen-mode .exit-fs-btn {
 .channel-btn .arrow {
   position: relative;
   display: inline-block;
-  /* match LED width so the middle column centres exactly on the button */
   width: 14px;
   height: 14px;
   color: var(--ink-soft);
 }
-/* CSS-drawn chevron: two thin lines meeting at 90°, rotated to point
-   right. Replaces the filled ▶ triangle for a lighter, more arrow-like
-   feel. Uses currentColor so it inherits the .arrow text colour. */
 .channel-btn .arrow::before {
   content: '';
   position: absolute;
@@ -964,11 +947,8 @@ body.fullscreen-mode .exit-fs-btn {
    untouched even if their viewport is narrow. */
 @media (max-width: 1280px) and (pointer: coarse) {
   .channel-btn {
-    /* Padding-y picks up the same --lp-btn-pady CSS variable the
-       landscape-phone block uses, so the widget's height slider tunes
-       channel buttons across BOTH iPad-class touch devices and
-       landscape-phone layouts in one go. Fallback (0.85cqi) keeps
-       the original behaviour when no var has been set. */
+    /* Padding-y picks up --lp-btn-pady so the widget's height slider
+       tunes both iPad-class touch + landscape-phone in one go. */
     padding: var(--lp-btn-pady, 0.85cqi) 0.8cqi;
     font-size: 0.95cqi;
   }
@@ -1659,13 +1639,9 @@ body.fullscreen-mode .exit-fs-btn {
 /* ─── Mobile bezel + helpers ──────────────────────────────────────────────
    The .tv-frame wrapper is `display: contents` on desktop so the chassis
    PNG and screen-area still behave as direct children of .tv-housing —
-   keeps every existing absolute position rule working unchanged. The
-   mobile-only chassis PNG and mobile socials are hidden on desktop. */
+   keeps every existing absolute position rule working unchanged. */
 .tv-frame { display: contents; }
 .tv-chassis-mobile { display: none; }
-/* Social channel buttons (YouTube / Instagram) — only show on mobile,
-   where they sit as the 4th row of the channel-button grid. Desktop
-   uses the dedicated SOCIAL plate inside the knob row. */
 .channel-btn-social { display: none; text-decoration: none; color: inherit; }
 .channel-btn .social-icon {
   width: 1.5cqi;
@@ -1675,15 +1651,9 @@ body.fullscreen-mode .exit-fs-btn {
   opacity: 0.85;
 }
 
-/* ─── Mobile breakpoint ───────────────────────────────────────────────────
-   Stacked column: gold-bezel TV → 2-col channel button grid → social
-   pills → footer. Knob row (POWER, VOLUME, BRIGHTNESS, CONTRAST, social
-   pills, player sockets) is dropped entirely — there's no chassis to
-   carry them. The supported-by sticker disappears with the desktop
-   chassis PNG (it's baked into that artwork). */
+/* ─── Mobile breakpoint ─────────────────────────────────────────────────── */
 @media (max-width: 720px) {
-  /* Slim the page padding so the TV uses the screen edge-to-edge.
-     Flex column + 100dvh so the colophon can be pinned to the bottom
+  /* Flex column + 100dvh so the colophon can be pinned to the bottom
      of the viewport via margin-top:auto on short pages, while still
      flowing naturally if the content overflows. */
   .page {
@@ -1692,9 +1662,6 @@ body.fullscreen-mode .exit-fs-btn {
     flex-direction: column;
     min-height: 100dvh;
   }
-
-  /* Headline scales down with viewport — already clamps at 24px,
-     no special handling needed. Tagline shrinks proportionally. */
   .topbar { margin-bottom: 1.5cqw; }
   .tagline {
     font-size: clamp(6px, 1.55cqw, 8px);
@@ -1706,39 +1673,21 @@ body.fullscreen-mode .exit-fs-btn {
     width: 4px; height: 4px;
     min-width: 4px; min-height: 4px;
   }
-
-  /* The TV housing becomes a flex column and loses its desktop aspect
-     ratio. Children stack: TV frame → channel grid → socials. The
-     chassis drop-shadow is dropped because the mobile bezel has its
-     own depth and we want the page to feel app-like, not chunky. */
   .tv-housing {
     aspect-ratio: auto;
     display: flex;
     flex-direction: column;
     gap: 18px;
     filter: none;
-    /* container-type stays inline-size so cqi units inside still work. */
   }
-
-  /* Turn .tv-frame into a real positioned box on mobile so the gold bezel
-     PNG and the screen-area become its absolute children. */
   .tv-frame {
     display: block;
     position: relative;
     width: 100%;
-    /* Match the bezel image's intrinsic aspect ratio (1156×875) */
     aspect-ratio: 1156 / 875;
     filter: drop-shadow(0 6px 12px rgba(60, 40, 20, 0.25));
-    /* Push the frame to fill more of the phone screen width. The scale
-       is a ratio so it stays "5% bigger than container width" on every
-       phone. The -5px Y nudge is a small absolute shift; reads
-       identical across phone widths. transform-origin keeps the top
-       edge anchored so the bezel grows downward into available column
-       space rather than off the top of the page. */
     transform-origin: top center;
     transform: translateY(-5px) scale(1.05);
-    /* Compensate for the visual overflow past the layout box so the
-       channel-panel below doesn't visually crowd the frame. */
     margin-bottom: 18px;
   }
   .tv-chassis { display: none; }
@@ -1751,10 +1700,6 @@ body.fullscreen-mode .exit-fs-btn {
     z-index: 2;
     pointer-events: none;
   }
-
-  /* Re-position the screen to fit inside the gold bezel cutout.
-     Coordinates derived visually from the PNG — the gold ring takes
-     ~9% of the width on each side and ~9% on top/bottom. */
   .tv-frame .screen-area {
     left: 6.1%;
     top: 5.7%;
@@ -1767,18 +1712,11 @@ body.fullscreen-mode .exit-fs-btn {
   .tv-frame .screen-area .show-overlay {
     bottom: 26%;
   }
-
-  /* Channel panel: drop the absolute-positioned card layout and become
-     a clean 2-column grid below the TV. Strip the recessed-card chrome
-     (gradient, shadows, matrix3d warp) so the buttons read as a normal
-     mobile grid. */
   .channel-panel {
     position: static;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    /* Row + column gap tuned independently — column slightly larger
-       than row so the two-up layout reads as columns rather than a
-       blob of buttons. */
+    /* Row + column gap tuned independently. */
     row-gap: 4px;
     column-gap: 5px;
     padding: 0;
@@ -1786,21 +1724,11 @@ body.fullscreen-mode .exit-fs-btn {
     border-radius: 0;
     box-shadow: none;
     inset: auto;
-    /* Pull the button block up toward the TV (the bezel scale-up
-       leaves visual space below the layout box; this absorbs it). */
     transform-origin: top center;
     transform: translateY(-21px);
   }
-  /* The "— CHANNEL SELECT —" header and the 4-icon socials inside the
-     panel are desktop-only ornament; hide on mobile. */
   .channel-panel .channel-header,
   .channel-panel .channel-footer { display: none; }
-
-  /* Channel buttons themselves keep the desktop styling (warm tan
-     plastic, LED, ▶ arrow, hover/active states) but resize for the
-     larger touch targets on mobile and tighter row gap. Static values
-     here mirror the JS widget defaults so the page renders right even
-     before the widget's apply() pass runs. */
   .channel-btn {
     padding: 15px 14px;
     font-size: 9.9px;
@@ -1808,12 +1736,9 @@ body.fullscreen-mode .exit-fs-btn {
     border-radius: 6px;
     gap: 10px;
   }
-  /* Just the label gets nudged for optical centring (uppercase glyphs
-     ride above the line-box centre because the line reserves descender
-     space the letters don't use). LED block + arrow stay at the row's
-     geometric centre — only the text moves. The wrapper span is added
-     by the JS pass since the original markup has the label as a bare
-     text node. */
+  /* Just the label gets translated for optical centring — LED + arrow
+     stay at the row's geometric centre. The wrapper span is added by
+     the JS pass since the original markup uses a bare text node. */
   .channel-btn .ch-label {
     display: inline-block;
     transform: translateY(var(--label-y, 1.5px));
@@ -1824,28 +1749,16 @@ body.fullscreen-mode .exit-fs-btn {
     /* var so the widget's --led-radius can drive this */
     border-radius: var(--led-radius, 1.5px);
   }
-  .channel-btn .arrow {
-    font-size: 12px;
-  }
-
-  /* Show YouTube + Instagram as the 4th row of the channel grid, in
-     the same physical-button style as the channel buttons. */
+  .channel-btn .arrow { font-size: 12px; }
   .channel-btn-social { display: grid; }
   .channel-btn .social-icon {
     width: 14px;
     height: 14px;
   }
-  /* Mobile-only: switch the channel buttons to Gothic A1 for a more
-     condensed, technical feel that matches the chassis labels. */
   .channel-btn {
     font-family: 'Gothic A1', 'Euclid', sans-serif;
   }
-
-  /* Knob row hidden — no chassis to mount it on. */
   .knob-row { display: none; }
-
-  /* Intro + colophon scale up a touch on mobile so they read at body
-     text sizes rather than the cqw-driven desktop-tiny. */
   .intro {
     font-size: 13px;
     max-width: 90%;
@@ -1859,15 +1772,9 @@ body.fullscreen-mode .exit-fs-btn {
     padding-top: 24px;
   }
 
-  /* Custom fullscreen mode on mobile: the .tv-frame wrapper has a
-     filter:drop-shadow + transform:scale that creates a stacking
-     context, trapping the .screen-area's z-index:9998 inside it. As a
-     result the supposed-to-be-fullscreen overlay paints UNDERNEATH
-     siblings (.topbar, .channel-panel, .colophon) on iOS Safari. Two
-     fixes layered together: reset the stacking-context creators on
-     .tv-frame so the fixed .screen-area can escape into body's
-     stacking context AND hide the surrounding chrome so nothing else
-     can compete for top-z position. */
+  /* Custom fullscreen on mobile: hide chrome + reset .tv-frame's
+     stacking-context creators so .screen-area can escape and actually
+     paint full-viewport. See live file comment for the why. */
   body.fullscreen-mode .topbar,
   body.fullscreen-mode .tagline,
   body.fullscreen-mode .channel-panel,
@@ -1881,30 +1788,117 @@ body.fullscreen-mode .exit-fs-btn {
   }
 }
 
-/* ─── Landscape phone band ───────────────────────────────────────────
-   Phones in landscape exceed the 720px mobile breakpoint and fall
-   through to the desktop layout, but the desktop layout's text /
-   button sizes (in cqi units) end up too large in the cramped
-   landscape height. Override only what needs resizing — channel
-   buttons + on-screen text. CSS variables here have defaults that
-   match the values Ben tuned via the widget; the widget's
-   applyLandscape() pass overrides them via setProperty on :root. */
+/* Landscape phone band — overrides only what needs resizing for the
+   cramped landscape height. CSS variables are set by the widget's
+   applyLandscape() pass on :root. */
 @media (orientation: landscape) and (max-height: 500px) and (max-width: 1100px) {
   .channel-btn {
     padding: var(--lp-btn-pady, 1.0cqi) 0.8cqi;
     font-size: var(--lp-btn-fs, 0.95cqi);
   }
   .now-playing .label,
-  .now-playing .episode {
-    font-size: var(--lp-np-size, 1.2cqi);
-  }
-  .show-title {
-    font-size: var(--lp-st-size, 4.0cqi);
-  }
-  .show-overlay .desc {
-    font-size: var(--lp-so-size, 1.2cqi);
-  }
+  .now-playing .episode { font-size: var(--lp-np-size, 1.2cqi); }
+  .show-title { font-size: var(--lp-st-size, 4.0cqi); }
+  .show-overlay .desc { font-size: var(--lp-so-size, 1.2cqi); }
 }
+
+/* ─── Teletext page (per-channel info screen) ────────────────────────
+   Sits inside .screen-area, hidden by default. When .screen.teletext-on
+   is set (toggled per channel by switchTo()), the page renders and the
+   normal video / static / overlays are hidden. Pure black field with
+   block-colour glyphs — no scanlines or static through the text. */
+.teletext-page {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  color: #fff;
+  font-family: 'VT323', 'Menlo', monospace;
+  /* No outer padding — the blue top bar runs edge-to-edge.
+     Padding (driven by widget vars --tt-pad-x / --tt-pad-y) is
+     applied to the body block only so the bar can stay flush
+     while the text below sits with breathing room. */
+  padding: 0;
+  z-index: 8;
+  display: none;
+  flex-direction: column;
+  /* Text is selectable + links inside the body are clickable. */
+}
+.teletext-page a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+.teletext-page a:hover { text-decoration: none; }
+.screen.teletext-on .teletext-page { display: flex; }
+.screen.teletext-on > video,
+.screen.teletext-on .static-noise,
+.screen.teletext-on .static-canvas,
+.screen.teletext-on .show-overlay,
+.screen.teletext-on .show-title,
+.screen.teletext-on .now-playing { display: none !important; }
+
+.teletext-page .tt-topbar {
+  /* Three-column grid: page number (left, on black) / title (middle,
+     on blue band) / clock (right, on black). The blue band is only
+     the middle cell — the topbar wrapper itself has no background. */
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: stretch;
+  gap: 1ch;
+  background: transparent;
+  color: #fff;
+  font-size: clamp(11px, var(--tt-topbar-fs, 4.3cqw), 48px);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+.teletext-page .tt-topbar > * {
+  display: flex;
+  align-items: center;
+  padding: var(--tt-bar-pad-y, 0.2em) var(--tt-bar-pad-x, 0.7em);
+  /* Optical Y-shift for text inside the bar — uppercase glyphs in
+     VT323 ride above the baseline a touch on some renderers. */
+  transform: translateY(var(--tt-bar-text-y, 0px));
+}
+.teletext-page .tt-topbar .pageno {
+  justify-content: flex-start;
+  /* Positive value pulls the page number toward centre (away from
+     the screen left edge). Negative pushes it past the edge. */
+  margin-left: var(--tt-bar-side-x, 0px);
+}
+.teletext-page .tt-topbar .time {
+  justify-content: flex-end;
+  /* Mirror — positive pulls the clock toward centre. */
+  margin-right: var(--tt-bar-side-x, 0px);
+}
+.teletext-page .tt-topbar .title {
+  justify-content: center;
+  background: #0202E7;          /* the blue band — only the middle cell */
+  text-align: center;
+}
+
+.teletext-page .tt-body {
+  /* Body owns the inset — top/bottom + horizontal — so the blue top
+     bar above stays edge-to-edge. */
+  padding: var(--tt-pad-y, 0.5%) var(--tt-pad-x, 3.5%);
+  font-size: clamp(10px, var(--tt-body-fs, 3.8cqw), 44px);
+  line-height: 1.25;
+}
+.teletext-page .tt-section {
+  color: #EAE807;             /* teletext yellow */
+  letter-spacing: 0.05em;
+  margin: 0.2em 0 0.7em 0;
+  font-size: 1.05em;
+}
+.teletext-page .tt-block { margin: 0 0 var(--tt-block-gap, 0.25em) 0; }
+.teletext-page .tt-block-header { color: #02F2FC; letter-spacing: 0.05em; } /* cyan */
+.teletext-page .tt-block-body   { color: #1CF701; letter-spacing: 0.05em; } /* green */
+/* Extended teletext palette — reach for these when a block needs to
+   stand out (warnings, calls-to-action, status flags). Add a class
+   like .tt-purple or .tt-red on the block-header / block-body span:
+     purple  #E10CD8     red  #D50201
+   Yellow #EAE807 (already used for section headers) and the cyan +
+   green above complete the BBC Mode-7 set. */
 </style>
 </head>
 <body>
@@ -1942,7 +1936,7 @@ body.fullscreen-mode .exit-fs-btn {
       <!-- Screen content (behind the chassis, visible through the cutout) -->
       <div class="screen-area screen">
         <video class="show" id="screenVideo"
-               src="assets/episode-01-web.mp4"
+               src="assets/channel-home.mp4"
                poster="assets/tv-content.jpeg"
                preload="metadata"
                autoplay muted loop playsinline></video>
@@ -1964,6 +1958,38 @@ body.fullscreen-mode .exit-fs-btn {
 
         <div class="static-noise" id="staticNoise"></div>
         <canvas class="static-canvas" id="staticCanvas"></canvas>
+
+        <!-- Teletext overlay — covers the screen-area and renders a
+             retro Mode-7 page when the active channel is one we've
+             marked as `teletext` (currently SUPPORT only). Hidden via
+             CSS by default; .screen.teletext-on flips it on and hides
+             the video / static / now-playing / show-overlay / show-
+             title siblings. -->
+        <div class="teletext-page" id="teletextPage" aria-hidden="true">
+          <div class="tt-topbar">
+            <span class="pageno">P104</span>
+            <span class="title">PIXEL PUPPETS &middot; SUPPORT</span>
+            <span class="time" id="ttClock">23:03</span>
+          </div>
+          <div class="tt-body">
+            <div class="tt-section">DEVELOPMENT STATUS</div>
+
+            <div class="tt-block">
+              <div class="tt-block-header">IMMERSIVE ARTS UK</div>
+              <div class="tt-block-body">EXPERIMENT STRAND &middot; ACTIVE</div>
+            </div>
+
+            <div class="tt-block">
+              <div class="tt-block-header">ARTS COUNCIL ENGLAND</div>
+              <div class="tt-block-body">R&amp;D GRANT &middot; ACTIVE</div>
+            </div>
+
+            <div class="tt-block">
+              <div class="tt-block-header">BFI IMMERSIVE FICTION LAB</div>
+              <div class="tt-block-body">DEVELOPED THROUGH EARLY R&amp;D</div>
+            </div>
+          </div>
+        </div>
 
         <div class="player-controls">
           <button class="play-btn" id="playBtn" aria-label="Play / Pause">▶</button>
@@ -2003,8 +2029,8 @@ body.fullscreen-mode .exit-fs-btn {
         <button class="channel-btn" data-color="green"   data-channel="support"><span class="led"></span>SUPPORT<span class="arrow"></span></button>
         <button class="channel-btn" data-color="blue"    data-channel="team"><span class="led"></span>TEAM<span class="arrow"></span></button>
         <button class="channel-btn" data-color="purple"  data-channel="contact"><span class="led"></span>CONTACT<span class="arrow"></span></button>
-        <a class="channel-btn channel-btn-social" data-platform="youtube" href="https://www.youtube.com/@pixelpuppetsuk" target="_blank" rel="noopener"><img class="social-icon" src="assets/youtube-black.svg" alt="">YOUTUBE<span class="arrow"></span></a>
-        <a class="channel-btn channel-btn-social" data-platform="instagram" href="https://www.instagram.com/pixel.puppets/" target="_blank" rel="noopener"><img class="social-icon" src="assets/instagram-black.svg" alt="">INSTAGRAM<span class="arrow"></span></a>
+        <a class="channel-btn channel-btn-social" data-platform="youtube" href="https://www.youtube.com/@pixelpuppetsuk" target="_blank" rel="noopener noreferrer"><img class="social-icon" src="assets/youtube-black.svg" alt="">YOUTUBE<span class="arrow"></span></a>
+        <a class="channel-btn channel-btn-social" data-platform="instagram" href="https://www.instagram.com/pixel.puppets/" target="_blank" rel="noopener noreferrer"><img class="social-icon" src="assets/instagram-black.svg" alt="">INSTAGRAM<span class="arrow"></span></a>
         <div class="channel-footer">
           <a class="social" href="#" title="YouTube"><img src="assets/youtube-black.svg" alt="YouTube"></a>
           <a class="social" href="#" title="Instagram"><img src="assets/instagram-black.svg" alt="Instagram"></a>
@@ -2030,10 +2056,10 @@ body.fullscreen-mode .exit-fs-btn {
         <div class="colour-system">
           <div class="dial-label">SOCIAL</div>
           <div class="lights social-lights">
-            <a class="social-light" href="https://www.youtube.com/@pixelpuppetsuk" target="_blank" rel="noopener" title="YouTube" data-platform="youtube">
+            <a class="social-light" href="https://www.youtube.com/@pixelpuppetsuk" target="_blank" rel="noopener noreferrer" title="YouTube" data-platform="youtube">
               <img src="assets/youtube-black.svg" alt="YouTube">
             </a>
-            <a class="social-light" href="https://www.instagram.com/pixel.puppets/" target="_blank" rel="noopener" title="Instagram" data-platform="instagram">
+            <a class="social-light" href="https://www.instagram.com/pixel.puppets/" target="_blank" rel="noopener noreferrer" title="Instagram" data-platform="instagram">
               <img src="assets/instagram-black.svg" alt="Instagram">
             </a>
           </div>
@@ -2091,32 +2117,78 @@ body.fullscreen-mode .exit-fs-btn {
       episode: 'PILOT PREVIEW',
       title: 'PIXEL<br>PUPPETS',
       body: '<p>A live performance format built around real-time digital puppetry, surreal comedy, and audience interaction.</p>',
-      video: 'assets/episode-01-web.mp4',
+      video: 'assets/channel-home.mp4',
     },
     rehearsals: {
       strap: 'CH. 02',
       episode: 'REHEARSALS',
       body: '<p>A new kind of live event sitting between theatre, cinema and game stream. Real puppeteers on stage drive digital characters across a cinematic screen, while the audience shapes how each show unfolds. Plays in cinemas and theatres alike.</p>',
+      teletext: {
+        pageno: 'P102',
+        section: 'WHAT IT IS',
+        blocks: [
+          { header: 'LIVE PERFORMANCE',  body: 'HYBRID THEATRE + CINEMA' },
+          { header: 'PUPPETEERS',        body: 'DRIVE DIGITAL CHARACTERS' },
+          { header: 'AUDIENCE',          body: 'SHAPES SHOW IN REAL TIME' },
+          { header: 'FORMAT',            body: 'CINEMAS &middot; THEATRES &middot; FESTIVALS' },
+        ],
+      },
     },
     about: {
       strap: 'CH. 03',
       episode: 'ABOUT',
       body: '<p>A 20-minute vertical slice in early R&D. Still figuring out the story, where the comedy lives, and how much of each performance comes from the performer on stage versus the puppet on screen.</p>',
+      teletext: {
+        pageno: 'P103',
+        section: 'PROJECT STAGE',
+        blocks: [
+          { header: 'PROTOTYPE', body: '20-MINUTE VERTICAL SLICE' },
+          { header: 'PHASE',     body: 'EARLY R&amp;D' },
+          { header: 'FOCUS',     body: 'STORY &middot; COMEDY &middot; PERFORMER VS PUPPET' },
+        ],
+      },
     },
     support: {
       strap: 'CH. 04',
       episode: 'SUPPORT',
       body: '<p>Developed through the BFI Immersive Fiction Lab. Now in funded research and development, supported by Arts Council England and Immersive Arts UK’s Experiment strand.</p>',
+      teletext: {
+        pageno: 'P104',
+        section: 'DEVELOPMENT STATUS',
+        blocks: [
+          { header: 'IMMERSIVE ARTS UK',         body: 'EXPERIMENT STRAND &middot; ACTIVE' },
+          { header: 'ARTS COUNCIL ENGLAND',      body: 'R&amp;D GRANT &middot; ACTIVE' },
+          { header: 'BFI IMMERSIVE FICTION LAB', body: 'DEVELOPED THROUGH EARLY R&amp;D' },
+        ],
+      },
     },
     team: {
       strap: 'CH. 05',
       episode: 'TEAM',
-      body: '<p>Created by Ben Carlin (Artistic Director) and Joe Duggan (Producer), with Daniel Bacchus on lead development and <a href="https://www.variousartists.studio" target="_blank" rel="noopener">Various Artists Studio</a> on characters and animation.</p>',
+      body: '<p>Created by Ben Carlin (Artistic Director) and Joe Duggan (Producer), with Daniel Bacchus on lead development and <a href="https://www.variousartists.studio" target="_blank" rel="noopener noreferrer">Various Artists Studio</a> on characters and animation.</p>',
+      teletext: {
+        pageno: 'P105',
+        section: 'CREW',
+        blocks: [
+          { header: 'BEN CARLIN',              body: 'ARTISTIC DIRECTOR' },
+          { header: 'JOE DUGGAN',              body: 'PRODUCER' },
+          { header: 'DANIEL BACCHUS',          body: 'LEAD DEVELOPMENT' },
+          { header: '<a href="https://www.variousartists.studio" target="_blank" rel="noopener noreferrer">VARIOUS ARTISTS STUDIO</a>',  body: 'CHARACTERS + ANIMATION' },
+        ],
+      },
     },
     contact: {
       strap: 'CH. 06',
       episode: 'CONTACT',
       body: '<p>Venue, festival, programmer or funder interested in talking further about Pixel Puppets? Drop us a line at <a href="mailto:hello@pixelpuppets.co">hello@pixelpuppets.co</a></p>',
+      teletext: {
+        pageno: 'P106',
+        section: 'GET IN TOUCH',
+        blocks: [
+          { header: 'EMAIL',       body: '<a href="mailto:hello@pixelpuppets.co">HELLO@PIXELPUPPETS.CO</a>' },
+          { header: 'TALKING TO',  body: 'VENUES &middot; FESTIVALS &middot; PROGRAMMERS &middot; FUNDERS' },
+        ],
+      },
     },
   };
 
@@ -2128,11 +2200,42 @@ body.fullscreen-mode .exit-fs-btn {
   const epEl = document.getElementById('nowPlayingEpisode');
   let currentChannel = 'home';
 
+  // Render whatever teletext data the channel carries — pageno,
+  // section header, and a list of {header, body} blocks. Called from
+  // switchTo() before the screen flips into teletext-on mode so the
+  // first paint already shows the right content.
+  const renderTeletext = (c) => {
+    if (!c.teletext) return;
+    const pageEl = document.querySelector('.teletext-page');
+    if (!pageEl) return;
+    pageEl.querySelector('.pageno').textContent = c.teletext.pageno;
+    pageEl.querySelector('.title').textContent  = c.episode;
+    pageEl.querySelector('.tt-section').textContent = c.teletext.section;
+    const body = pageEl.querySelector('.tt-body');
+    body.querySelectorAll('.tt-block').forEach(b => b.remove());
+    c.teletext.blocks.forEach(blk => {
+      const div = document.createElement('div');
+      div.className = 'tt-block';
+      div.innerHTML =
+        '<div class="tt-block-header">' + blk.header + '</div>' +
+        '<div class="tt-block-body">'   + blk.body   + '</div>';
+      body.appendChild(div);
+    });
+  };
+
   const switchTo = (key) => {
     if (key === currentChannel) return;
     const c = CHANNELS[key];
     if (!c) return;
     currentChannel = key;
+
+    // Channels that carry a `teletext` field render as a teletext
+    // page instead of the normal video / static layout. CSS rule
+    // .screen.teletext-on hides the video + overlays and shows the
+    // populated .teletext-page.
+    const screenEl = document.querySelector('.screen');
+    if (c.teletext) renderTeletext(c);
+    if (screenEl) screenEl.classList.toggle('teletext-on', !!c.teletext);
 
     // Fire the static-flicker animation (forces restart by removing then adding)
     noise.classList.remove('active');
@@ -2153,7 +2256,7 @@ body.fullscreen-mode .exit-fs-btn {
       strapEl.textContent = c.strap;
       epEl.textContent = c.episode;
       // Swap the video feed when the channel has a clip; otherwise pause
-      // the current video and keep the canvas up so the screen reads as
+      // the current video and leave the canvas up so the screen reads as
       // "no signal" until we record something for that channel. While a
       // fresh clip is loading, keep the canvas up as a preloader and
       // only fade it out once the video is *actually* playing — listening
@@ -2287,7 +2390,6 @@ body.fullscreen-mode .exit-fs-btn {
   const screen = document.querySelector('.screen');
   const video = document.getElementById('screenVideo');
   if (!screen || !video) return;
-  // Skip the static if the video is already actually playing.
   if (!video.paused && video.readyState >= 3) return;
   screen.classList.add('no-signal');
   const clear = () => {
@@ -2469,6 +2571,17 @@ body.fullscreen-mode .exit-fs-btn {
     // Initial sync — page loads with thumb at MIN, so video stays muted.
     applyVolume(MIN_REL);
 
+    // Channel changes swap the video src; the new clip's volume defaults
+    // to 1 + unmuted, so re-apply the user's current slider position
+    // each time a new clip is ready.
+    const v = document.querySelector('.screen video.show');
+    if (v) {
+      v.addEventListener('loadeddata', () => {
+        const rel = parseFloat(thumb.style.left || '8') / 100;
+        applyVolume(rel);
+      });
+    }
+
     const setFromClientX = (clientX) => {
       let rel = (clientX - trackRect.left) / trackRect.width;
       rel = Math.max(MIN_REL, Math.min(MAX_REL, rel));
@@ -2503,6 +2616,21 @@ body.fullscreen-mode .exit-fs-btn {
     document.addEventListener('mouseup', onUp);
     document.addEventListener('touchend', onUp);
   });
+})();
+
+// ─── Teletext live clock ─────────────────────────────────────────────────
+// Updates the wall-clock in the teletext page top bar on the minute
+// boundary so the time reads as "now" without ticking visibly.
+(() => {
+  const clk = document.getElementById('ttClock');
+  if (!clk) return;
+  const tick = () => {
+    const d = new Date();
+    clk.textContent = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  };
+  tick();
+  const msToNextMin = 60_000 - (Date.now() % 60_000);
+  setTimeout(() => { tick(); setInterval(tick, 60_000); }, msToNextMin);
 })();
 
 // ─── Boundary-mapping mode ────────────────────────────────────────────────
@@ -2803,34 +2931,39 @@ body.fullscreen-mode .exit-fs-btn {
   };
 })();
 
-// ─── MOBILE BUTTON-STYLE PASS + TUNING WIDGET ───────────────────────────
-// The apply() pass ALWAYS runs on mobile so the page renders with the
-// full tuned styling (colour stops, shadow filter, CSS vars for the
-// pseudo-element highlights — none of which the static CSS can express).
-// The widget UI itself is gated: visit `?tune` once to show it (the
-// flag persists in localStorage), or `?untune` to hide. Tuned state in
-// `pp-btn-style` lives on past disable so the next tune pass resumes
-// from exactly where you left off.
+// ─── MOBILE BUTTON-STYLE TUNING WIDGET ─────────────────────────────────
+// Hidden for end users — visit the page with `?tune` once to enable
+// (the flag persists via localStorage), or `?untune` to switch it back
+// off. State carries over between sessions so a future tune pass starts
+// where the last one left off.
 (() => {
-  // Activate when ANY of: mobile portrait / landscape phone / iPad-
-  // class touch device. The button-height slider in the widget drives
-  // a CSS var that's read by both the landscape-phone @media block AND
-  // the touch-coarse @media block, so one tweak retunes both contexts.
+  // Run on every viewport so the teletext layout pass can apply on
+  // desktop too. Inner apply() / applyTv() passes are still gated on
+  // isPortraitMobile so they don't write inline styles overriding the
+  // desktop button CSS. applyLandscape + applyTeletext use CSS vars
+  // which are scoped to their respective targets and safe to run
+  // anywhere.
   const isPortraitMobile = window.matchMedia('(max-width: 720px)').matches;
   const isLandscapePhone = window.matchMedia('(orientation: landscape) and (max-height: 500px) and (max-width: 1100px)').matches;
   const isTouchSmall     = window.matchMedia('(max-width: 1280px) and (pointer: coarse)').matches;
-  if (!isPortraitMobile && !isLandscapePhone && !isTouchSmall) return;
+  // Tune-widget access token. End users can't enable the widget by
+  // discovering `?tune` — they need the right value. Change this
+  // string if it ever leaks; doing so doesn't affect anyone whose
+  // localStorage.pp-tune flag is already set (their session stays
+  // enabled until they ?untune).
+  const TUNE_TOKEN = 'puppet';
   const params = new URL(location.href).searchParams;
-  if (params.has('tune')) localStorage.setItem('pp-tune', '1');
+  if (params.get('tune') === TUNE_TOKEN) localStorage.setItem('pp-tune', '1');
   if (params.has('untune')) localStorage.removeItem('pp-tune');
+  // apply() always runs so the page renders with tuned styling; the
+  // widget UI itself is only inserted when tuneVisible is true.
   const tuneVisible = localStorage.getItem('pp-tune') === '1';
   const buttons = document.querySelectorAll('.channel-btn');
   const panel = document.querySelector('.channel-panel');
   if (!buttons.length || !panel) return;
 
-  // Wrap the bare-text label inside each button in <span class="ch-label">
-  // so it can be translated independently of the LED + arrow (which stay
-  // at the row's geometric centre). Idempotent — safe to re-run.
+  // Wrap the bare-text label in <span class="ch-label"> so it can be
+  // translated independently of the LED + arrow. Idempotent.
   buttons.forEach(b => {
     if (b.querySelector('.ch-label')) return;
     Array.from(b.childNodes).forEach(node => {
@@ -2844,51 +2977,21 @@ body.fullscreen-mode .exit-fs-btn {
   });
 
   const defaults = {
-    // Baseline reflects Ben's tuned values from earlier passes — anyone
-    // landing here with a fresh localStorage gets the same starting look
-    // the page renders before JS runs.
-    paddingY: 15,
-    vAlign: 1.5,       // px — translateY applied to the .ch-label
-                       // wrapper only (LED + arrow stay at the row's
-                       // geometric centre). Positive shifts text down,
-                       // compensating for all-caps labels riding above
-                       // the line-box centre.
-    gap: 4,            // px — vertical (row) gap between buttons
-    gapX: 5,           // px — horizontal (column) gap between buttons
-    radius: 6,
-    c1: '#cbac82', c2: '#ba9d75', c3: '#b79971', c4: '#9a7c54',
-    // Independent stop positions so you can compress the dark band into
-    // just the bottom edge (push c4stop high, c3stop close to it) and
-    // keep the top of the button a flat field of c1.
-    c2stop: 80,
-    c3stop: 85,
-    c4stop: 100,
-    shadow: 1.35,
-    shadowX: 0,        // horizontal shadow offset (0 = flat-on)
-    shadowY: 4,        // vertical shadow offset
-    shadowBlur: 9.5,   // blur radius — fuzziness vs hardness
-    // True asymmetric X / Y spread driven by an SVG feMorphology dilate
-    // filter; sx widens the shadow, sy lengthens it, independently.
-    shadowSpreadX: 0,
-    shadowSpreadY: 0,
-    outline: 0.9,      // extra true-black inset outline width in px
-    fontSize: 9.9,     // px
-    kerning: 0.02,     // em — letter-spacing
-    ledRadius: 1.5,    // px — coloured LED block corner radius
-    ledStroke: 0.9,    // px — black stroke around the LED block
-    ledHighlight: 0.55, // opacity of the top white strip on the LED
-    ledHighlightH: 1,  // px — thickness of that white strip
-    btnHighlight: 0.7, // opacity of the cream highlight strip inside the
-                       // button stroke (independent of shadow opacity)
-    c1stop: 0,         // top stop — make c1 hold solid for X% before c2
-                       // starts blending in
+    paddingY: 15, vAlign: 1.5, gap: 4, gapX: 5, radius: 6,
+    c1: '#f2deb1', c2: '#d8c08f', c3: '#cab280', c4: '#947f55',
+    c2stop: 80, c3stop: 85, c4stop: 100,
+    shadow: 1.35, shadowX: 0, shadowY: 4, shadowBlur: 9.5,
+    shadowSpreadX: 0, shadowSpreadY: 0,
+    outline: 0.9,
+    fontSize: 9.9, kerning: 0.02,
+    ledRadius: 1.5, ledStroke: 0.9, ledHighlight: 0.55, ledHighlightH: 1,
+    btnHighlight: 0.7,
+    c1stop: 0,
   };
   const STORAGE_KEY = 'pp-btn-style';
   let initial;
   try {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-    // Migrate the old single `shadowSpread` key onto the new X/Y pair so
-    // existing saves don't get reset.
     if ('shadowSpread' in stored && !('shadowSpreadX' in stored)) {
       stored.shadowSpreadX = stored.shadowSpread;
       stored.shadowSpreadY = stored.shadowSpread;
@@ -2899,21 +3002,13 @@ body.fullscreen-mode .exit-fs-btn {
 
   // ── TV TEXT state ──────────────────────────────────────────────────
   // Separate state + storage key for the on-screen text tweaks (now
-  // playing badge, show title, description card). Same gating, same
-  // widget UI, but persisted independently.
+  // playing badge, show title, description card).
   const tvDefaults = {
-    // Mobile-tuned values (apply pass runs only inside the
-    // `max-width:720px` matchMedia gate, so desktop is unaffected and
-    // keeps the static CSS values).
-    npSize: 2.30,    // cqi — Now Playing label/episode font size
-    npX: 0.50,       // cqi — translateX for the now-playing badge
-    npY: -4.40,      // cqi — translateY
-    stSize: 6.80,    // cqi — show title (PIXEL PUPPETS)
-    stX: 0.20,
-    stY: -8.10,
-    soSize: 2.95,    // cqi — show overlay description font size
-    soX: 0,
-    soY: 4.40,
+    // Mobile-tuned values — apply pass only runs on max-width:720px
+    // so desktop keeps the static CSS values.
+    npSize: 2.30, npX: 0.50, npY: -4.40,
+    stSize: 6.80, stX: 0.20, stY: -8.10,
+    soSize: 2.95, soX: 0,    soY: 4.40,
   };
   const TV_STORAGE_KEY = 'pp-tv-text';
   let tvInitial;
@@ -2923,16 +3018,9 @@ body.fullscreen-mode .exit-fs-btn {
   } catch { tvInitial = { ...tvDefaults }; }
 
   // ── LANDSCAPE PHONE state ─────────────────────────────────────────
-  // Drives CSS variables that the landscape-phone media query block
-  // picks up. Variables only have effect inside that @media block, so
-  // we can safely setProperty regardless of current orientation.
   const lpDefaults = {
-    btnHeight: 1.2,  // cqi — channel button vertical padding (drives
-                     // both iPad touch-mode + landscape-phone @media)
-    btnFs:     0.95, // cqi — channel button label font size
-    npSize:    1.2,  // cqi — Now Playing badge font size
-    stSize:    4.0,  // cqi — Show Title (PIXEL PUPPETS) font size
-    soSize:    1.2,  // cqi — Show Overlay description font size
+    btnHeight: 1.2, btnFs: 0.95,
+    npSize: 1.2, stSize: 4.0, soSize: 1.2,
   };
   const LP_STORAGE_KEY = 'pp-landscape-style';
   let lpInitial;
@@ -2941,14 +3029,57 @@ body.fullscreen-mode .exit-fs-btn {
     lpInitial = { ...lpDefaults, ...stored };
   } catch { lpInitial = { ...lpDefaults }; }
 
+  // ── TELETEXT state ────────────────────────────────────────────────
+  // Two sub-sets — mobile and desktop — because the cqw values that
+  // read right on a small screen end up far too large when the same
+  // cqw scales up against the desktop screen container. ttCurrent()
+  // picks which set is active based on the current viewport so the
+  // sliders always tweak the relevant set; viewport-change listeners
+  // re-sync the sliders to whichever set just became active.
+  const ttDefaultsMobile = {
+    padX: 3.5,  padY: 3.5, topbarFs: 4.3, bodyFs: 3.8, blockGap: 0.25,
+    barPadX: 0.7, barPadY: 0.2,   // em — internal padding around bar text
+    barTextY: 0,                   // px — Y nudge for bar text (optical)
+    barSideX: 0,                   // px — pull pageno + time toward centre
+  };
+  const ttDefaultsDesktop = {
+    padX: 4.75, padY: 3.75, topbarFs: 2.3, bodyFs: 2.4, blockGap: 0.45,
+    barPadX: 2.2, barPadY: 0.3,
+    barTextY: 10,
+    barSideX: 18,
+  };
+  const TT_STORAGE_KEY = 'pp-teletext';
+  let ttInitial;
+  try {
+    const stored = JSON.parse(localStorage.getItem(TT_STORAGE_KEY) || '{}');
+    // Migrate legacy flat shape (no .mobile / .desktop sub-keys) into
+    // the new shape — assume the previously-tuned values were mobile.
+    const legacyFlat = stored && !('mobile' in stored) && !('desktop' in stored) && Object.keys(stored).length;
+    ttInitial = {
+      mobile:  { ...ttDefaultsMobile,  ...(legacyFlat ? stored : (stored.mobile  || {})) },
+      desktop: { ...ttDefaultsDesktop, ...(stored.desktop || {}) },
+    };
+  } catch {
+    ttInitial = {
+      mobile:  { ...ttDefaultsMobile },
+      desktop: { ...ttDefaultsDesktop },
+    };
+  }
+  const ttIsMobile = () => window.matchMedia('(max-width: 720px)').matches;
+
   const w = document.createElement('div');
   w.id = 'btn-style-widget';
   w.innerHTML = `
-    <div class="btw-head" data-toggle="bs">
-      <span><span class="btw-toggle">▶</span>BUTTON STYLE</span>
+    <div class="btw-group-head" data-group-toggle="btn">
+      <span><span class="btw-group-toggle">▶</span>CHANNEL BUTTONS</span>
       <button class="btw-x" aria-label="close">×</button>
     </div>
-    <div class="btw-body" data-section="bs">
+    <div class="btw-group-body" data-group="btn">
+
+    <div class="btw-head" data-toggle="lay">
+      <span><span class="btw-toggle">▶</span>Layout &amp; Type</span>
+    </div>
+    <div class="btw-body" data-section="lay">
     <div class="btw-row">
       <label>height <input type="range" min="6"  max="28" step="1"   data-key="paddingY" value="${initial.paddingY}"><span class="btw-v"></span></label>
       <label>v-align<input type="range" min="-6" max="8"  step="0.5" data-key="vAlign"   value="${initial.vAlign}"><span class="btw-v"></span></label>
@@ -2958,11 +3089,21 @@ body.fullscreen-mode .exit-fs-btn {
       <label>row gap<input type="range" min="0"  max="20" step="1" data-key="gap"  value="${initial.gap}"><span class="btw-v"></span></label>
       <label>col gap<input type="range" min="0"  max="32" step="1" data-key="gapX" value="${initial.gapX}"><span class="btw-v"></span></label>
     </div>
+    <div class="btw-section-label">type</div>
+    <div class="btw-row">
+      <label>size    <input type="range" min="8"   max="20"  step="0.1"  data-key="fontSize" value="${initial.fontSize}"><span class="btw-v"></span></label>
+      <label>kerning <input type="range" min="-0.05" max="0.4" step="0.01" data-key="kerning"  value="${initial.kerning}"><span class="btw-v"></span></label>
+    </div>
+    </div><!-- /.btw-body lay -->
+
+    <div class="btw-divider"></div>
+    <div class="btw-head" data-toggle="col"><span><span class="btw-toggle">▶</span>Colours</span></div>
+    <div class="btw-body" data-section="col">
     <div class="btw-row btw-colors">
-      <label>top    <input type="color" data-key="c1" value="${initial.c1}"></label>
-      <label>mid 1  <input type="color" data-key="c2" value="${initial.c2}"></label>
-      <label>mid 2  <input type="color" data-key="c3" value="${initial.c3}"></label>
-      <label>bottom <input type="color" data-key="c4" value="${initial.c4}"></label>
+      <label>top    <input type="color" data-key="c1" value="${initial.c1}"><button class="btw-eyedrop" data-target="c1" title="Pick from screen">💧 pick</button></label>
+      <label>mid 1  <input type="color" data-key="c2" value="${initial.c2}"><button class="btw-eyedrop" data-target="c2" title="Pick from screen">💧 pick</button></label>
+      <label>mid 2  <input type="color" data-key="c3" value="${initial.c3}"><button class="btw-eyedrop" data-target="c3" title="Pick from screen">💧 pick</button></label>
+      <label>bottom <input type="color" data-key="c4" value="${initial.c4}"><button class="btw-eyedrop" data-target="c4" title="Pick from screen">💧 pick</button></label>
     </div>
     <div class="btw-section-label">colour stops (where each band kicks in)</div>
     <div class="btw-row">
@@ -2973,11 +3114,11 @@ body.fullscreen-mode .exit-fs-btn {
       <label>mid 2  <input type="range" min="20"  max="95"  step="1"    data-key="c3stop"  value="${initial.c3stop}"><span class="btw-v"></span></label>
       <label>bottom <input type="range" min="60"  max="100" step="1"    data-key="c4stop"  value="${initial.c4stop}"><span class="btw-v"></span></label>
     </div>
-    <div class="btw-section-label">type</div>
-    <div class="btw-row">
-      <label>size    <input type="range" min="8"   max="20"  step="0.1"  data-key="fontSize" value="${initial.fontSize}"><span class="btw-v"></span></label>
-      <label>kerning <input type="range" min="-0.05" max="0.4" step="0.01" data-key="kerning"  value="${initial.kerning}"><span class="btw-v"></span></label>
-    </div>
+    </div><!-- /.btw-body col -->
+
+    <div class="btw-divider"></div>
+    <div class="btw-head" data-toggle="led"><span><span class="btw-toggle">▶</span>LED &amp; Highlights</span></div>
+    <div class="btw-body" data-section="led">
     <div class="btw-section-label">led block</div>
     <div class="btw-row">
       <label>radius   <input type="range" min="0"   max="8"   step="0.5"  data-key="ledRadius"    value="${initial.ledRadius}"><span class="btw-v"></span></label>
@@ -2991,7 +3132,11 @@ body.fullscreen-mode .exit-fs-btn {
     <div class="btw-row">
       <label>opacity<input type="range" min="0"   max="1"   step="0.05" data-key="btnHighlight" value="${initial.btnHighlight}"><span class="btw-v"></span></label>
     </div>
-    <div class="btw-section-label">shadow</div>
+    </div><!-- /.btw-body led -->
+
+    <div class="btw-divider"></div>
+    <div class="btw-head" data-toggle="sh"><span><span class="btw-toggle">▶</span>Shadow</span></div>
+    <div class="btw-body" data-section="sh">
     <div class="btw-row">
       <label>opacity <input type="range" min="0"   max="2"   step="0.05" data-key="shadow"     value="${initial.shadow}"><span class="btw-v"></span></label>
       <label>blur    <input type="range" min="0"   max="30"  step="0.5"  data-key="shadowBlur" value="${initial.shadowBlur}"><span class="btw-v"></span></label>
@@ -3005,10 +3150,16 @@ body.fullscreen-mode .exit-fs-btn {
       <label>Y       <input type="range" min="0"   max="14"  step="0.5"  data-key="shadowY" value="${initial.shadowY}"><span class="btw-v"></span></label>
       <label>outline <input type="range" min="0"   max="3"   step="0.1"  data-key="outline" value="${initial.outline}"><span class="btw-v"></span></label>
     </div>
-    </div><!-- /.btw-body bs -->
+    </div><!-- /.btw-body sh -->
+    </div><!-- /.btw-group-body btn -->
 
-    <div class="btw-divider"></div>
-    <div class="btw-head" data-toggle="tv"><span><span class="btw-toggle">▶</span>TV TEXT</span></div>
+    <div class="btw-group-divider"></div>
+    <div class="btw-group-head" data-group-toggle="screen">
+      <span><span class="btw-group-toggle">▶</span>SCREEN CONTENT</span>
+    </div>
+    <div class="btw-group-body" data-group="screen">
+
+    <div class="btw-head" data-toggle="tv"><span><span class="btw-toggle">▶</span>TV Text</span></div>
     <div class="btw-body" data-section="tv">
 
     <div class="btw-section-label">now playing badge (ON AIR SOON / PILOT PREVIEW)</div>
@@ -3034,7 +3185,40 @@ body.fullscreen-mode .exit-fs-btn {
     </div><!-- /.btw-body tv -->
 
     <div class="btw-divider"></div>
-    <div class="btw-head" data-toggle="lp"><span><span class="btw-toggle">▶</span>LANDSCAPE PHONE</span></div>
+    <div class="btw-head" data-toggle="tt"><span><span class="btw-toggle">▶</span>Teletext Layout</span></div>
+    <div class="btw-body" data-section="tt">
+    <div class="btw-section-label">body padding (within screen)</div>
+    <div class="btw-row">
+      <label>pad X<input type="range" min="0" max="14" step="0.25" data-key="x-padX" value="${ttInitial.mobile.padX}"><span class="btw-v"></span></label>
+      <label>pad Y<input type="range" min="0" max="14" step="0.25" data-key="x-padY" value="${ttInitial.mobile.padY}"><span class="btw-v"></span></label>
+    </div>
+    <div class="btw-section-label">top bar (page no / title / time)</div>
+    <div class="btw-row">
+      <label>bar pad X<input type="range" min="0"  max="3"  step="0.05" data-key="x-barPadX"  value="${ttInitial.mobile.barPadX}"><span class="btw-v"></span></label>
+      <label>bar pad Y<input type="range" min="0"  max="2"  step="0.05" data-key="x-barPadY"  value="${ttInitial.mobile.barPadY}"><span class="btw-v"></span></label>
+    </div>
+    <div class="btw-row">
+      <label>text Y<input type="range" min="-10" max="10" step="0.1" data-key="x-barTextY" value="${ttInitial.mobile.barTextY}"><span class="btw-v"></span></label>
+      <label>side X<input type="range" min="-30" max="120" step="1" data-key="x-barSideX" value="${ttInitial.mobile.barSideX}"><span class="btw-v"></span></label>
+    </div>
+    <div class="btw-section-label">type sizes (cqw)</div>
+    <div class="btw-row">
+      <label>top bar<input type="range" min="1.0" max="5.0" step="0.05" data-key="x-topbarFs" value="${ttInitial.mobile.topbarFs}"><span class="btw-v"></span></label>
+      <label>body   <input type="range" min="0.8" max="4.5" step="0.05" data-key="x-bodyFs"   value="${ttInitial.mobile.bodyFs}"><span class="btw-v"></span></label>
+    </div>
+    <div class="btw-row">
+      <label>block gap<input type="range" min="0.2" max="2.0" step="0.05" data-key="x-blockGap" value="${ttInitial.mobile.blockGap}"><span class="btw-v"></span></label>
+    </div>
+    </div><!-- /.btw-body tt -->
+    </div><!-- /.btw-group-body screen -->
+
+    <div class="btw-group-divider"></div>
+    <div class="btw-group-head" data-group-toggle="land">
+      <span><span class="btw-group-toggle">▶</span>LANDSCAPE PHONE</span>
+    </div>
+    <div class="btw-group-body" data-group="land">
+
+    <div class="btw-head" data-toggle="lp"><span><span class="btw-toggle">▶</span>Channel Buttons + Screen Text</span></div>
     <div class="btw-body" data-section="lp">
 
     <div class="btw-section-label">channel buttons (right-side panel)</div>
@@ -3052,6 +3236,7 @@ body.fullscreen-mode .exit-fs-btn {
       <label>desc       <input type="range" min="0.5" max="3"   step="0.05" data-key="l-soSize" value="${lpInitial.soSize}"><span class="btw-v"></span></label>
     </div>
     </div><!-- /.btw-body lp -->
+    </div><!-- /.btw-group-body land -->
   `;
   Object.assign(w.style, {
     position: 'fixed', left: '0', right: '0', bottom: '0', zIndex: 9999,
@@ -3061,14 +3246,9 @@ body.fullscreen-mode .exit-fs-btn {
     boxShadow: '0 -4px 12px rgba(0,0,0,0.4)',
     borderTop: '1px solid rgba(255,240,200,0.25)',
     backdropFilter: 'blur(4px)',
-    /* Cap the height + scroll internally so adding more sections (TV
-       text, etc.) doesn't run the widget off the top of the viewport. */
     maxHeight: '75vh',
     overflowY: 'auto',
   });
-  // Widget element is built in memory above so the input-syncing /
-  // listener wiring can still query against it; only push it into the
-  // DOM when the tune flag is set so end users never see it.
   if (tuneVisible) document.body.appendChild(w);
 
   const s = document.createElement('style');
@@ -3081,27 +3261,32 @@ body.fullscreen-mode .exit-fs-btn {
     #btn-style-widget .btw-v { min-width:24px; text-align:right; font-variant-numeric:tabular-nums; }
     #btn-style-widget .btw-colors label { flex-direction:column; gap:2px; align-items:flex-start; }
     #btn-style-widget .btw-colors input[type=color] { width:100%; height:24px; border:0; padding:0; background:transparent; cursor:pointer; }
+    #btn-style-widget .btw-eyedrop { width:100%; margin-top:2px; background:rgba(255,240,200,0.08); border:1px solid rgba(255,240,200,0.22); color:#f0e6d2; font:10px/1 -apple-system,Menlo,monospace; padding:3px 4px; border-radius:3px; cursor:pointer; letter-spacing:0.04em; }
+    #btn-style-widget .btw-eyedrop:hover { background:rgba(255,240,200,0.18); }
+    body.no-eyedrop #btn-style-widget .btw-eyedrop { display:none; }
     #btn-style-widget .btw-x { background:#3a2a1a; color:#f0e6d2; border:0; padding:6px 10px; border-radius:4px; font:inherit; cursor:pointer; }
-    #btn-style-widget .btw-divider { height:1px; background:rgba(255,240,200,0.18); margin:12px 0 8px; }
+    #btn-style-widget .btw-divider { height:1px; background:rgba(255,240,200,0.10); margin:8px 0 6px; }
     #btn-style-widget .btw-head:not(:first-child) { margin-top:0; }
-    /* Accordion: each section's body is collapsed by default; tap the
-       header to expand. Only one section open at a time. */
-    #btn-style-widget .btw-head[data-toggle] { cursor:pointer; user-select:none; }
+    /* Sub-section accordion (within a group) */
+    #btn-style-widget .btw-head[data-toggle] { cursor:pointer; user-select:none; font-weight:500; opacity:0.85; padding:2px 0; }
     #btn-style-widget .btw-head .btw-toggle { display:inline-block; font-size:9px; opacity:0.55; margin-right:6px; transition:transform 0.15s ease; transform:rotate(0deg); }
     #btn-style-widget .btw-head.open .btw-toggle { transform:rotate(90deg); }
-    #btn-style-widget .btw-body { display:none; }
+    #btn-style-widget .btw-head.open { opacity:1; }
+    #btn-style-widget .btw-body { display:none; padding:4px 0 6px 14px; }
     #btn-style-widget .btw-body.open { display:block; }
+    /* Top-level group accordion (one extra level above sub-sections) */
+    #btn-style-widget .btw-group-head { display:flex; justify-content:space-between; align-items:center; cursor:pointer; user-select:none; font-weight:700; letter-spacing:0.1em; padding:6px 0; }
+    #btn-style-widget .btw-group-head .btw-group-toggle { display:inline-block; font-size:11px; opacity:0.7; margin-right:8px; transition:transform 0.15s ease; transform:rotate(0deg); }
+    #btn-style-widget .btw-group-head.open .btw-group-toggle { transform:rotate(90deg); }
+    #btn-style-widget .btw-group-body { display:none; padding-left:6px; }
+    #btn-style-widget .btw-group-body.open { display:block; }
+    #btn-style-widget .btw-group-divider { height:1px; background:rgba(255,240,200,0.28); margin:14px 0 10px; }
   `;
   if (tuneVisible) document.head.appendChild(s);
 
-  // The chassis-noise SVG is the same data URL the buttons already use.
-  // Building it once keeps the apply() string short.
   const NOISE = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 60'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='2.4' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.72  0 0 0 0 0.6  0 0 0 0 0.44  0 0 0 0.22 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")`;
 
   const buildBg = (s) => {
-    // c1 holds solid from 0% to c1stop% before transitioning to c2 — this
-    // is the "top hold" Ben asked for so the upper portion of the button
-    // stays a flat colour band rather than starting to blend immediately.
     const c1Tail = s.c1stop > 0 ? `, ${s.c1} ${s.c1stop}%` : '';
     return `${NOISE},
     radial-gradient(ellipse at 30% -10%, rgba(255, 240, 210, 0.5), transparent 55%),
@@ -3109,9 +3294,8 @@ body.fullscreen-mode .exit-fs-btn {
     linear-gradient(180deg, ${s.c1} 0%${c1Tail}, ${s.c2} ${s.c2stop}%, ${s.c3} ${s.c3stop}%, ${s.c4} ${s.c4stop}%)`;
   };
 
-  // Drop shadow is now drawn by the SVG filter (see below) so it can
-  // take asymmetric X/Y spread — buildShadow only handles the inset
-  // bevel shadows + the optional black outline.
+  // Drop shadow is now drawn by an SVG filter (see below) so it can
+  // take asymmetric X/Y spread. buildShadow only handles insets.
   const buildShadow = (s) => {
     const m = s.shadow;
     const layers = [
@@ -3124,11 +3308,9 @@ body.fullscreen-mode .exit-fs-btn {
     return layers.join(',\n     ');
   };
 
-  // Inject a single shared SVG filter for the drop shadow. feMorphology
-  // dilate with `radius="sx sy"` is the only CSS-accessible primitive
-  // that can take genuinely separate X and Y spread — box-shadow has
-  // one uniform spread value. The filter region is generous so the
-  // shadow has room to fall outside the source bounds.
+  // Shared SVG filter — feMorphology dilate is the only CSS-accessible
+  // primitive that takes separate X and Y spread radii (box-shadow's
+  // single spread can't do this).
   if (!document.getElementById('pp-btn-shadow-svg')) {
     const svgNS = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(svgNS, 'svg');
@@ -3159,9 +3341,6 @@ body.fullscreen-mode .exit-fs-btn {
   const fFlood = filterEl.querySelector('feFlood');
   const updateShadowFilter = (s) => {
     fMorph.setAttribute('radius', `${Math.max(0, s.shadowSpreadX).toFixed(1)} ${Math.max(0, s.shadowSpreadY).toFixed(1)}`);
-    // CSS box-shadow blur is roughly 2× SVG stdDeviation so halve it
-    // to keep the visual softness in the same ballpark as the slider's
-    // earlier behaviour.
     fBlur.setAttribute('stdDeviation', (s.shadowBlur / 2).toFixed(2));
     fOffset.setAttribute('dx', s.shadowX);
     fOffset.setAttribute('dy', s.shadowY);
@@ -3185,8 +3364,6 @@ body.fullscreen-mode .exit-fs-btn {
       b.style.filter = 'url(#pp-btn-shadow)';
       b.style.fontSize = state.fontSize + 'px';
       b.style.letterSpacing = state.kerning + 'em';
-      // CSS vars drive the ::before pseudos for the highlight strip on
-      // both the button and (when present) the LED block.
       b.style.setProperty('--btn-stroke', state.outline + 'px');
       b.style.setProperty('--btn-highlight', state.btnHighlight);
       b.style.setProperty('--btn-radius-top', Math.max(0, state.radius - state.outline) + 'px');
@@ -3203,11 +3380,6 @@ body.fullscreen-mode .exit-fs-btn {
   };
 
   // ── TV TEXT apply pass ─────────────────────────────────────────────
-  // Inline style overrides on the existing on-screen text elements so
-  // size + position can be tweaked via the widget. Sizes are in cqi
-  // (so they keep scaling with the TV container width on resize); X/Y
-  // are translateN cqi offsets layered on top of whatever positioning
-  // the static CSS already gives the element.
   const tvState = { ...tvInitial };
   const applyTv = () => {
     const np = document.querySelector('.now-playing');
@@ -3236,10 +3408,6 @@ body.fullscreen-mode .exit-fs-btn {
   };
 
   // ── LANDSCAPE PHONE apply pass ────────────────────────────────────
-  // Sets CSS variables on :root that the @media (orientation:landscape
-  // and max-height:500px) block picks up. Variables exist regardless
-  // of orientation but only have effect inside the matching media
-  // query — safe to call from any orientation.
   const lpState = { ...lpInitial };
   const applyLandscape = () => {
     const r = document.documentElement.style;
@@ -3254,6 +3422,41 @@ body.fullscreen-mode .exit-fs-btn {
     try { localStorage.setItem(LP_STORAGE_KEY, JSON.stringify(lpState)); } catch {}
   };
 
+  // ── TELETEXT apply pass ───────────────────────────────────────────
+  // Sets CSS variables on the .teletext-page element. Pulls from the
+  // mobile or desktop sub-set based on current viewport so the same
+  // teletext can be tuned to different sizes per breakpoint.
+  const ttState = ttInitial;
+  const ttCurrent = () => ttIsMobile() ? ttState.mobile : ttState.desktop;
+  const applyTeletext = () => {
+    const tt = document.querySelector('.teletext-page');
+    if (!tt) return;
+    const v = ttCurrent();
+    tt.style.setProperty('--tt-pad-x',      v.padX      + '%');
+    tt.style.setProperty('--tt-pad-y',      v.padY      + '%');
+    tt.style.setProperty('--tt-topbar-fs',  v.topbarFs  + 'cqw');
+    tt.style.setProperty('--tt-body-fs',    v.bodyFs    + 'cqw');
+    tt.style.setProperty('--tt-block-gap',  v.blockGap  + 'em');
+    tt.style.setProperty('--tt-bar-pad-x',  v.barPadX   + 'em');
+    tt.style.setProperty('--tt-bar-pad-y',  v.barPadY   + 'em');
+    tt.style.setProperty('--tt-bar-text-y', v.barTextY  + 'px');
+    tt.style.setProperty('--tt-bar-side-x', v.barSideX  + 'px');
+  };
+  const TT_KEY_PREFIX = 'x-';
+  const persistTt = () => {
+    try { localStorage.setItem(TT_STORAGE_KEY, JSON.stringify(ttState)); } catch {}
+  };
+  // Sync the teletext sliders to whichever sub-set is currently active.
+  const syncTtSliders = () => {
+    const cur = ttCurrent();
+    w.querySelectorAll('input').forEach(input => {
+      const k = input.dataset.key;
+      if (!k || !k.startsWith(TT_KEY_PREFIX)) return;
+      const xk = k.slice(TT_KEY_PREFIX.length);
+      if (cur[xk] !== undefined) input.value = cur[xk];
+    });
+  };
+
   const refreshReadouts = () => {
     w.querySelectorAll('input[type=range]').forEach(i => {
       const v = +i.value;
@@ -3261,14 +3464,12 @@ body.fullscreen-mode .exit-fs-btn {
       let text;
       if (k === 'shadow' || k === 'kerning' || k === 'ledHighlight' || k === 'btnHighlight') text = v.toFixed(2);
       else if (k === 'outline' || k === 'shadowX' || k === 'shadowY' || k === 'shadowBlur' || k === 'shadowSpreadX' || k === 'shadowSpreadY' || k === 'fontSize' || k === 'ledStroke' || k === 'ledRadius' || k === 'ledHighlightH' || k === 'vAlign') text = v.toFixed(1);
-      else if (k && (k.startsWith(TV_KEY_PREFIX) || k.startsWith(LP_KEY_PREFIX))) text = v.toFixed(2);
+      else if (k && (k.startsWith(TV_KEY_PREFIX) || k.startsWith(LP_KEY_PREFIX) || k.startsWith(TT_KEY_PREFIX))) text = v.toFixed(2);
       else text = v.toString();
       i.parentElement.querySelector('.btw-v').textContent = text;
     });
   };
 
-  // Sync UI to whatever was loaded — button-style keys live on `state`,
-  // TV-text keys are prefixed `t-` and live on `tvState`.
   w.querySelectorAll('input').forEach(input => {
     const k = input.dataset.key;
     if (!k) return;
@@ -3278,19 +3479,23 @@ body.fullscreen-mode .exit-fs-btn {
     } else if (k.startsWith(LP_KEY_PREFIX)) {
       const lk = k.slice(LP_KEY_PREFIX.length);
       if (lpState[lk] !== undefined) input.value = lpState[lk];
+    } else if (k.startsWith(TT_KEY_PREFIX)) {
+      const xk = k.slice(TT_KEY_PREFIX.length);
+      const cur = ttCurrent();
+      if (cur[xk] !== undefined) input.value = cur[xk];
     } else if (state[k] !== undefined) {
       input.value = state[k];
     }
   });
-  // Apply passes: button-style + tv-text only run if mobile portrait
-  // (otherwise they'd write inline styles overriding the desktop CSS
-  // we want to keep in landscape). Landscape always runs — its CSS
-  // vars only have effect inside the matching @media block.
+  // Button + tv-text apply only run in mobile portrait so they don't
+  // overwrite the desktop CSS in landscape. Landscape always runs —
+  // its CSS vars only have effect inside the matching media query.
   if (isPortraitMobile) {
     apply();
     applyTv();
   }
   applyLandscape();
+  applyTeletext();
   refreshReadouts();
 
   const persist = () => {
@@ -3306,17 +3511,26 @@ body.fullscreen-mode .exit-fs-btn {
         applyTv();
         refreshReadouts();
         persistTv();
-      } else if (k.startsWith(LP_KEY_PREFIX)) {
+        return;
+      }
+      if (k.startsWith(TT_KEY_PREFIX)) {
+        ttCurrent()[k.slice(TT_KEY_PREFIX.length)] = v;
+        applyTeletext();
+        refreshReadouts();
+        persistTt();
+        return;
+      }
+      if (k.startsWith(LP_KEY_PREFIX)) {
         lpState[k.slice(LP_KEY_PREFIX.length)] = v;
         applyLandscape();
         refreshReadouts();
         persistLp();
-      } else {
-        state[k] = v;
-        apply();
-        refreshReadouts();
-        persist();
+        return;
       }
+      state[k] = v;
+      apply();
+      refreshReadouts();
+      persist();
     });
   });
 
@@ -3325,14 +3539,34 @@ body.fullscreen-mode .exit-fs-btn {
     w.remove();
   };
 
-  // Accordion: tap a section header to open it (closing whatever was
-  // open). Default-open the section most relevant to the current
-  // device — LANDSCAPE PHONE for iPad / landscape, BUTTON STYLE
-  // otherwise.
+  // Two-level accordion. GROUPS (top): only one expanded at a time;
+  // expanding shows that group's sub-section headers. SECTIONS (sub):
+  // only one expanded across all groups.
+  const openGroup = (id) => {
+    w.querySelectorAll('.btw-group-head').forEach(h => h.classList.toggle('open', h.dataset.groupToggle === id));
+    w.querySelectorAll('.btw-group-body').forEach(b => b.classList.toggle('open', b.dataset.group === id));
+  };
   const openSection = (id) => {
     w.querySelectorAll('.btw-head[data-toggle]').forEach(h => h.classList.toggle('open', h.dataset.toggle === id));
     w.querySelectorAll('.btw-body').forEach(b => b.classList.toggle('open', b.dataset.section === id));
   };
+  const reserveAfterToggle = () => {
+    if (tuneVisible) document.body.style.paddingBottom = (w.offsetHeight + 16) + 'px';
+  };
+  w.querySelectorAll('.btw-group-head').forEach(head => {
+    head.addEventListener('click', e => {
+      if (e.target.closest('.btw-x')) return;
+      const id = head.dataset.groupToggle;
+      const alreadyOpen = head.classList.contains('open');
+      if (alreadyOpen) {
+        head.classList.remove('open');
+        w.querySelector(`.btw-group-body[data-group="${id}"]`).classList.remove('open');
+      } else {
+        openGroup(id);
+      }
+      reserveAfterToggle();
+    });
+  });
   w.querySelectorAll('.btw-head[data-toggle]').forEach(head => {
     head.addEventListener('click', e => {
       if (e.target.closest('.btw-x')) return;
@@ -3343,16 +3577,45 @@ body.fullscreen-mode .exit-fs-btn {
         w.querySelector(`.btw-body[data-section="${id}"]`).classList.remove('open');
       } else {
         openSection(id);
-        // Re-measure space reservation since height just changed
-        if (tuneVisible) document.body.style.paddingBottom = (w.offsetHeight + 16) + 'px';
       }
+      reserveAfterToggle();
     });
   });
-  openSection(isPortraitMobile ? 'bs' : 'lp');
+  // Smart default-open per viewport — pick whichever GROUP + SECTION
+  // actually affects the current device.
+  let defaultGroup = 'screen', defaultSection = 'tt';        // desktop
+  if (isPortraitMobile)             { defaultGroup = 'btn';    defaultSection = 'lay'; }
+  else if (isLandscapePhone || isTouchSmall) { defaultGroup = 'land';   defaultSection = 'lp'; }
+  openGroup(defaultGroup);
+  openSection(defaultSection);
 
-  // Reserve scroll space at the bottom of the page equal to the widget's
-  // height so the YouTube / Instagram buttons can be scrolled clear of
-  // it. Only needed when the widget is actually visible.
+  // ── EyeDropper buttons ────────────────────────────────────────────
+  // Native browser API for picking an on-screen colour. Chromium-only
+  // (Chrome / Edge / Android Chrome) — unsupported on Safari + Firefox.
+  // We hide the buttons on unsupported browsers via a body class so
+  // mobile Safari doesn't show non-functional buttons.
+  if (typeof EyeDropper === 'undefined') {
+    document.body.classList.add('no-eyedrop');
+  } else {
+    w.querySelectorAll('.btw-eyedrop').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        try {
+          const result = await new EyeDropper().open();
+          const hex = result.sRGBHex;
+          const target = btn.dataset.target;
+          const colorInput = w.querySelector(`input[data-key="${target}"]`);
+          if (!colorInput) return;
+          colorInput.value = hex;
+          // Fire the same `input` event the picker would so the
+          // existing listener path runs apply() + persist().
+          colorInput.dispatchEvent(new Event('input', { bubbles: true }));
+        } catch (_) { /* user dismissed the picker — silent */ }
+      });
+    });
+  }
+
+  // Only needed when the widget is actually visible.
   if (tuneVisible) {
     const reserveSpace = () => {
       document.body.style.paddingBottom = (w.offsetHeight + 16) + 'px';
@@ -3362,13 +3625,10 @@ body.fullscreen-mode .exit-fs-btn {
   }
 
   // ── React to orientation / breakpoint changes without a refresh ──
-  // The button + tv-text apply passes set INLINE styles on .channel-btn
-  // and the on-screen text elements. Inline styles override @media-
-  // based CSS, so when the device rotates from portrait → landscape
-  // (or vice versa) those inline styles persist and "stick" the page
-  // in the wrong layout. Listen on the matchMedia objects and on
-  // every change clear the inline styles + reapply only the passes
-  // that match the current mode.
+  // Inline styles set by apply()/applyTv() override @media-based CSS,
+  // so on rotation the page would otherwise stick in the wrong layout
+  // until a reload. Listen on matchMedia and re-evaluate which mode
+  // we're in, clearing inline styles when leaving portrait mobile.
   const portraitMQ      = window.matchMedia('(max-width: 720px)');
   const landscapePhoneMQ = window.matchMedia('(orientation: landscape) and (max-height: 500px) and (max-width: 1100px)');
   const touchSmallMQ    = window.matchMedia('(max-width: 1280px) and (pointer: coarse)');
@@ -3406,7 +3666,12 @@ body.fullscreen-mode .exit-fs-btn {
     } else {
       clearPortraitInline();
     }
-    applyLandscape();  // CSS vars on :root — always safe to set
+    applyLandscape();
+    // Teletext: re-apply with the now-active sub-set + re-sync the
+    // teletext sliders so they reflect the new viewport's values.
+    applyTeletext();
+    syncTtSliders();
+    refreshReadouts();
   };
 
   [portraitMQ, landscapePhoneMQ, touchSmallMQ].forEach(mq => {
