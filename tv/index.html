@@ -964,7 +964,12 @@ body.fullscreen-mode .exit-fs-btn {
    untouched even if their viewport is narrow. */
 @media (max-width: 1280px) and (pointer: coarse) {
   .channel-btn {
-    padding: 0.85cqi 0.8cqi;
+    /* Padding-y picks up the same --lp-btn-pady CSS variable the
+       landscape-phone block uses, so the widget's height slider tunes
+       channel buttons across BOTH iPad-class touch devices and
+       landscape-phone layouts in one go. Fallback (0.85cqi) keeps
+       the original behaviour when no var has been set. */
+    padding: var(--lp-btn-pady, 0.85cqi) 0.8cqi;
     font-size: 0.95cqi;
   }
   .channel-btn .led {
@@ -2807,13 +2812,14 @@ body.fullscreen-mode .exit-fs-btn {
 // `pp-btn-style` lives on past disable so the next tune pass resumes
 // from exactly where you left off.
 (() => {
-  // Activate when EITHER mobile portrait OR landscape phone — landscape
-  // phone exceeds the 720px width so falls through to desktop layout,
-  // but it gets its own (smaller) tuning section so the text + buttons
-  // can be resized for the cramped landscape height.
+  // Activate when ANY of: mobile portrait / landscape phone / iPad-
+  // class touch device. The button-height slider in the widget drives
+  // a CSS var that's read by both the landscape-phone @media block AND
+  // the touch-coarse @media block, so one tweak retunes both contexts.
   const isPortraitMobile = window.matchMedia('(max-width: 720px)').matches;
   const isLandscapePhone = window.matchMedia('(orientation: landscape) and (max-height: 500px) and (max-width: 1100px)').matches;
-  if (!isPortraitMobile && !isLandscapePhone) return;
+  const isTouchSmall     = window.matchMedia('(max-width: 1280px) and (pointer: coarse)').matches;
+  if (!isPortraitMobile && !isLandscapePhone && !isTouchSmall) return;
   const params = new URL(location.href).searchParams;
   if (params.has('tune')) localStorage.setItem('pp-tune', '1');
   if (params.has('untune')) localStorage.removeItem('pp-tune');
