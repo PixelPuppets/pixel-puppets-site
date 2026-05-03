@@ -2927,7 +2927,8 @@ body.fullscreen-mode .exit-fs-btn {
   // picks up. Variables only have effect inside that @media block, so
   // we can safely setProperty regardless of current orientation.
   const lpDefaults = {
-    btnHeight: 1.0,  // cqi — channel button vertical padding
+    btnHeight: 1.2,  // cqi — channel button vertical padding (drives
+                     // both iPad touch-mode + landscape-phone @media)
     btnFs:     0.95, // cqi — channel button label font size
     npSize:    1.2,  // cqi — Now Playing badge font size
     stSize:    4.0,  // cqi — Show Title (PIXEL PUPPETS) font size
@@ -2943,10 +2944,11 @@ body.fullscreen-mode .exit-fs-btn {
   const w = document.createElement('div');
   w.id = 'btn-style-widget';
   w.innerHTML = `
-    <div class="btw-head">
-      <span>BUTTON STYLE</span>
+    <div class="btw-head" data-toggle="bs">
+      <span><span class="btw-toggle">▶</span>BUTTON STYLE</span>
       <button class="btw-x" aria-label="close">×</button>
     </div>
+    <div class="btw-body" data-section="bs">
     <div class="btw-row">
       <label>height <input type="range" min="6"  max="28" step="1"   data-key="paddingY" value="${initial.paddingY}"><span class="btw-v"></span></label>
       <label>v-align<input type="range" min="-6" max="8"  step="0.5" data-key="vAlign"   value="${initial.vAlign}"><span class="btw-v"></span></label>
@@ -3003,9 +3005,11 @@ body.fullscreen-mode .exit-fs-btn {
       <label>Y       <input type="range" min="0"   max="14"  step="0.5"  data-key="shadowY" value="${initial.shadowY}"><span class="btw-v"></span></label>
       <label>outline <input type="range" min="0"   max="3"   step="0.1"  data-key="outline" value="${initial.outline}"><span class="btw-v"></span></label>
     </div>
+    </div><!-- /.btw-body bs -->
 
     <div class="btw-divider"></div>
-    <div class="btw-head"><span>TV TEXT</span></div>
+    <div class="btw-head" data-toggle="tv"><span><span class="btw-toggle">▶</span>TV TEXT</span></div>
+    <div class="btw-body" data-section="tv">
 
     <div class="btw-section-label">now playing badge (ON AIR SOON / PILOT PREVIEW)</div>
     <div class="btw-row">
@@ -3027,9 +3031,11 @@ body.fullscreen-mode .exit-fs-btn {
       <label>X    <input type="range" min="-10" max="20"  step="0.1"  data-key="t-soX"    value="${tvInitial.soX}"><span class="btw-v"></span></label>
       <label>Y    <input type="range" min="-20" max="20"  step="0.1"  data-key="t-soY"    value="${tvInitial.soY}"><span class="btw-v"></span></label>
     </div>
+    </div><!-- /.btw-body tv -->
 
     <div class="btw-divider"></div>
-    <div class="btw-head"><span>LANDSCAPE PHONE</span></div>
+    <div class="btw-head" data-toggle="lp"><span><span class="btw-toggle">▶</span>LANDSCAPE PHONE</span></div>
+    <div class="btw-body" data-section="lp">
 
     <div class="btw-section-label">channel buttons (right-side panel)</div>
     <div class="btw-row">
@@ -3045,6 +3051,7 @@ body.fullscreen-mode .exit-fs-btn {
     <div class="btw-row">
       <label>desc       <input type="range" min="0.5" max="3"   step="0.05" data-key="l-soSize" value="${lpInitial.soSize}"><span class="btw-v"></span></label>
     </div>
+    </div><!-- /.btw-body lp -->
   `;
   Object.assign(w.style, {
     position: 'fixed', left: '0', right: '0', bottom: '0', zIndex: 9999,
@@ -3077,6 +3084,13 @@ body.fullscreen-mode .exit-fs-btn {
     #btn-style-widget .btw-x { background:#3a2a1a; color:#f0e6d2; border:0; padding:6px 10px; border-radius:4px; font:inherit; cursor:pointer; }
     #btn-style-widget .btw-divider { height:1px; background:rgba(255,240,200,0.18); margin:12px 0 8px; }
     #btn-style-widget .btw-head:not(:first-child) { margin-top:0; }
+    /* Accordion: each section's body is collapsed by default; tap the
+       header to expand. Only one section open at a time. */
+    #btn-style-widget .btw-head[data-toggle] { cursor:pointer; user-select:none; }
+    #btn-style-widget .btw-head .btw-toggle { display:inline-block; font-size:9px; opacity:0.55; margin-right:6px; transition:transform 0.15s ease; transform:rotate(0deg); }
+    #btn-style-widget .btw-head.open .btw-toggle { transform:rotate(90deg); }
+    #btn-style-widget .btw-body { display:none; }
+    #btn-style-widget .btw-body.open { display:block; }
   `;
   if (tuneVisible) document.head.appendChild(s);
 
@@ -3311,6 +3325,31 @@ body.fullscreen-mode .exit-fs-btn {
     w.remove();
   };
 
+  // Accordion: tap a section header to open it (closing whatever was
+  // open). Default-open the section most relevant to the current
+  // device — LANDSCAPE PHONE for iPad / landscape, BUTTON STYLE
+  // otherwise.
+  const openSection = (id) => {
+    w.querySelectorAll('.btw-head[data-toggle]').forEach(h => h.classList.toggle('open', h.dataset.toggle === id));
+    w.querySelectorAll('.btw-body').forEach(b => b.classList.toggle('open', b.dataset.section === id));
+  };
+  w.querySelectorAll('.btw-head[data-toggle]').forEach(head => {
+    head.addEventListener('click', e => {
+      if (e.target.closest('.btw-x')) return;
+      const id = head.dataset.toggle;
+      const alreadyOpen = head.classList.contains('open');
+      if (alreadyOpen) {
+        head.classList.remove('open');
+        w.querySelector(`.btw-body[data-section="${id}"]`).classList.remove('open');
+      } else {
+        openSection(id);
+        // Re-measure space reservation since height just changed
+        if (tuneVisible) document.body.style.paddingBottom = (w.offsetHeight + 16) + 'px';
+      }
+    });
+  });
+  openSection(isPortraitMobile ? 'bs' : 'lp');
+
   // Reserve scroll space at the bottom of the page equal to the widget's
   // height so the YouTube / Instagram buttons can be scrolled clear of
   // it. Only needed when the widget is actually visible.
@@ -3321,6 +3360,58 @@ body.fullscreen-mode .exit-fs-btn {
     reserveSpace();
     window.addEventListener('resize', reserveSpace);
   }
+
+  // ── React to orientation / breakpoint changes without a refresh ──
+  // The button + tv-text apply passes set INLINE styles on .channel-btn
+  // and the on-screen text elements. Inline styles override @media-
+  // based CSS, so when the device rotates from portrait → landscape
+  // (or vice versa) those inline styles persist and "stick" the page
+  // in the wrong layout. Listen on the matchMedia objects and on
+  // every change clear the inline styles + reapply only the passes
+  // that match the current mode.
+  const portraitMQ      = window.matchMedia('(max-width: 720px)');
+  const landscapePhoneMQ = window.matchMedia('(orientation: landscape) and (max-height: 500px) and (max-width: 1100px)');
+  const touchSmallMQ    = window.matchMedia('(max-width: 1280px) and (pointer: coarse)');
+
+  const clearPortraitInline = () => {
+    buttons.forEach(b => {
+      ['padding','borderRadius','background','backgroundBlendMode','boxShadow','filter','fontSize','letterSpacing']
+        .forEach(p => b.style[p] = '');
+      ['--btn-stroke','--btn-highlight','--btn-radius-top','--label-y']
+        .forEach(v => b.style.removeProperty(v));
+      const led = b.querySelector('.led');
+      if (led) ['--led-radius','--led-stroke','--led-highlight','--led-highlight-h']
+        .forEach(v => led.style.removeProperty(v));
+    });
+    panel.style.rowGap = '';
+    panel.style.columnGap = '';
+    const np = document.querySelector('.now-playing');
+    if (np) {
+      np.style.transform = '';
+      const lbl = np.querySelector('.label'); if (lbl) lbl.style.fontSize = '';
+      const ep = np.querySelector('.episode'); if (ep) ep.style.fontSize = '';
+    }
+    const st = document.querySelector('.show-title');
+    if (st) { st.style.fontSize = ''; st.style.transform = ''; }
+    const so = document.querySelector('.show-overlay');
+    if (so) so.style.transform = '';
+    const desc = document.querySelector('.show-overlay .desc');
+    if (desc) desc.style.fontSize = '';
+  };
+
+  const reapplyForCurrentMode = () => {
+    if (portraitMQ.matches) {
+      apply();
+      applyTv();
+    } else {
+      clearPortraitInline();
+    }
+    applyLandscape();  // CSS vars on :root — always safe to set
+  };
+
+  [portraitMQ, landscapePhoneMQ, touchSmallMQ].forEach(mq => {
+    mq.addEventListener('change', reapplyForCurrentMode);
+  });
 })();
 
 </script>
