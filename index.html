@@ -2224,11 +2224,17 @@ body.fullscreen-mode .exit-fs-btn {
       <!-- The chassis PNG sits between the screen content and the controls.
            It hides anything outside the screen cutout while the controls
            layered above it remain visible and clickable. -->
-      <img class="tv-chassis" src="assets/tv-chassis.png" alt="" aria-hidden="true">
+      <picture>
+        <source srcset="assets/tv-chassis.webp" type="image/webp">
+        <img class="tv-chassis" src="assets/tv-chassis.png" alt="" aria-hidden="true">
+      </picture>
 
       <!-- Mobile-only bezel — gold rounded TV frame that wraps just the
            screen on phone-sized viewports. Hidden on desktop. -->
-      <img class="tv-chassis-mobile" src="assets/tv-frame-mobile.png" alt="" aria-hidden="true">
+      <picture>
+        <source srcset="assets/tv-frame-mobile.webp" type="image/webp">
+        <img class="tv-chassis-mobile" src="assets/tv-frame-mobile.png" alt="" aria-hidden="true">
+      </picture>
 
       </div><!-- /.tv-frame -->
 
