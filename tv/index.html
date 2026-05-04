@@ -3046,9 +3046,15 @@ body.fullscreen-mode .exit-fs-btn {
   const params = new URL(location.href).searchParams;
   if (params.has('tune'))   localStorage.setItem('pp-tune', '1');
   if (params.has('untune')) localStorage.removeItem('pp-tune');
+  // ?clean — preview mode for "what does an end user see?". Skips the
+  // stored tune state without wiping localStorage, and hides the widget
+  // for the duration of the load. Visit again without ?clean to come
+  // back to your tuned view. The PREVIEW button in the widget topbar
+  // opens this in a new tab so you can flip between the two.
+  const isClean = params.has('clean');
   // apply() always runs so the page renders with tuned styling; the
   // widget UI itself is only inserted when tuneVisible is true.
-  const tuneVisible = localStorage.getItem('pp-tune') === '1';
+  const tuneVisible = !isClean && localStorage.getItem('pp-tune') === '1';
   const buttons = document.querySelectorAll('.channel-btn');
   const panel = document.querySelector('.channel-panel');
   if (!buttons.length || !panel) return;
@@ -3188,9 +3194,18 @@ body.fullscreen-mode .exit-fs-btn {
     return h.toString(36);
   })();
   const _tuneSigKey = 'pp-tune-sig';
-  if (localStorage.getItem(_tuneSigKey) !== _tuneSig) {
-    ['pp-btn-style','pp-tv-text','pp-landscape-style','pp-teletext','pp-desktop-buttons','pp-db-anchors'].forEach(k => localStorage.removeItem(k));
-    localStorage.setItem(_tuneSigKey, _tuneSig);
+  const _sigChanged = localStorage.getItem(_tuneSigKey) !== _tuneSig;
+  if (_sigChanged || isClean) {
+    if (_sigChanged) {
+      // Defaults changed since last visit — wipe stored tune state so
+      // your view picks up the new defaults. Sig-update only runs on
+      // an actual change (not in preview mode) so ?clean stays
+      // non-destructive.
+      ['pp-btn-style','pp-tv-text','pp-landscape-style','pp-teletext','pp-desktop-buttons','pp-db-anchors'].forEach(k => localStorage.removeItem(k));
+      localStorage.setItem(_tuneSigKey, _tuneSig);
+    }
+    // Reset Initials to fresh code defaults so the apply pass below
+    // ignores anything that loaded from localStorage moments earlier.
     initial   = { ...defaults };
     tvInitial = { ...tvDefaults };
     lpInitial = { ...lpDefaults };
@@ -3205,6 +3220,7 @@ body.fullscreen-mode .exit-fs-btn {
       <button class="btw-mode-btn" data-mode="mobile" type="button">MOBILE</button>
       <button class="btw-mode-btn" data-mode="desktop" type="button">DESKTOP</button>
       <span class="btw-vp" id="btwVp"></span>
+      <button class="btw-preview" id="btwPreview" type="button" title="Open this page in a new tab as an end user (ignores your tune state)">PREVIEW</button>
       <button class="btw-reset" id="btwReset" type="button" title="Wipe all widget state and reload — see what end users see">RESET</button>
       <button class="btw-x" aria-label="close" type="button">×</button>
     </div>
@@ -3455,6 +3471,8 @@ body.fullscreen-mode .exit-fs-btn {
     #btn-style-widget .btw-vp { font:10px/1 -apple-system,Menlo,monospace; opacity:0.55; letter-spacing:0.04em; margin-left:auto; padding:0 8px; }
     #btn-style-widget .btw-reset { background:#3a1a1a; color:#f0d6c2; border:1px solid rgba(255,180,160,0.30); padding:5px 10px; border-radius:4px; font:inherit; cursor:pointer; letter-spacing:0.06em; opacity:0.7; }
     #btn-style-widget .btw-reset:hover { opacity:1; background:#5a2a2a; }
+    #btn-style-widget .btw-preview { background:#1a3a2a; color:#d2f0d8; border:1px solid rgba(180,255,200,0.30); padding:5px 10px; border-radius:4px; font:inherit; cursor:pointer; letter-spacing:0.06em; opacity:0.7; }
+    #btn-style-widget .btw-preview:hover { opacity:1; background:#2a5a3a; }
     /* Mode = desktop: hide mobile-only groups + sub-sections.
        DESKTOP BUTTONS group + its preceding divider stay visible. */
     #btn-style-widget[data-mode="desktop"] .btw-group-head[data-group-toggle="btn"],
@@ -3821,6 +3839,16 @@ body.fullscreen-mode .exit-fs-btn {
       localStorage.removeItem(k);
     });
     location.reload();
+  };
+
+  // PREVIEW — open the same page in a new tab with ?clean appended.
+  // ?clean tells the IIFE to skip stored tune state and hide the
+  // widget for that load, so the new tab shows what an end user
+  // sees. Non-destructive: your tune state stays intact in this tab.
+  w.querySelector('#btwPreview').onclick = () => {
+    const url = new URL(location.href);
+    url.searchParams.set('clean', '1');
+    window.open(url.toString(), '_blank');
   };
 
   // Two-level accordion. GROUPS (top): only one expanded at a time;
