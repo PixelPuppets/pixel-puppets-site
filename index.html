@@ -187,38 +187,37 @@ html, body {
    see it. position:fixed pins it to viewport top regardless of
    scroll so it's always visible the moment it gains focus. */
 .skip-link {
-  /* Position the skip link AT its visible location (top:12px, left:12px)
-     and use transform to translate it off-screen visually when not
-     focused. Crucially this keeps the element's logical position
-     inside the viewport, which means Safari + some other engines
-     keep it in the keyboard tab order. Off-screen via `top: -100px`
-     is more visually intuitive but can cause some browsers to skip
-     Tab focus on elements painted outside the viewport. */
   position: fixed;
-  top: 12px;
-  left: 12px;
+  top: -120px;
+  left: 16px;
   z-index: 10000;
-  transform: translateY(calc(-100% - 24px));
   /* Reset native button styling so Safari / iOS don't add a default
      blue gradient or rounded chrome on top of our brand styling. */
   appearance: none;
   -webkit-appearance: none;
   background: #3a2a1a;
   color: #f0e6d2;
-  padding: 10px 16px;
+  padding: 12px 20px;
   border: 2px solid #ffb15a;
   border-radius: 4px;
   text-decoration: none;
   font-family: 'Euclid', system-ui, sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.04em;
   cursor: pointer;
-  transition: transform 0.15s ease;
+  transition: top 0.18s ease;
+  /* Subtle outer glow so the link reads clearly against any
+     page background once it slides in. */
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 .skip-link:focus,
 .skip-link:focus-visible {
-  transform: translateY(0);
+  /* Plenty of vertical clearance from browser chrome (URL bar + tab
+     row + bookmarks bar can take up significant viewport top space
+     in Safari). 50px puts it comfortably below all of that without
+     looking awkward. */
+  top: 50px;
   outline: none;
 }
 
@@ -2463,12 +2462,17 @@ body.fullscreen-mode .exit-fs-btn {
 </div>
 
 <script>
-// ─── Skip link click handler ─────────────────────────────────────────────
-// The skip link is a <button> (not <a href>) so Safari's default
-// "Press Tab to highlight each item on a webpage" = off doesn't filter
-// it out of Tab order. Click handler scrolls + focuses the target,
-// equivalent to following an in-page anchor. Activates on click, Enter,
-// or Space (all native button behaviour).
+// ─── Skip link click handler + Safari Tab fallback ──────────────────────
+// The skip link is a <button> so Safari's "Press Tab to highlight each
+// item" = off doesn't filter it out (that filter applies to <a> links,
+// not buttons). Click handler scrolls + focuses the target.
+//
+// Safari Tab-focus belt-and-braces: if the user presses Tab while focus
+// is still at document body (i.e. they just loaded the page and pressed
+// Tab as their first interaction), force-focus the skip link. Some
+// Safari configurations + some macOS keyboard nav settings can route
+// the first Tab anywhere except into the page; this listener ensures
+// the skip link gets first dibs regardless.
 (() => {
   document.querySelectorAll('.skip-link[data-skip-to]').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -2478,6 +2482,20 @@ body.fullscreen-mode .exit-fs-btn {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       target.focus();
     });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab' || e.shiftKey) return;
+    const skip = document.querySelector('.skip-link');
+    if (!skip) return;
+    // Only force-focus if focus is still on the body / html (i.e. nothing
+    // useful has been focused yet). Once the user is in the page, leave
+    // their tab navigation alone.
+    const ae = document.activeElement;
+    if (ae === document.body || ae === document.documentElement || ae === null) {
+      e.preventDefault();
+      skip.focus();
+    }
   });
 })();
 
