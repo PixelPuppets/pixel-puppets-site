@@ -1,0 +1,11 @@
+# /tv was the development URL while the CRT TV redesign was in flight.
+# It IS the site now, so redirect /tv (and anything under it) → root.
+# `!` forces the redirect even if a matching file exists.
+/tv     /  301!
+/tv/*   /  301!
+
+# Old three-page site URLs (archived in .archive/) → root. The new
+# single-page site has the same content reachable via channel buttons
+# (HOME / ABOUT / R&D / TEAM / SUPPORT / CONTACT).
+/about.html    /  301
+/contact.html  /  301

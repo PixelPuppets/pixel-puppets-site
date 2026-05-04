@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pixel Puppets - A playful power up for anyone tired of adulting">
+    <title>Pixel Puppets</title>
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pixelpuppets.co/">
+    <meta property="og:title" content="Pixel Puppets">
+    <meta property="og:description" content="A live performance format built around real-time digital puppetry, surreal comedy, and audience interaction.">
+    <meta property="og:image" content="https://pixelpuppets.co/assets/images/og-image.jpg">
+    <meta property="og:image:width" content="1125">
+    <meta property="og:image:height" content="1135">
+    <meta property="og:site_name" content="Pixel Puppets">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://pixelpuppets.co/">
+    <meta name="twitter:title" content="Pixel Puppets">
+    <meta name="twitter:description" content="A live performance format built around real-time digital puppetry, surreal comedy, and audience interaction.">
+    <meta name="twitter:image" content="https://pixelpuppets.co/assets/images/og-image.jpg">
+
+    <link rel="icon" type="image/webp" href="assets/images/favicon.webp">
+    <link rel="alternate icon" type="image/png" href="assets/images/favicon.png">
+    <link rel="preload" href="fonts/LEDpixel-SquareOutline.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/LEDpixel-S_DEMO_SlabSerif.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/LEDpixel-Circle.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/EuclidCircularB-Medium.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="assets/images/logo-rollover.webp" as="image">
+    <link rel="preload" href="assets/images/logo-mobile-rollover.webp" as="image">
+    <link rel="stylesheet" href="style.css">
+    <script src="assets/js/site-fx.js" defer></script>
+</head>
+<body class="home">
+    <div id="preloader" class="cs-loader">
+      <div class="cs-loader-inner">
+        <label>●</label>
+        <label>●</label>
+        <label>●</label>
+        <label>●</label>
+        <label>●</label>
+        <label>●</label>
+      </div>
+    </div>
+    <nav class="nav">
+        <div class="nav-brand">
+            <a href="index.html">
+                <picture>
+                    <source srcset="assets/images/logo.webp" type="image/webp">
+                    <img src="assets/images/logo.png" alt="Pixel Puppets" class="nav-logo">
+                </picture>
+                <picture>
+                    <source srcset="assets/images/logo-rollover.webp" type="image/webp">
+                    <img src="assets/images/logo-rollover.webp" alt="Pixel Puppets" class="nav-logo-hover">
+                </picture>
+                <picture>
+                    <source srcset="assets/images/logo-mobile.webp" type="image/webp">
+                    <img src="assets/images/logo-mobile.png" alt="Pixel Puppets" class="nav-logo-mobile">
+                </picture>
+                <picture>
+                    <source srcset="assets/images/logo-mobile-rollover.webp" type="image/webp">
+                    <img src="assets/images/logo-mobile-rollover.webp" alt="Pixel Puppets" class="nav-logo-mobile-hover">
+                </picture>
+            </a>
+        </div>
+        <div class="nav-burger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="nav-links">
+            <a href="about.html">About</a>
+            <a href="contact.html">Contact</a>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="container">
+            <h1 class="main-title">
+                <span class="title-line">
+                    <span class="square-outline">{</span><span class="s-demo-slab">P</span><span class="sh1-slab-serif">Ĩ</span><span class="square-outline">x</span><span class="s-slab-serif">e</span><span class="circle">l</span>
+                </span>
+                <span class="title-line">
+                    <span class="sh2-slab-serif">P</span><span class="scr-slab-serif">ů</span><span class="circle">p</span><span class="ho-slab-serif">p</span><span class="square-circle">ē</span><span class="t-slab-serif">T</span><span class="ho-unicase">Ş</span><span class="ho-slab-serif">}</span>
+                </span>
+            </h1>
+            <p class="main-tagline">
+                <span class="tagline-line">A PLAYFUL POWER UP FOR</span>
+                <span class="tagline-line">ANYONE TIRED OF ADULTING...</span>
+            </p>
+            <a href="mailto:hello@pixelpuppets.co" class="main-button">GET IN TOUCH</a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Pixel Puppets &middot; Made in the UK<br>Developed at the BFI Immersive Fiction Lab &middot; Supported by Arts Council England and Immersive Arts UK</p>
+    </footer>
+
+    <script>
+        const burger = document.querySelector('.nav-burger');
+        const navLinks = document.querySelector('.nav-links');
+        
+        burger.addEventListener('click', () => {
+            burger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+        
+        // Close menu when clicking a link
+        navLinks.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+                burger.classList.remove('active');
+                navLinks.classList.remove('active');
+            }
+        });
+        
+        // Enable hover effects after entrance animation completes
+        setTimeout(() => {
+            const title = document.querySelector('.main-title');
+            if (title) {
+                title.classList.add('loaded');
+            }
+        }, 1600); // Wait for all 14 characters to finish (1.4s + 0.2s buffer)
+
+        window.addEventListener('load', () => {
+          const preloader = document.getElementById('preloader');
+          if (preloader) {
+            preloader.style.opacity = '0';
+            preloader.style.pointerEvents = 'none';
+            setTimeout(() => preloader.style.display = 'none', 400);
+          }
+        });
+    </script>
+</body>
+</html>
