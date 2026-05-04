@@ -143,7 +143,11 @@ html, body {
    "sr-only" pattern: in the DOM and indexable, but not painted to the
    viewport. The <main> element using this class carries every channel's
    content as plain HTML so search engines, AI summarisers, and assistive
-   tech see the full project description without needing JS execution. */
+   tech see the full project description without needing JS execution.
+
+   Inline .sr-only spans use the same rule for "(opens in new tab)"
+   announcements on external-link anchors — WCAG G201 best practice. */
+.sr-only,
 .sr-only-main {
   position: absolute;
   width: 1px;
@@ -2069,8 +2073,8 @@ body.fullscreen-mode .exit-fs-btn {
   <ul>
     <li><strong>Ben Carlin</strong> — Artistic Director</li>
     <li><strong>Joe Duggan</strong> — Producer</li>
-    <li><strong><a href="https://danielbacchus.co.uk" target="_blank" rel="noopener noreferrer">Daniel Bacchus</a></strong> — Lead Development</li>
-    <li><strong>Various Artists Studio</strong> — Characters and Animation</li>
+    <li><strong><a href="https://danielbacchus.co.uk" target="_blank" rel="noopener noreferrer">Daniel Bacchus<span class="sr-only"> (opens in new tab)</span></a></strong> — Lead Development</li>
+    <li><strong><a href="https://www.variousartists.studio" target="_blank" rel="noopener noreferrer">Various Artists Studio<span class="sr-only"> (opens in new tab)</span></a></strong> — Characters and Animation</li>
   </ul>
 
   <h2>Support and funding</h2>
@@ -2086,8 +2090,8 @@ body.fullscreen-mode .exit-fs-btn {
 
   <h2>Find us online</h2>
   <ul>
-    <li><a href="https://www.youtube.com/@pixelpuppetsuk">YouTube</a></li>
-    <li><a href="https://www.instagram.com/pixel.puppets/">Instagram</a></li>
+    <li><a href="https://www.youtube.com/@pixelpuppetsuk" target="_blank" rel="noopener noreferrer">YouTube<span class="sr-only"> (opens in new tab)</span></a></li>
+    <li><a href="https://www.instagram.com/pixel.puppets/" target="_blank" rel="noopener noreferrer">Instagram<span class="sr-only"> (opens in new tab)</span></a></li>
   </ul>
 </main>
 
@@ -2249,8 +2253,8 @@ body.fullscreen-mode .exit-fs-btn {
         <button class="channel-btn" data-color="green"   data-channel="team"><span class="led"></span>TEAM<span class="arrow"></span></button>
         <button class="channel-btn" data-color="blue"    data-channel="support"><span class="led"></span>SUPPORT<span class="arrow"></span></button>
         <button class="channel-btn" data-color="purple"  data-channel="contact"><span class="led"></span>CONTACT<span class="arrow"></span></button>
-        <a class="channel-btn channel-btn-social" data-platform="youtube" href="https://www.youtube.com/@pixelpuppetsuk" target="_blank" rel="noopener noreferrer"><img class="social-icon" src="assets/youtube-black.svg" alt="">YOUTUBE<span class="arrow"></span></a>
-        <a class="channel-btn channel-btn-social" data-platform="instagram" href="https://www.instagram.com/pixel.puppets/" target="_blank" rel="noopener noreferrer"><img class="social-icon" src="assets/instagram-black.svg" alt="">INSTAGRAM<span class="arrow"></span></a>
+        <a class="channel-btn channel-btn-social" data-platform="youtube" href="https://www.youtube.com/@pixelpuppetsuk" target="_blank" rel="noopener noreferrer"><img class="social-icon" src="assets/youtube-black.svg" alt="">YOUTUBE<span class="sr-only"> (opens in new tab)</span><span class="arrow"></span></a>
+        <a class="channel-btn channel-btn-social" data-platform="instagram" href="https://www.instagram.com/pixel.puppets/" target="_blank" rel="noopener noreferrer"><img class="social-icon" src="assets/instagram-black.svg" alt="">INSTAGRAM<span class="sr-only"> (opens in new tab)</span><span class="arrow"></span></a>
         <div class="channel-footer">
           <a class="social" href="#" title="YouTube"><img src="assets/youtube-black.svg" alt="YouTube"></a>
           <a class="social" href="#" title="Instagram"><img src="assets/instagram-black.svg" alt="Instagram"></a>
@@ -2276,11 +2280,11 @@ body.fullscreen-mode .exit-fs-btn {
         <div class="colour-system">
           <div class="dial-label">SOCIAL</div>
           <div class="lights social-lights">
-            <a class="social-light" href="https://www.youtube.com/@pixelpuppetsuk" target="_blank" rel="noopener noreferrer" title="YouTube" data-platform="youtube">
-              <img src="assets/youtube-black.svg" alt="YouTube">
+            <a class="social-light" href="https://www.youtube.com/@pixelpuppetsuk" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube (opens in new tab)" data-platform="youtube">
+              <img src="assets/youtube-black.svg" alt="">
             </a>
-            <a class="social-light" href="https://www.instagram.com/pixel.puppets/" target="_blank" rel="noopener noreferrer" title="Instagram" data-platform="instagram">
-              <img src="assets/instagram-black.svg" alt="Instagram">
+            <a class="social-light" href="https://www.instagram.com/pixel.puppets/" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Instagram (opens in new tab)" data-platform="instagram">
+              <img src="assets/instagram-black.svg" alt="">
             </a>
           </div>
         </div>
@@ -2388,7 +2392,7 @@ body.fullscreen-mode .exit-fs-btn {
     team: {
       strap: 'CH. 04',
       episode: 'TEAM',
-      body: '<p>Created by Ben Carlin (Artistic Director) and Joe Duggan (Producer), with <a href="https://danielbacchus.co.uk" target="_blank" rel="noopener noreferrer">Daniel Bacchus</a> on lead development and <a href="https://www.variousartists.studio" target="_blank" rel="noopener noreferrer">Various Artists Studio</a> on characters and animation.</p>',
+      body: '<p>Created by Ben Carlin (Artistic Director) and Joe Duggan (Producer), with <a href="https://danielbacchus.co.uk" target="_blank" rel="noopener noreferrer">Daniel Bacchus<span class="sr-only"> (opens in new tab)</span></a> on lead development and <a href="https://www.variousartists.studio" target="_blank" rel="noopener noreferrer">Various Artists Studio<span class="sr-only"> (opens in new tab)</span></a> on characters and animation.</p>',
       teletext: {
         pageno: 'P104',
         section: '',
@@ -2396,8 +2400,8 @@ body.fullscreen-mode .exit-fs-btn {
         blocks: [
           { header: 'BEN CARLIN',     headerColor: 'cyan',   body: 'ARTISTIC DIRECTOR' },
           { header: 'JOE DUGGAN',     headerColor: 'purple', body: 'PRODUCER' },
-          { header: '<a href="https://danielbacchus.co.uk" target="_blank" rel="noopener noreferrer">DANIEL BACCHUS</a>', headerColor: 'green',  body: 'LEAD DEVELOPMENT' },
-          { header: '<a href="https://www.variousartists.studio" target="_blank" rel="noopener noreferrer">VARIOUS ARTISTS STUDIO</a>', headerColor: 'yellow', body: 'CHARACTERS + ANIMATION' },
+          { header: '<a href="https://danielbacchus.co.uk" target="_blank" rel="noopener noreferrer">DANIEL BACCHUS<span class="sr-only"> (opens in new tab)</span></a>', headerColor: 'green',  body: 'LEAD DEVELOPMENT' },
+          { header: '<a href="https://www.variousartists.studio" target="_blank" rel="noopener noreferrer">VARIOUS ARTISTS STUDIO<span class="sr-only"> (opens in new tab)</span></a>', headerColor: 'yellow', body: 'CHARACTERS + ANIMATION' },
         ],
       },
     },
