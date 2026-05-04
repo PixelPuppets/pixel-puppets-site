@@ -191,6 +191,10 @@ html, body {
   top: -100px;
   left: 12px;
   z-index: 10000;
+  /* Reset native button styling so Safari / iOS don't add a default
+     blue gradient or rounded chrome on top of our brand styling. */
+  appearance: none;
+  -webkit-appearance: none;
   background: #3a2a1a;
   color: #f0e6d2;
   padding: 10px 16px;
@@ -198,8 +202,10 @@ html, body {
   border-radius: 4px;
   text-decoration: none;
   font-family: 'Euclid', system-ui, sans-serif;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.04em;
+  cursor: pointer;
   transition: top 0.15s ease;
 }
 .skip-link:focus,
@@ -2115,8 +2121,15 @@ body.fullscreen-mode .exit-fs-btn {
 
 <!-- Skip link for keyboard users — invisible until tab-focused, then
      pops into the top-left so they can jump past the channel button
-     stack to the screen content. WCAG 2.4.1 (Bypass Blocks). -->
-<a href="#tv-screen" class="skip-link">Skip to main content</a>
+     stack to the screen content. WCAG 2.4.1 (Bypass Blocks).
+     Implemented as a <button> rather than <a href="#…"> because
+     macOS Safari's default "Press Tab to highlight each item on a
+     webpage" preference is OFF for many users — and that preference
+     filters out <a> links from the Tab order, but NOT buttons. Using
+     a button means the skip-link is reachable by Tab on every
+     browser regardless of user preferences. JS handler below scrolls
+     + focuses the target. -->
+<button type="button" class="skip-link" data-skip-to="tv-screen">Skip to main content</button>
 
 <!-- aria-live region announcing channel changes to screen readers.
      Visually hidden; updated by switchTo() each time a channel is
@@ -2432,6 +2445,24 @@ body.fullscreen-mode .exit-fs-btn {
 </div>
 
 <script>
+// ─── Skip link click handler ─────────────────────────────────────────────
+// The skip link is a <button> (not <a href>) so Safari's default
+// "Press Tab to highlight each item on a webpage" = off doesn't filter
+// it out of Tab order. Click handler scrolls + focuses the target,
+// equivalent to following an in-page anchor. Activates on click, Enter,
+// or Space (all native button behaviour).
+(() => {
+  document.querySelectorAll('.skip-link[data-skip-to]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.getElementById(btn.dataset.skipTo);
+      if (!target) return;
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      target.focus();
+    });
+  });
+})();
+
 // ─── Channel content + static-flicker switcher ────────────────────────────
 // Each button maps to a channel object; clicking fires the static overlay,
 // swaps the on-screen text, and updates the NOW PLAYING strap. Video keeps
