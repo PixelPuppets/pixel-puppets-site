@@ -3179,6 +3179,7 @@ body.fullscreen-mode .exit-fs-btn {
       <button class="btw-mode-btn" data-mode="mobile" type="button">MOBILE</button>
       <button class="btw-mode-btn" data-mode="desktop" type="button">DESKTOP</button>
       <span class="btw-vp" id="btwVp"></span>
+      <button class="btw-reset" id="btwReset" type="button" title="Wipe all widget state and reload — see what end users see">RESET</button>
       <button class="btw-x" aria-label="close" type="button">×</button>
     </div>
     <div class="btw-group-head" data-group-toggle="btn">
@@ -3426,6 +3427,8 @@ body.fullscreen-mode .exit-fs-btn {
     #btn-style-widget .btw-mode-btn.active { opacity:1; background:#5a4424; border-color:rgba(255,240,200,0.6); }
     #btn-style-widget .btw-mode-bar .btw-x { margin-left:0; }
     #btn-style-widget .btw-vp { font:10px/1 -apple-system,Menlo,monospace; opacity:0.55; letter-spacing:0.04em; margin-left:auto; padding:0 8px; }
+    #btn-style-widget .btw-reset { background:#3a1a1a; color:#f0d6c2; border:1px solid rgba(255,180,160,0.30); padding:5px 10px; border-radius:4px; font:inherit; cursor:pointer; letter-spacing:0.06em; opacity:0.7; }
+    #btn-style-widget .btw-reset:hover { opacity:1; background:#5a2a2a; }
     /* Mode = desktop: hide mobile-only groups + sub-sections.
        DESKTOP BUTTONS group + its preceding divider stay visible. */
     #btn-style-widget[data-mode="desktop"] .btw-group-head[data-group-toggle="btn"],
@@ -3779,6 +3782,19 @@ body.fullscreen-mode .exit-fs-btn {
   w.querySelector('.btw-x').onclick = () => {
     document.body.style.paddingBottom = '';
     w.remove();
+  };
+
+  // RESET — wipe every widget-related localStorage key (but keep the
+  // pp-tune flag so the widget reappears after reload) and reload.
+  // This is "show me what end users see" mode: all stored overrides
+  // gone, hardcoded defaults take over. Confirms first because the
+  // wipe is destructive.
+  w.querySelector('#btwReset').onclick = () => {
+    if (!confirm('Wipe all widget state and reload? This discards every slider tweak you have stored.')) return;
+    ['pp-btn-style','pp-tv-text','pp-landscape-style','pp-teletext','pp-desktop-buttons','pp-db-anchors'].forEach(k => {
+      localStorage.removeItem(k);
+    });
+    location.reload();
   };
 
   // Two-level accordion. GROUPS (top): only one expanded at a time;
