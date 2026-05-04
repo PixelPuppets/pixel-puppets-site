@@ -1,0 +1,33 @@
+# Netlify per-path response headers. Belt-and-braces hardening for a
+# static site — none of these prevent a specific known exploit (the
+# site has no auth, no backend, no user input), but they shrink the
+# blast radius if anything ever goes wrong, and they're free.
+
+/*
+  # Stop browsers MIME-sniffing a response as a different content type
+  # than what's declared. Cheap, no downside.
+  X-Content-Type-Options: nosniff
+
+  # Refuse to be loaded inside an iframe on another origin (clickjacking
+  # defence). The site is meant to be visited directly, not embedded.
+  X-Frame-Options: DENY
+
+  # Tell browsers what to send in the Referer header when the user
+  # navigates away. strict-origin-when-cross-origin: full URL on
+  # same-origin nav, just the origin (no path) cross-origin, nothing
+  # on https→http downgrade. Privacy + minor info-disclosure win.
+  Referrer-Policy: strict-origin-when-cross-origin
+
+  # Disable browser features the site has zero use for. If a future
+  # script tried to ask for the user's mic / camera / location, the
+  # browser silently rejects without prompting.
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), accelerometer=(), gyroscope=(), magnetometer=(), interest-cohort=()
+
+  # Content Security Policy — restricts where each resource type can
+  # load from. 'unsafe-inline' is required for our script/style usage
+  # (lots of inline <script> + <style> blocks) so the script-XSS
+  # surface isn't fully closed, but everything else is locked to
+  # 'self' or a specific Google Fonts origin. Stops drive-by image
+  # / font / media / connect / frame loads from anywhere we don't
+  # explicitly trust.
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';
