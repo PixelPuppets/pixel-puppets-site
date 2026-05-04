@@ -1,0 +1,58 @@
+# Pixel Puppets
+
+> Live interactive theatre where performers drive digital characters in real time on a cinema-scale screen, with the audience shaping what happens next. Theatre meets cinema meets gaming. In development since 2024.
+
+## What we do
+
+Pixel Puppets is a new format of interactive theatre. Costumed performers appear in front of a cinema-scale screen, using game controllers, live voice and facial tracking to bring digital characters to life as the audience watches and shapes the show.
+
+The work sits at the intersection of theatre, cinema and live gaming. It's designed for auditorium audiences without headsets or VR equipment — what's sometimes called "extended reality theatre" or "XR theatre" presented as live cinema rather than VR.
+
+## Where we're based
+
+A Yorkshire-based theatre company working across:
+- Sheffield, South Yorkshire, United Kingdom
+- Holmfirth, West Yorkshire, United Kingdom
+
+## Project status
+
+In funded research and development. Currently building a 20-minute vertical slice as proof of concept.
+
+Building piece by piece:
+- Format: 20-minute vertical slice
+- Story: scripted comedy meets live improv meets audience chaos
+- Puppetry: game controllers, live voice, facial capture
+- Screen: cinema-scale projection, performers on stage in front
+- Latency: getting the screen to react instantly to the performer
+
+## Team
+
+- Ben Carlin — Artistic Director
+- Joe Duggan — Producer
+- Daniel Bacchus — Lead Development
+- Various Artists Studio — Characters and Animation
+
+## Funding and support
+
+- BFI Immersive Fiction Lab (early concept development, initial R&D)
+- Immersive Arts UK (Experiment Strand, current R&D phase)
+- Arts Council England (R&D Grant, current R&D phase)
+
+## Looking for
+
+Festival programmers, theatre venues, immersive performance curators and commissioners interested in new live formats. Especially programmers exploring:
+- Interactive theatre
+- Immersive theatre
+- Digital theatre
+- Extended reality theatre / XR theatre
+- Theatre meets cinema
+- Theatre meets gaming
+- Audience-driven performance
+- New theatre formats
+
+## Links
+
+- Website: https://pixelpuppets.co
+- YouTube: https://www.youtube.com/@pixelpuppetsuk
+- Instagram: https://www.instagram.com/pixel.puppets/
+- Email: hello@pixelpuppets.co

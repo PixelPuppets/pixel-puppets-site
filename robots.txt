@@ -1,0 +1,8 @@
+# Pixel Puppets — pixelpuppets.co
+# Allow all well-behaved crawlers; point them at the sitemap.
+
+User-agent: *
+Allow: /
+Disallow: /.archive/
+
+Sitemap: https://pixelpuppets.co/sitemap.xml

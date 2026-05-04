@@ -3,7 +3,83 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Pixel Puppets — Desktop Mockup</title>
+
+<!-- ─── SEO + social ─────────────────────────────────────────────── -->
+<title>Pixel Puppets · Live Interactive Theatre, Yorkshire UK</title>
+<meta name="description" content="Live interactive theatre where performers drive digital characters on a cinema-scale screen. Audiences shape the show in real time. Based across Sheffield and Holmfirth, Yorkshire.">
+<meta name="keywords" content="interactive theatre, immersive theatre, digital theatre, extended reality theatre, XR theatre, theatre meets cinema, theatre meets gaming, live digital performance, audience-driven theatre, real-time animation, Yorkshire theatre, Sheffield theatre, South Yorkshire theatre, Holmfirth theatre, BFI Immersive Fiction Lab, Immersive Arts UK, new theatre format">
+<meta name="author" content="Pixel Puppets">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://pixelpuppets.co/">
+
+<!-- Open Graph (Facebook / LinkedIn / Slack / Discord / WhatsApp link previews) -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pixelpuppets.co/">
+<meta property="og:title" content="Pixel Puppets · Live Interactive Theatre">
+<meta property="og:description" content="A new format of interactive theatre — performers drive digital characters live on a cinema-scale screen, with the audience shaping the show. Theatre meets cinema meets gaming. Based across Sheffield and Holmfirth, Yorkshire. In development since 2024 with support from the BFI, Arts Council England and Immersive Arts UK.">
+<meta property="og:image" content="https://pixelpuppets.co/assets/tv-chassis.png">
+<meta property="og:image:width" content="1344">
+<meta property="og:image:height" content="892">
+<meta property="og:site_name" content="Pixel Puppets">
+<meta property="og:locale" content="en_GB">
+
+<!-- Twitter / X cards -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Pixel Puppets · Live Interactive Theatre">
+<meta name="twitter:description" content="Performers drive digital characters live on a cinema-scale screen. Audience shapes the show in real time. Theatre meets cinema meets gaming. Yorkshire, UK.">
+<meta name="twitter:image" content="https://pixelpuppets.co/assets/tv-chassis.png">
+
+<!-- Schema.org structured data — TheaterGroup. Tells Google + AI
+     summarisers (ChatGPT, Perplexity, Google AI Overviews etc.) the
+     factual shape of who we are, where we work, who funds us, who's
+     in the team, what we know about. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TheaterGroup",
+  "name": "Pixel Puppets",
+  "alternateName": "Pixel Puppets Theatre",
+  "url": "https://pixelpuppets.co",
+  "logo": "https://pixelpuppets.co/assets/tv-chassis.png",
+  "image": "https://pixelpuppets.co/assets/tv-chassis.png",
+  "description": "Live interactive theatre where performers drive digital characters on a cinema-scale screen, with the audience shaping the show in real time. Theatre meets cinema meets gaming, designed for auditorium audiences without headsets or VR equipment.",
+  "slogan": "Theatre meets cinema meets gaming.",
+  "foundingDate": "2024",
+  "email": "hello@pixelpuppets.co",
+  "founder": { "@type": "Person", "name": "Ben Carlin", "jobTitle": "Artistic Director" },
+  "member": [
+    { "@type": "Person", "name": "Ben Carlin",     "jobTitle": "Artistic Director" },
+    { "@type": "Person", "name": "Joe Duggan",     "jobTitle": "Producer" },
+    { "@type": "Person", "name": "Daniel Bacchus", "jobTitle": "Lead Development" }
+  ],
+  "location": [
+    { "@type": "Place", "name": "Sheffield",  "address": { "@type": "PostalAddress", "addressLocality": "Sheffield",  "addressRegion": "South Yorkshire", "addressCountry": "GB" } },
+    { "@type": "Place", "name": "Holmfirth",  "address": { "@type": "PostalAddress", "addressLocality": "Holmfirth",  "addressRegion": "West Yorkshire", "addressCountry": "GB" } }
+  ],
+  "areaServed": ["Sheffield", "Holmfirth", "Yorkshire", "Northern England", "United Kingdom"],
+  "funder": [
+    { "@type": "Organization", "name": "BFI Immersive Fiction Lab", "url": "https://www.bfi.org.uk" },
+    { "@type": "Organization", "name": "Arts Council England",      "url": "https://www.artscouncil.org.uk" },
+    { "@type": "Organization", "name": "Immersive Arts UK",         "url": "https://immersivearts.uk" }
+  ],
+  "sameAs": [
+    "https://www.youtube.com/@pixelpuppetsuk",
+    "https://www.instagram.com/pixel.puppets/"
+  ],
+  "knowsAbout": [
+    "Interactive theatre",
+    "Immersive theatre",
+    "Digital theatre",
+    "Extended reality theatre",
+    "Real-time animation",
+    "Live performance",
+    "Audience interaction",
+    "Game engine theatre",
+    "Cinema-scale projection"
+  ]
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@500;700;800&display=swap" rel="stylesheet">
@@ -59,6 +135,23 @@ html, body {
   background-image:
     radial-gradient(circle at 20% 10%, rgba(255, 248, 230, 0.6), transparent 50%),
     radial-gradient(circle at 80% 80%, rgba(180, 140, 100, 0.15), transparent 60%);
+}
+
+/* Visually-hidden content for crawlers + screen readers. WCAG-compliant
+   "sr-only" pattern: in the DOM and indexable, but not painted to the
+   viewport. The <main> element using this class carries every channel's
+   content as plain HTML so search engines, AI summarisers, and assistive
+   tech see the full project description without needing JS execution. */
+.sr-only-main {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .page {
@@ -1940,6 +2033,87 @@ body.fullscreen-mode .exit-fs-btn {
 </style>
 </head>
 <body>
+
+<!-- ─── SEO / accessibility content block ────────────────────────────
+     Visually hidden (sr-only) so the TV interface is the brand
+     experience for sighted JS-enabled visitors, but every channel's
+     content is in the static HTML for: search engine crawlers, AI
+     summarisers (ChatGPT / Perplexity / Google AI Overviews), screen
+     readers, and any visitor with JS disabled (the noscript block at
+     the bottom unhides this and dims the TV interface in that case).
+     This is a legitimate accessibility pattern, not a hidden-keyword
+     trick — every word here is honest content describing the project. -->
+<main class="sr-only-main" aria-label="Pixel Puppets — about the project">
+  <h1>Pixel Puppets — Live Interactive Theatre Where Performers Drive Digital Characters</h1>
+
+  <p>Pixel Puppets is a new format of interactive theatre, in development since 2024. Live performers drive digital characters in real time on a cinema-scale screen, while the audience actively shapes what happens next. The work sits at the intersection of theatre, cinema and live gaming — designed for auditorium audiences, with no headsets or VR equipment required. We sometimes call it extended reality theatre, but the audience experience is closer to a really alive cinema show.</p>
+
+  <p>We're a Yorkshire-based theatre company, working across Sheffield (South Yorkshire) and Holmfirth (West Yorkshire) in the United Kingdom. In funded research and development, with support from the BFI Immersive Fiction Lab, Arts Council England, and Immersive Arts UK.</p>
+
+  <h2>About the project</h2>
+  <p>Pixel Puppets is a live comedy performance where digital characters are puppeteered in real time, turning a cinema screen into a strange, reactive playground. Costumed performers appear in front of the screen, using game controllers, live voice and facial tracking to bring animated characters to life as the audience watches. The result sits somewhere between theatre, video game, live stream and Saturday morning TV, with the room actively shaping what happens next.</p>
+
+  <h2>Research and development</h2>
+  <p>Currently in funded R&amp;D. Building the show piece by piece — story, hardware, engine, latency — and seeing what lands. The current target is a 20-minute vertical slice as proof of concept.</p>
+  <ul>
+    <li><strong>The format:</strong> 20-minute vertical slice, proof of concept.</li>
+    <li><strong>The story:</strong> scripted comedy meets live improv meets audience chaos.</li>
+    <li><strong>The puppetry:</strong> game controllers, live voice, facial capture.</li>
+    <li><strong>The screen:</strong> cinema-scale projection, with performers on stage in front of it.</li>
+    <li><strong>The latency:</strong> if the screen lags behind the actor, the magic dies — so reducing it is most of the technical work.</li>
+  </ul>
+
+  <h2>Team</h2>
+  <ul>
+    <li><strong>Ben Carlin</strong> — Artistic Director</li>
+    <li><strong>Joe Duggan</strong> — Producer</li>
+    <li><strong>Daniel Bacchus</strong> — Lead Development</li>
+    <li><strong>Various Artists Studio</strong> — Characters and Animation</li>
+  </ul>
+
+  <h2>Support and funding</h2>
+  <ul>
+    <li><strong>BFI Immersive Fiction Lab</strong> — Early concept development and initial R&amp;D.</li>
+    <li><strong>Immersive Arts UK</strong> (Experiment Strand) — Active R&amp;D phase.</li>
+    <li><strong>Arts Council England</strong> (R&amp;D Grant) — Active R&amp;D phase.</li>
+  </ul>
+
+  <h2>Contact</h2>
+  <p>Get in touch: <a href="mailto:hello@pixelpuppets.co">hello@pixelpuppets.co</a>.</p>
+  <p>We're talking to venues, festivals, programmers and funders interested in live interactive performance, immersive theatre, digital theatre, extended reality theatre, and new theatre formats that sit between stage, cinema and gaming.</p>
+
+  <h2>Find us online</h2>
+  <ul>
+    <li><a href="https://www.youtube.com/@pixelpuppetsuk">YouTube</a></li>
+    <li><a href="https://www.instagram.com/pixel.puppets/">Instagram</a></li>
+  </ul>
+</main>
+
+<noscript>
+  <style>
+    /* JS off: surface the prose content and dim the TV interface
+       (which depends on JS for channel switching, video playback,
+       teletext rendering). */
+    .sr-only-main {
+      position: static !important;
+      width: auto !important;
+      height: auto !important;
+      clip: auto !important;
+      overflow: visible !important;
+      white-space: normal !important;
+      margin: 0 auto !important;
+      padding: 2em 1.5em !important;
+      max-width: 720px !important;
+      font-family: 'Euclid', system-ui, sans-serif;
+      color: #2a1f15;
+    }
+    .sr-only-main h1 { font-size: 1.5em; margin: 0 0 0.5em; }
+    .sr-only-main h2 { font-size: 1.15em; margin: 1.5em 0 0.4em; }
+    .sr-only-main p, .sr-only-main ul { margin: 0 0 1em; line-height: 1.5; }
+    .sr-only-main ul { padding-left: 1.5em; }
+    .tv-housing, .tv-frame, .channel-panel, .colophon, .topbar { display: none !important; }
+  </style>
+</noscript>
 
 <div class="page">
 
