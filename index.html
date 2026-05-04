@@ -82,6 +82,25 @@
 }
 </script>
 
+<!-- VideoObject schema for the home channel video — lets Google video
+     search and AI summarisers index the R&D footage. Description
+     mirrors the screen-reader audio description on the video element. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  "name": "Pixel Puppets — Unreal Engine R&D footage",
+  "description": "Silent looping research-and-development video shot inside Unreal Engine. Opens on a house in the countryside looking out at a city in the distance, then a first-person view of the player entering a car and driving from countryside into city — an open-world get-into-a-car-and-drive dynamic. The lighting shifts from bright daylight to a darker neon city as the player arrives, then back to the warm countryside on the return drive. Children's-TV warm, friendly, brightly-lit aesthetic throughout, set against the city's neon contrast. In-engine R&D, not finished show content.",
+  "thumbnailUrl": "https://pixelpuppets.co/assets/tv-content.jpeg",
+  "contentUrl": "https://pixelpuppets.co/assets/episode-01-web.mp4",
+  "uploadDate": "2026-05-01",
+  "duration": "PT1M",
+  "isFamilyFriendly": true,
+  "inLanguage": "en-GB",
+  "publisher": { "@type": "TheaterGroup", "name": "Pixel Puppets", "url": "https://pixelpuppets.co" }
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@500;700;800&display=swap" rel="stylesheet">
@@ -158,6 +177,58 @@ html, body {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* Skip link — visually hidden until a keyboard user tabs into it,
+   then pops into the top-left as a focusable affordance. Lets users
+   jump past the channel button stack to the TV screen / main content.
+   Brand-matched warm amber palette so it fits the cream/wood look
+   when it does appear. Mouse users never see it. */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 12px;
+  z-index: 10000;
+  background: #3a2a1a;
+  color: #f0e6d2;
+  padding: 10px 16px;
+  border: 2px solid #ffb15a;
+  border-radius: 4px;
+  text-decoration: none;
+  font-family: 'Euclid', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition: top 0.15s ease;
+}
+.skip-link:focus,
+.skip-link:focus-visible {
+  top: 12px;
+  outline: none;
+}
+
+/* Brand-matched keyboard focus indicator. Uses :focus-visible so it
+   only shows on actual keyboard navigation (Tab key) — sighted mouse
+   users never see a focus ring. The amber/warm cream palette echoes
+   the chassis highlight so it reads as part of the brand rather than
+   a default browser blue ring. WCAG 2.4.7 (Focus Visible). */
+:focus-visible {
+  outline: 2px solid #ffb15a;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+/* Channel buttons already have a subtle border-radius — match it on
+   the focus ring so the outline curves with the button shape. */
+.channel-btn:focus-visible {
+  outline: 2px solid #ffb15a;
+  outline-offset: 2px;
+}
+/* The TV screen target for the skip link — when the user clicks
+   "Skip to main content", focus lands inside the screen area. The
+   tabindex=-1 makes it focusable programmatically without putting
+   it in the regular tab order. Suppress the default focus ring on
+   the screen container itself; the content inside is what matters. */
+#tv-screen:focus-visible {
+  outline: none;
 }
 
 .page {
@@ -2040,6 +2111,17 @@ body.fullscreen-mode .exit-fs-btn {
 </head>
 <body>
 
+<!-- Skip link for keyboard users — invisible until tab-focused, then
+     pops into the top-left so they can jump past the channel button
+     stack to the screen content. WCAG 2.4.1 (Bypass Blocks). -->
+<a href="#tv-screen" class="skip-link">Skip to main content</a>
+
+<!-- aria-live region announcing channel changes to screen readers.
+     Visually hidden; updated by switchTo() each time a channel is
+     activated. Politeness=polite so it doesn't interrupt other
+     speech. WCAG 4.1.3 (Status Messages). -->
+<div id="channelAnnouncer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
 <!-- ─── SEO / accessibility content block ────────────────────────────
      Visually hidden (sr-only) so the TV interface is the brand
      experience for sighted JS-enabled visitors, but every channel's
@@ -2152,12 +2234,23 @@ body.fullscreen-mode .exit-fs-btn {
       <div class="tv-frame">
 
       <!-- Screen content (behind the chassis, visible through the cutout) -->
-      <div class="screen-area screen">
+      <div class="screen-area screen" id="tv-screen" tabindex="-1">
         <video class="show" id="screenVideo"
                src="assets/episode-01-web.mp4"
                poster="assets/tv-content.jpeg"
                preload="metadata"
+               aria-describedby="videoDesc"
                autoplay muted loop playsinline></video>
+
+        <!-- Silent video, so blind / low-vision visitors get a textual
+             description of what the home channel is showing. The video
+             is R&D inside Unreal Engine — describing it here gives
+             screen reader users the same "look at this" moment a
+             sighted visitor gets when the looping clip plays. WCAG
+             1.2.5 (Audio Description) adapted for silent video. -->
+        <p id="videoDesc" class="sr-only">
+          The home channel plays a silent looping video showing research and development inside Unreal Engine. The shot opens on a house in the countryside looking out at a city in the distance. A first-person view shows the player walking up to and entering a car, then driving from the countryside into the city — demonstrating an open-world get-into-a-car-and-drive dynamic. As the player arrives, the lighting state shifts from bright daylight to a darker night-time city full of neon. The drive then continues back out of the city to the countryside. Throughout, the world has the warm, friendly, brightly-lit aesthetic of children's TV, with the city's neon-noir contrasting against the gentle countryside. This is in-engine R&D footage, not finished show content.
+        </p>
 
         <div class="now-playing" id="nowPlaying">
           <span class="dot"></span>
@@ -2211,11 +2304,11 @@ body.fullscreen-mode .exit-fs-btn {
 
         <div class="player-controls">
           <button class="play-btn" id="playBtn" aria-label="Play / Pause">▶</button>
-          <div class="scrub" id="scrub">
+          <div class="scrub" id="scrub" aria-hidden="true">
             <div class="fill" id="scrubFill"></div>
             <div class="knob-handle" id="scrubHandle"></div>
           </div>
-          <div class="time" id="timeDisplay">0:00 / 0:00</div>
+          <div class="time" id="timeDisplay" aria-hidden="true">0:00 / 0:00</div>
           <div class="icon-cluster">
             <button class="cc-btn on" id="ccBtn" aria-label="Toggle captions" aria-pressed="true">CC</button>
             <button class="fullscreen-btn" id="fullscreenBtn" aria-label="Fullscreen">⛶</button>
@@ -2247,7 +2340,7 @@ body.fullscreen-mode .exit-fs-btn {
       <!-- Channel select — overlaid on the upper-right side panel of the TV -->
       <aside class="channel-panel">
         <div class="channel-header">— CHANNEL SELECT —</div>
-        <button class="channel-btn" data-color="red"     data-channel="home"><span class="led"></span>HOME<span class="arrow"></span></button>
+        <button class="channel-btn" data-color="red"     data-channel="home" aria-current="true"><span class="led"></span>HOME<span class="arrow"></span></button>
         <button class="channel-btn" data-color="orange"  data-channel="about"><span class="led"></span>ABOUT<span class="arrow"></span></button>
         <button class="channel-btn" data-color="yellow"  data-channel="rehearsals"><span class="led"></span>R&amp;D<span class="arrow"></span></button>
         <button class="channel-btn" data-color="green"   data-channel="team"><span class="led"></span>TEAM<span class="arrow"></span></button>
@@ -2263,13 +2356,22 @@ body.fullscreen-mode .exit-fs-btn {
         </div>
       </aside>
 
-      <!-- Knob row — overlaid on the bottom bezel of the TV -->
+      <!-- Knob row — overlaid on the bottom bezel of the TV. Most of
+           these are decorative TV chrome (POWER button, VOLUME slider,
+           BRIGHTNESS/CONTRAST knobs, PLAYER 1/2 sockets) that drive
+           video filters or cosmetic state. They're playful affordances
+           rather than essential controls — the channel buttons handle
+           navigation and the play/pause/CC/fullscreen buttons handle
+           the video. So each decorative knob is aria-hidden + given
+           tabindex=-1 to take it out of the keyboard tab order, but
+           the .colour-system block (containing the YouTube / Instagram
+           links) stays accessible because those are real navigation. -->
       <div class="knob-row">
-        <div class="knob is-power">
+        <div class="knob is-power" aria-hidden="true">
           <div class="dial-label">POWER</div>
           <div class="power-button"></div>
         </div>
-        <div class="knob is-slider">
+        <div class="knob is-slider" aria-hidden="true">
           <div class="dial-label">VOLUME</div>
           <div class="slider-row">
             <span class="dial-marker">MIN</span>
@@ -2278,7 +2380,7 @@ body.fullscreen-mode .exit-fs-btn {
           </div>
         </div>
         <div class="colour-system">
-          <div class="dial-label">SOCIAL</div>
+          <div class="dial-label" aria-hidden="true">SOCIAL</div>
           <div class="lights social-lights">
             <a class="social-light" href="https://www.youtube.com/@pixelpuppetsuk" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube (opens in new tab)" data-platform="youtube">
               <img src="assets/youtube-black.svg" alt="">
@@ -2288,7 +2390,7 @@ body.fullscreen-mode .exit-fs-btn {
             </a>
           </div>
         </div>
-        <div class="knob is-dial">
+        <div class="knob is-dial" aria-hidden="true">
           <div class="dial-label">BRIGHTNESS</div>
           <div class="dial-row">
             <span class="dial-marker symbol">−</span>
@@ -2296,7 +2398,7 @@ body.fullscreen-mode .exit-fs-btn {
             <span class="dial-marker symbol">+</span>
           </div>
         </div>
-        <div class="knob is-dial">
+        <div class="knob is-dial" aria-hidden="true">
           <div class="dial-label">CONTRAST</div>
           <div class="dial-row">
             <span class="dial-marker symbol">−</span>
@@ -2304,7 +2406,7 @@ body.fullscreen-mode .exit-fs-btn {
             <span class="dial-marker symbol">+</span>
           </div>
         </div>
-        <div class="power-cluster">
+        <div class="power-cluster" aria-hidden="true">
           <div class="knob">
             <div class="socket socket-red"></div>
             PLAYER 1
@@ -2483,6 +2585,21 @@ body.fullscreen-mode .exit-fs-btn {
     const c = CHANNELS[key];
     if (!c) return;
     currentChannel = key;
+
+    // Accessibility: tell screen readers which channel is now active,
+    // and mark the active button via aria-current so they can locate
+    // it in the channel list. Sighted users see the visible channel
+    // change; non-visual users get the equivalent here.
+    const announcer = document.getElementById('channelAnnouncer');
+    if (announcer) {
+      const label = key.charAt(0).toUpperCase() + key.slice(1).replace('rehearsals', 'R&D');
+      announcer.textContent = 'Now showing: ' + label + ' — ' + c.episode;
+    }
+    document.querySelectorAll('.channel-btn').forEach(b => {
+      const isActive = b.dataset.channel === key;
+      if (isActive) b.setAttribute('aria-current', 'true');
+      else          b.removeAttribute('aria-current');
+    });
 
     // Channels that carry a `teletext` field render as a teletext
     // page instead of the normal video / static layout. CSS rule
