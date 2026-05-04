@@ -187,10 +187,18 @@ html, body {
    see it. position:fixed pins it to viewport top regardless of
    scroll so it's always visible the moment it gains focus. */
 .skip-link {
+  /* Position the skip link AT its visible location (top:12px, left:12px)
+     and use transform to translate it off-screen visually when not
+     focused. Crucially this keeps the element's logical position
+     inside the viewport, which means Safari + some other engines
+     keep it in the keyboard tab order. Off-screen via `top: -100px`
+     is more visually intuitive but can cause some browsers to skip
+     Tab focus on elements painted outside the viewport. */
   position: fixed;
-  top: -100px;
+  top: 12px;
   left: 12px;
   z-index: 10000;
+  transform: translateY(calc(-100% - 24px));
   /* Reset native button styling so Safari / iOS don't add a default
      blue gradient or rounded chrome on top of our brand styling. */
   appearance: none;
@@ -206,11 +214,11 @@ html, body {
   font-weight: 700;
   letter-spacing: 0.04em;
   cursor: pointer;
-  transition: top 0.15s ease;
+  transition: transform 0.15s ease;
 }
 .skip-link:focus,
 .skip-link:focus-visible {
-  top: 12px;
+  transform: translateY(0);
   outline: none;
 }
 
