@@ -2333,13 +2333,23 @@ body.fullscreen-mode .exit-fs-btn {
           </div>
           <div class="time" id="timeDisplay" aria-hidden="true">0:00 / 0:00</div>
           <div class="icon-cluster">
-            <button class="cc-btn on" id="ccBtn" aria-label="Toggle captions" aria-pressed="true">CC</button>
-            <button class="fullscreen-btn" id="fullscreenBtn" aria-label="Fullscreen">⛶</button>
+            <!-- CC + fullscreen are decorative chassis affordances rather
+                 than essential controls. The home video is silent (no
+                 caption track to toggle) and screen-reader / keyboard
+                 users have native browser shortcuts (F for fullscreen,
+                 Esc to exit) so we don't need to compete with those.
+                 aria-hidden + tabindex=-1 keeps them clickable for
+                 sighted mouse users but out of the assistive-tech and
+                 Tab-order paths. -->
+            <button class="cc-btn on" id="ccBtn" aria-hidden="true" tabindex="-1">CC</button>
+            <button class="fullscreen-btn" id="fullscreenBtn" aria-hidden="true" tabindex="-1">⛶</button>
           </div>
         </div>
         <!-- Visible only while the screen is in fullscreen — provides an
-             explicit close affordance in addition to native Esc. -->
-        <button class="exit-fs-btn" id="exitFsBtn" aria-label="Exit fullscreen" type="button">✕</button>
+             explicit close affordance in addition to native Esc. Same
+             aria-hidden treatment for consistency; users in fullscreen
+             can always Esc to exit (native browser behaviour). -->
+        <button class="exit-fs-btn" id="exitFsBtn" type="button" aria-hidden="true" tabindex="-1">✕</button>
 
       </div>
 
