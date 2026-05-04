@@ -2462,17 +2462,12 @@ body.fullscreen-mode .exit-fs-btn {
 </div>
 
 <script>
-// ─── Skip link click handler + Safari Tab fallback ──────────────────────
-// The skip link is a <button> so Safari's "Press Tab to highlight each
-// item" = off doesn't filter it out (that filter applies to <a> links,
-// not buttons). Click handler scrolls + focuses the target.
-//
-// Safari Tab-focus belt-and-braces: if the user presses Tab while focus
-// is still at document body (i.e. they just loaded the page and pressed
-// Tab as their first interaction), force-focus the skip link. Some
-// Safari configurations + some macOS keyboard nav settings can route
-// the first Tab anywhere except into the page; this listener ensures
-// the skip link gets first dibs regardless.
+// ─── Skip link click handler ─────────────────────────────────────────────
+// The skip link is a <button> (not <a href>) so it's always tab-focusable
+// in Safari regardless of the "Press Tab to highlight each item on a
+// webpage" preference (that filter only applies to <a> links). Click
+// handler scrolls + focuses the target; activates on click, Enter, or
+// Space (all native button behaviour).
 (() => {
   document.querySelectorAll('.skip-link[data-skip-to]').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -2482,20 +2477,6 @@ body.fullscreen-mode .exit-fs-btn {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       target.focus();
     });
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Tab' || e.shiftKey) return;
-    const skip = document.querySelector('.skip-link');
-    if (!skip) return;
-    // Only force-focus if focus is still on the body / html (i.e. nothing
-    // useful has been focused yet). Once the user is in the page, leave
-    // their tab navigation alone.
-    const ae = document.activeElement;
-    if (ae === document.body || ae === document.documentElement || ae === null) {
-      e.preventDefault();
-      skip.focus();
-    }
   });
 })();
 
