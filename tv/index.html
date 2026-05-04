@@ -216,7 +216,14 @@ html, body {
   z-index: 1;
   overflow: hidden;
   background: #000;
+  /* Held back until the chassis PNG has loaded so the user doesn't see
+     static + video floating in a black rectangle for ~100-400ms before
+     the wooden frame snaps in around them. JS adds .tv-ready to body
+     once whichever chassis (desktop or mobile) finishes loading. */
+  opacity: 0;
+  transition: opacity 0.45s ease;
 }
+body.tv-ready .tv-housing .screen-area { opacity: 1; }
 
 /* ─── Boundary-mapping mode ─────────────────────────────────
    When body has .boundary-mode, hide the on-chassis controls
@@ -932,6 +939,17 @@ body.fullscreen-mode .exit-fs-btn {
 .channel-btn[data-color="purple"] .led { background: #7f5d9a; }
 .channel-btn[data-color="white"]  .led { background: #fff; border: 1px solid rgba(0,0,0,0.2); }
 
+/* Narrow-viewport button height — fluid clamp() interpolates between
+   1.05cqi at 723px viewport and 1.30cqi at 947px viewport (anchors
+   tuned by hand). Above 947px holds at 1.30cqi (the original default);
+   below 723px mobile mode kicks in. The widget's DESKTOP BUTTONS
+   slider can still override --narrow-btn-pady to a flat value when
+   actively tuning. Touch devices below get --lp-btn-pady which wins. */
+@media (max-width: 1280px) {
+  .channel-btn {
+    padding: var(--narrow-btn-pady, clamp(1.05cqi, calc(1.05cqi + 0.25cqi * ((100vw - 723px) / 224px)), 1.30cqi)) 0.8cqi;
+  }
+}
 /* Touch-device tablets/phones (iPad most notably) — slim the channel
    buttons so the panel ends BEFORE the supported-by sticker baked into
    the chassis, rather than overlapping it. Combo of `pointer: coarse`
@@ -939,8 +957,6 @@ body.fullscreen-mode .exit-fs-btn {
    untouched even if their viewport is narrow. */
 @media (max-width: 1280px) and (pointer: coarse) {
   .channel-btn {
-    /* Padding-y picks up --lp-btn-pady so the widget's height slider
-       tunes both iPad-class touch + landscape-phone in one go. */
     padding: var(--lp-btn-pady, 0.85cqi) 0.8cqi;
     font-size: 0.95cqi;
   }
@@ -1883,14 +1899,44 @@ body.fullscreen-mode .exit-fs-btn {
   font-size: 1.05em;
 }
 .teletext-page .tt-block { margin: 0 0 var(--tt-block-gap, 0.25em) 0; }
-.teletext-page .tt-block-header { color: #02F2FC; letter-spacing: 0.05em; } /* cyan */
+.teletext-page .tt-block-header { color: #02F2FC; letter-spacing: 0.05em; } /* cyan default */
 .teletext-page .tt-block-body   { color: #1CF701; letter-spacing: 0.05em; } /* green */
+/* Per-header colour overrides — blocks pass `headerColor: 'purple'`
+   etc. and renderTeletext applies the matching class. */
+.teletext-page .tt-h-cyan   { color: #02F2FC; }
+.teletext-page .tt-h-yellow { color: #EAE807; }
+.teletext-page .tt-h-green  { color: #1CF701; }
+.teletext-page .tt-h-purple { color: #E10CD8; }
+.teletext-page .tt-h-red    { color: #D50201; }
+.teletext-page .tt-h-white  { color: #ffffff; }
 /* Extended teletext palette — reach for these when a block needs to
    stand out (warnings, calls-to-action, status flags). Add a class
    like .tt-purple or .tt-red on the block-header / block-body span:
      purple  #E10CD8     red  #D50201
    Yellow #EAE807 (already used for section headers) and the cyan +
    green above complete the BBC Mode-7 set. */
+
+/* Prose-page variant — used when a teletext page is just paragraphs
+   (no cyan/green header/body pairs). Section header becomes a yellow
+   HIGHLIGHT (yellow background, black text) and body text reads in
+   white instead of green. JS adds the .tt-prose class on the
+   .teletext-page when every block is prose-only (currently ABOUT). */
+.teletext-page.tt-prose .tt-block-body { color: #fff; }
+/* Section-as-yellow-highlight style — opt-in via `sectionHighlight:
+   true` on a channel's teletext config. Applies to either prose
+   (.tt-prose) OR header/body pages. Used on SUPPORT and ABOUT. */
+.teletext-page.tt-prose .tt-section,
+.teletext-page.tt-section-highlight .tt-section {
+  display: inline-block;
+  background: #EAE807;
+  color: #000;
+  padding: 0.05em 0.5em 0.1em;
+  margin: 0.2em 0 0.7em 0;
+}
+/* Page-level opt-in for white body text (set `bodyWhite: true` on
+   the channel's teletext config). Used by R&D / TEAM / SUPPORT so
+   their coloured headers sit above white bodies rather than green. */
+.teletext-page.tt-body-white .tt-block-body { color: #fff; }
 </style>
 </head>
 <body>
@@ -2016,10 +2062,10 @@ body.fullscreen-mode .exit-fs-btn {
       <aside class="channel-panel">
         <div class="channel-header">— CHANNEL SELECT —</div>
         <button class="channel-btn" data-color="red"     data-channel="home"><span class="led"></span>HOME<span class="arrow"></span></button>
-        <button class="channel-btn" data-color="orange"  data-channel="rehearsals"><span class="led"></span>REHEARSALS<span class="arrow"></span></button>
-        <button class="channel-btn" data-color="yellow"  data-channel="about"><span class="led"></span>ABOUT<span class="arrow"></span></button>
-        <button class="channel-btn" data-color="green"   data-channel="support"><span class="led"></span>SUPPORT<span class="arrow"></span></button>
-        <button class="channel-btn" data-color="blue"    data-channel="team"><span class="led"></span>TEAM<span class="arrow"></span></button>
+        <button class="channel-btn" data-color="orange"  data-channel="about"><span class="led"></span>ABOUT<span class="arrow"></span></button>
+        <button class="channel-btn" data-color="yellow"  data-channel="rehearsals"><span class="led"></span>R&amp;D<span class="arrow"></span></button>
+        <button class="channel-btn" data-color="green"   data-channel="team"><span class="led"></span>TEAM<span class="arrow"></span></button>
+        <button class="channel-btn" data-color="blue"    data-channel="support"><span class="led"></span>SUPPORT<span class="arrow"></span></button>
         <button class="channel-btn" data-color="purple"  data-channel="contact"><span class="led"></span>CONTACT<span class="arrow"></span></button>
         <a class="channel-btn channel-btn-social" data-platform="youtube" href="https://www.youtube.com/@pixelpuppetsuk" target="_blank" rel="noopener noreferrer"><img class="social-icon" src="assets/youtube-black.svg" alt="">YOUTUBE<span class="arrow"></span></a>
         <a class="channel-btn channel-btn-social" data-platform="instagram" href="https://www.instagram.com/pixel.puppets/" target="_blank" rel="noopener noreferrer"><img class="social-icon" src="assets/instagram-black.svg" alt="">INSTAGRAM<span class="arrow"></span></a>
@@ -2112,60 +2158,64 @@ body.fullscreen-mode .exit-fs-btn {
       video: 'assets/episode-01-web.mp4',
     },
     rehearsals: {
-      strap: 'CH. 02',
-      episode: 'REHEARSALS',
-      body: '<p>A new kind of live event sitting between theatre, cinema and game stream. Real puppeteers on stage drive digital characters across a cinematic screen, while the audience shapes how each show unfolds. Plays in cinemas and theatres alike.</p>',
+      strap: 'CH. 03',
+      episode: 'R&D',
+      body: '<p>Currently in funded research and development. Building the show piece by piece — story, hardware, engine, latency — and seeing what lands.</p>',
       teletext: {
-        pageno: 'P102',
-        section: 'WHAT IT IS',
+        pageno: 'P103',
+        section: '',
+        bodyWhite: true,
         blocks: [
-          { header: 'LIVE PERFORMANCE',  body: 'HYBRID THEATRE + CINEMA' },
-          { header: 'PUPPETEERS',        body: 'DRIVE DIGITAL CHARACTERS' },
-          { header: 'AUDIENCE',          body: 'SHAPES SHOW IN REAL TIME' },
-          { header: 'FORMAT',            body: 'CINEMAS &middot; THEATRES &middot; FESTIVALS' },
+          { header: 'THE FORMAT',   headerColor: 'cyan',   body: '20-MINUTE VERTICAL SLICE &middot; PROOF OF CONCEPT' },
+          { header: 'THE STORY',    headerColor: 'purple', body: 'SCRIPTED COMEDY &middot; LIVE IMPROV &middot; AUDIENCE CHAOS' },
+          { header: 'THE PUPPETRY', headerColor: 'green',  body: 'GAME CONTROLLERS &middot; LIVE VOICE &middot; FACIAL CAPTURE' },
+          { header: 'THE SCREEN',   headerColor: 'yellow', body: 'CINEMA-SCALE PROJECTION &middot; PERFORMERS IN FRONT' },
+          { header: 'LATENCY',      headerColor: 'red',    body: 'IF THE SCREEN LAGS BEHIND THE ACTOR, THE MAGIC DIES' },
         ],
       },
     },
     about: {
-      strap: 'CH. 03',
+      strap: 'CH. 02',
       episode: 'ABOUT',
       body: '<p>A 20-minute vertical slice in early R&D. Still figuring out the story, where the comedy lives, and how much of each performance comes from the performer on stage versus the puppet on screen.</p>',
       teletext: {
-        pageno: 'P103',
-        section: 'PROJECT STAGE',
+        pageno: 'P102',
+        section: '',  // ABOUT runs as plain prose, no section header
         blocks: [
-          { header: 'PROTOTYPE', body: '20-MINUTE VERTICAL SLICE' },
-          { header: 'PHASE',     body: 'EARLY R&amp;D' },
-          { header: 'FOCUS',     body: 'STORY &middot; COMEDY &middot; PERFORMER VS PUPPET' },
+          { body: 'Pixel Puppets is a live comedy performance where digital characters are puppeteered in real time, turning a cinema screen into a strange, reactive playground.' },
+          { body: 'Costumed performers appear in front of the screen, using game controllers, live voice and facial tracking to bring animated characters to life as the audience watches. The result sits somewhere between theatre, video game, live stream and Saturday morning TV, with the room actively shaping what happens next.' },
         ],
       },
     },
     support: {
-      strap: 'CH. 04',
+      strap: 'CH. 05',
       episode: 'SUPPORT',
       body: '<p>Developed through the BFI Immersive Fiction Lab. Now in funded research and development, supported by Arts Council England and Immersive Arts UK’s Experiment strand.</p>',
       teletext: {
-        pageno: 'P104',
+        pageno: 'P105',
         section: 'DEVELOPMENT STATUS',
+        sectionHighlight: true,
+        bodyWhite: true,
         blocks: [
-          { header: 'IMMERSIVE ARTS UK',         body: 'EXPERIMENT STRAND &middot; ACTIVE' },
-          { header: 'ARTS COUNCIL ENGLAND',      body: 'R&amp;D GRANT &middot; ACTIVE' },
-          { header: 'BFI IMMERSIVE FICTION LAB', body: 'DEVELOPED THROUGH EARLY R&amp;D' },
+          { header: 'EARLY CONCEPT DEVELOPMENT', headerColor: 'cyan',   body: 'BFI IMMERSIVE FICTION LAB &middot; INITIAL R&amp;D' },
+          { header: 'CURRENT R&amp;D PHASE',     headerColor: 'purple', body: 'IMMERSIVE ARTS UK &middot; EXPERIMENT STRAND' },
+          { header: 'CURRENT R&amp;D PHASE',     headerColor: 'green',  body: 'ARTS COUNCIL ENGLAND &middot; R&amp;D GRANT' },
         ],
       },
     },
     team: {
-      strap: 'CH. 05',
+      strap: 'CH. 04',
       episode: 'TEAM',
       body: '<p>Created by Ben Carlin (Artistic Director) and Joe Duggan (Producer), with Daniel Bacchus on lead development and <a href="https://www.variousartists.studio" target="_blank" rel="noopener noreferrer">Various Artists Studio</a> on characters and animation.</p>',
       teletext: {
-        pageno: 'P105',
-        section: 'CREW',
+        pageno: 'P104',
+        section: '',
+        bodyWhite: true,
         blocks: [
-          { header: 'BEN CARLIN',              body: 'ARTISTIC DIRECTOR' },
-          { header: 'JOE DUGGAN',              body: 'PRODUCER' },
-          { header: 'DANIEL BACCHUS',          body: 'LEAD DEVELOPMENT' },
-          { header: '<a href="https://www.variousartists.studio" target="_blank" rel="noopener noreferrer">VARIOUS ARTISTS STUDIO</a>',  body: 'CHARACTERS + ANIMATION' },
+          { header: 'BEN CARLIN',     headerColor: 'cyan',   body: 'ARTISTIC DIRECTOR' },
+          { header: 'JOE DUGGAN',     headerColor: 'purple', body: 'PRODUCER' },
+          { header: 'DANIEL BACCHUS', headerColor: 'green',  body: 'LEAD DEVELOPMENT' },
+          { header: '<a href="https://www.variousartists.studio" target="_blank" rel="noopener noreferrer">VARIOUS ARTISTS STUDIO</a>', headerColor: 'yellow', body: 'CHARACTERS + ANIMATION' },
         ],
       },
     },
@@ -2176,9 +2226,11 @@ body.fullscreen-mode .exit-fs-btn {
       teletext: {
         pageno: 'P106',
         section: 'GET IN TOUCH',
+        sectionHighlight: true,
+        bodyWhite: true,
         blocks: [
-          { header: 'EMAIL',       body: '<a href="mailto:hello@pixelpuppets.co">HELLO@PIXELPUPPETS.CO</a>' },
-          { header: 'TALKING TO',  body: 'VENUES &middot; FESTIVALS &middot; PROGRAMMERS &middot; FUNDERS' },
+          { header: 'EMAIL',      headerColor: 'cyan',   body: '<a href="mailto:hello@pixelpuppets.co">HELLO@PIXELPUPPETS.CO</a>' },
+          { header: 'TALKING TO', headerColor: 'purple', body: 'VENUES &middot; FESTIVALS &middot; PROGRAMMERS &middot; FUNDERS' },
         ],
       },
     },
@@ -2202,17 +2254,42 @@ body.fullscreen-mode .exit-fs-btn {
     if (!pageEl) return;
     pageEl.querySelector('.pageno').textContent = c.teletext.pageno;
     pageEl.querySelector('.title').textContent  = c.episode;
-    pageEl.querySelector('.tt-section').textContent = c.teletext.section;
+    // Section header is optional — set empty / omit to skip it.
+    const sectionEl = pageEl.querySelector('.tt-section');
+    if (c.teletext.section) {
+      sectionEl.textContent = c.teletext.section;
+      sectionEl.style.display = '';
+    } else {
+      sectionEl.textContent = '';
+      sectionEl.style.display = 'none';
+    }
     const body = pageEl.querySelector('.tt-body');
     body.querySelectorAll('.tt-block').forEach(b => b.remove());
     c.teletext.blocks.forEach(blk => {
       const div = document.createElement('div');
       div.className = 'tt-block';
-      div.innerHTML =
-        '<div class="tt-block-header">' + blk.header + '</div>' +
-        '<div class="tt-block-body">'   + blk.body   + '</div>';
+      let html = '';
+      if (blk.header) {
+        const colorCls = blk.headerColor ? ' tt-h-' + blk.headerColor : '';
+        html += '<div class="tt-block-header' + colorCls + '">' + blk.header + '</div>';
+      }
+      if (blk.body) html += '<div class="tt-block-body">' + blk.body + '</div>';
+      div.innerHTML = html;
+      if (!blk.header) div.classList.add('tt-block-prose');
       body.appendChild(div);
     });
+    // Pages that are all prose (no header/body block pairs) get a
+    // different palette — yellow-highlight section header + white
+    // body text — handled in CSS via the .tt-prose class.
+    const allProse = c.teletext.blocks.every(b => !b.header);
+    pageEl.classList.toggle('tt-prose', allProse);
+    // Per-page opt-in to white body text (e.g. R&D channel) so the
+    // bodies are still green by default elsewhere.
+    pageEl.classList.toggle('tt-body-white', !!c.teletext.bodyWhite);
+    // Per-page opt-in to render the section header as a yellow
+    // highlight (yellow bg + black text) — used on pages that want
+    // the prose-style section bar but are still header/body pages.
+    pageEl.classList.toggle('tt-section-highlight', !!c.teletext.sectionHighlight);
   };
 
   const switchTo = (key) => {
@@ -2391,6 +2468,32 @@ body.fullscreen-mode .exit-fs-btn {
   video.addEventListener('playing', clear, { once: true });
   video.addEventListener('canplay', clear, { once: true });
   const failsafe = setTimeout(clear, 5000);
+})();
+
+// ─── Chassis-first loading order ─────────────────────────────────────────
+// Hold back .screen-area until the chassis PNG has loaded so the static
+// and video don't paint as a floating black rectangle before the wooden
+// frame snaps in around them. CSS hides .screen-area at opacity 0; we
+// add .tv-ready to body once whichever chassis (desktop or mobile —
+// only one is display:visible at a time, but both may pre-download)
+// finishes loading. Promise.race: first one home triggers the reveal.
+// 3-second failsafe so we never leave the screen blank if a load event
+// fails to fire (offline edge cases, cached image quirks, etc.).
+(() => {
+  const ready = () => document.body.classList.add('tv-ready');
+  const watch = (img) => {
+    if (!img) return Promise.resolve();
+    if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+    return new Promise(resolve => {
+      img.addEventListener('load',  resolve, { once: true });
+      img.addEventListener('error', resolve, { once: true });
+    });
+  };
+  Promise.race([
+    watch(document.querySelector('.tv-chassis')),
+    watch(document.querySelector('.tv-chassis-mobile')),
+  ]).then(ready);
+  setTimeout(ready, 3000);
 })();
 
 // ─── Video player ──────────────────────────────────────────────────────────
@@ -3021,6 +3124,20 @@ body.fullscreen-mode .exit-fs-btn {
     lpInitial = { ...lpDefaults, ...stored };
   } catch { lpInitial = { ...lpDefaults }; }
 
+  // ── DESKTOP BUTTONS state ─────────────────────────────────────────
+  // Drives `--narrow-btn-pady` so the user can dial in channel-button
+  // height for narrow desktop browsers (any viewport <1280px) before
+  // the layout flips into mobile at 720px. Default 1.3 matches the
+  // original CSS so the button look doesn't change until the slider
+  // is actually moved.
+  const dbDefaults = { btnPady: 1.3 };
+  const DB_STORAGE_KEY = 'pp-desktop-buttons';
+  let dbInitial;
+  try {
+    const stored = JSON.parse(localStorage.getItem(DB_STORAGE_KEY) || '{}');
+    dbInitial = { ...dbDefaults, ...stored };
+  } catch { dbInitial = { ...dbDefaults }; }
+
   // ── TELETEXT state ────────────────────────────────────────────────
   // Two sub-sets — mobile and desktop — because the cqw values that
   // read right on a small screen end up far too large when the same
@@ -3029,7 +3146,7 @@ body.fullscreen-mode .exit-fs-btn {
   // sliders always tweak the relevant set; viewport-change listeners
   // re-sync the sliders to whichever set just became active.
   const ttDefaultsMobile = {
-    padX: 3.5,  padY: 3.5, topbarFs: 4.3, bodyFs: 3.8, blockGap: 0.25,
+    padX: 3.5,  padY: 7, topbarFs: 4.3, bodyFs: 3.5, blockGap: 0.5,
     barPadX: 0.7, barPadY: 0.2,   // em — internal padding around bar text
     barTextY: 0,                   // px — Y nudge for bar text (optical)
     barSideX: 0,                   // px — pull pageno + time toward centre
@@ -3062,9 +3179,14 @@ body.fullscreen-mode .exit-fs-btn {
   const w = document.createElement('div');
   w.id = 'btn-style-widget';
   w.innerHTML = `
+    <div class="btw-mode-bar">
+      <button class="btw-mode-btn" data-mode="mobile" type="button">MOBILE</button>
+      <button class="btw-mode-btn" data-mode="desktop" type="button">DESKTOP</button>
+      <span class="btw-vp" id="btwVp"></span>
+      <button class="btw-x" aria-label="close" type="button">×</button>
+    </div>
     <div class="btw-group-head" data-group-toggle="btn">
       <span><span class="btw-group-toggle">▶</span>CHANNEL BUTTONS</span>
-      <button class="btw-x" aria-label="close">×</button>
     </div>
     <div class="btw-group-body" data-group="btn">
 
@@ -3229,6 +3351,22 @@ body.fullscreen-mode .exit-fs-btn {
     </div>
     </div><!-- /.btw-body lp -->
     </div><!-- /.btw-group-body land -->
+
+    <div class="btw-group-divider"></div>
+    <div class="btw-group-head" data-group-toggle="dbtn">
+      <span><span class="btw-group-toggle">▶</span>DESKTOP BUTTONS</span>
+    </div>
+    <div class="btw-group-body" data-group="dbtn">
+    <div class="btw-section-label">narrow desktop (window &lt; 1280px)</div>
+    <div class="btw-row">
+      <label>height<input type="range" min="0.3" max="2" step="0.05" data-key="d-btnPady" value="${dbInitial.btnPady}"><span class="btw-v"></span></label>
+    </div>
+    <div class="btw-anchor-head">
+      <span class="btw-section-label" style="margin:0;">anchors (width &rarr; height)</span>
+      <button class="btw-drop-anchor" id="btwDropAnchor" type="button">+ drop here</button>
+    </div>
+    <div class="btw-anchors" id="btwAnchors"></div>
+    </div><!-- /.btw-group-body dbtn -->
   `;
   Object.assign(w.style, {
     position: 'fixed', left: '0', right: '0', bottom: '0', zIndex: 9999,
@@ -3256,6 +3394,18 @@ body.fullscreen-mode .exit-fs-btn {
     #btn-style-widget .btw-eyedrop { width:100%; margin-top:2px; background:rgba(255,240,200,0.08); border:1px solid rgba(255,240,200,0.22); color:#f0e6d2; font:10px/1 -apple-system,Menlo,monospace; padding:3px 4px; border-radius:3px; cursor:pointer; letter-spacing:0.04em; }
     #btn-style-widget .btw-eyedrop:hover { background:rgba(255,240,200,0.18); }
     body.no-eyedrop #btn-style-widget .btw-eyedrop { display:none; }
+    /* Anchor list — auto-captured (viewport width, slider value) pairs.
+       Released-on-change so quick scrubs don't spam entries. Sorted
+       wide→narrow so the list reads like a media-query plan. */
+    #btn-style-widget .btw-anchors { display:flex; flex-wrap:wrap; gap:4px; margin-top:6px; }
+    #btn-style-widget .btw-anchors:empty::before { content:'no anchors yet — release the slider to capture'; font-size:10px; opacity:0.4; font-style:italic; }
+    #btn-style-widget .btw-anchor { display:inline-flex; align-items:center; gap:2px; font-size:10px; padding:2px 4px 2px 6px; background:rgba(255,240,200,0.10); border:1px solid rgba(255,240,200,0.18); border-radius:3px; font-variant-numeric:tabular-nums; }
+    #btn-style-widget .btw-anchor button { background:none; border:0; color:#f0e6d2; opacity:0.5; cursor:pointer; padding:0 4px; font:inherit; line-height:1; }
+    #btn-style-widget .btw-anchor button:hover { opacity:1; }
+    #btn-style-widget .btw-anchor-head { display:flex; align-items:center; gap:10px; margin:8px 0 -2px; }
+    #btn-style-widget .btw-drop-anchor { background:rgba(255,240,200,0.10); border:1px solid rgba(255,240,200,0.22); color:#f0e6d2; font:10px/1 -apple-system,Menlo,monospace; padding:4px 9px; border-radius:3px; cursor:pointer; letter-spacing:0.04em; }
+    #btn-style-widget .btw-drop-anchor:hover { background:rgba(255,240,200,0.20); }
+    #btn-style-widget .btw-drop-anchor:active { background:rgba(255,240,200,0.30); }
     #btn-style-widget .btw-x { background:#3a2a1a; color:#f0e6d2; border:0; padding:6px 10px; border-radius:4px; font:inherit; cursor:pointer; }
     #btn-style-widget .btw-divider { height:1px; background:rgba(255,240,200,0.10); margin:8px 0 6px; }
     #btn-style-widget .btw-head:not(:first-child) { margin-top:0; }
@@ -3273,6 +3423,25 @@ body.fullscreen-mode .exit-fs-btn {
     #btn-style-widget .btw-group-body { display:none; padding-left:6px; }
     #btn-style-widget .btw-group-body.open { display:block; }
     #btn-style-widget .btw-group-divider { height:1px; background:rgba(255,240,200,0.28); margin:14px 0 10px; }
+    /* Mode toggle bar — pick which viewport's controls are visible
+       (and which sub-set of mode-aware sliders to edit). */
+    #btn-style-widget .btw-mode-bar { display:flex; gap:6px; align-items:center; margin-bottom:10px; }
+    #btn-style-widget .btw-mode-btn { background:#3a2a1a; color:#f0e6d2; border:1px solid rgba(255,240,200,0.22); padding:5px 12px; border-radius:4px; font:inherit; cursor:pointer; opacity:0.55; letter-spacing:0.06em; }
+    #btn-style-widget .btw-mode-btn.active { opacity:1; background:#5a4424; border-color:rgba(255,240,200,0.6); }
+    #btn-style-widget .btw-mode-bar .btw-x { margin-left:0; }
+    #btn-style-widget .btw-vp { font:10px/1 -apple-system,Menlo,monospace; opacity:0.55; letter-spacing:0.04em; margin-left:auto; padding:0 8px; }
+    /* Mode = desktop: hide mobile-only groups + sub-sections.
+       DESKTOP BUTTONS group + its preceding divider stay visible. */
+    #btn-style-widget[data-mode="desktop"] .btw-group-head[data-group-toggle="btn"],
+    #btn-style-widget[data-mode="desktop"] .btw-group-body[data-group="btn"],
+    #btn-style-widget[data-mode="desktop"] .btw-group-head[data-group-toggle="land"],
+    #btn-style-widget[data-mode="desktop"] .btw-group-body[data-group="land"],
+    #btn-style-widget[data-mode="desktop"] .btw-head[data-toggle="tv"],
+    #btn-style-widget[data-mode="desktop"] .btw-body[data-section="tv"],
+    #btn-style-widget[data-mode="desktop"] .btw-divider { display:none; }
+    /* Mode = mobile: hide DESKTOP BUTTONS group (it's desktop-only). */
+    #btn-style-widget[data-mode="mobile"] .btw-group-head[data-group-toggle="dbtn"],
+    #btn-style-widget[data-mode="mobile"] .btw-group-body[data-group="dbtn"] { display:none; }
   `;
   if (tuneVisible) document.head.appendChild(s);
 
@@ -3414,12 +3583,58 @@ body.fullscreen-mode .exit-fs-btn {
     try { localStorage.setItem(LP_STORAGE_KEY, JSON.stringify(lpState)); } catch {}
   };
 
+  // ── DESKTOP BUTTONS apply pass ────────────────────────────────────
+  const dbState = { ...dbInitial };
+  const applyDesktopButtons = () => {
+    // Slider at default (1.3) → unset the var so the CSS clamp() curve
+    // applies. Any other value → override with that flat cqi value
+    // across the whole narrow band (useful for one-off retuning).
+    if (dbState.btnPady === dbDefaults.btnPady) {
+      document.documentElement.style.removeProperty('--narrow-btn-pady');
+    } else {
+      document.documentElement.style.setProperty('--narrow-btn-pady', dbState.btnPady + 'cqi');
+    }
+  };
+  const DB_KEY_PREFIX = 'd-';
+  const persistDb = () => {
+    try { localStorage.setItem(DB_STORAGE_KEY, JSON.stringify(dbState)); } catch {}
+  };
+
+  // ── DESKTOP BUTTONS anchors — auto-capture (vw, value) pairs ──────
+  // Captures on the slider's 'change' event (release), not 'input', so
+  // a scrub doesn't litter the list. If an existing anchor is within
+  // 20px of the current viewport width, it's overwritten — keeps the
+  // list a clean per-breakpoint plan rather than a scrub log.
+  const DB_ANCHORS_KEY = 'pp-db-anchors';
+  let dbAnchors = (() => {
+    try { return JSON.parse(localStorage.getItem(DB_ANCHORS_KEY) || '[]'); }
+    catch { return []; }
+  })();
+  const saveDbAnchors = () => {
+    try { localStorage.setItem(DB_ANCHORS_KEY, JSON.stringify(dbAnchors)); } catch {}
+  };
+  const renderDbAnchors = () => {
+    const container = w.querySelector('#btwAnchors');
+    if (!container) return;
+    container.innerHTML = [...dbAnchors]
+      .sort((a, b) => b.w - a.w)
+      .map(a => `<span class="btw-anchor">${a.w}px → ${a.v.toFixed(2)}<button data-w="${a.w}" type="button" title="remove">×</button></span>`)
+      .join('');
+  };
+
   // ── TELETEXT apply pass ───────────────────────────────────────────
   // Sets CSS variables on the .teletext-page element. Pulls from the
   // mobile or desktop sub-set based on current viewport so the same
   // teletext can be tuned to different sizes per breakpoint.
   const ttState = ttInitial;
-  const ttCurrent = () => ttIsMobile() ? ttState.mobile : ttState.desktop;
+  // ttModeOverride: when set to 'mobile' or 'desktop' by the widget's
+  // mode toggle, ttCurrent uses that sub-set regardless of viewport.
+  // null → auto-detect from viewport (default for end users).
+  let ttModeOverride = null;
+  const ttCurrent = () => {
+    const mode = ttModeOverride || (ttIsMobile() ? 'mobile' : 'desktop');
+    return ttState[mode];
+  };
   const applyTeletext = () => {
     const tt = document.querySelector('.teletext-page');
     if (!tt) return;
@@ -3456,7 +3671,7 @@ body.fullscreen-mode .exit-fs-btn {
       let text;
       if (k === 'shadow' || k === 'kerning' || k === 'ledHighlight' || k === 'btnHighlight') text = v.toFixed(2);
       else if (k === 'outline' || k === 'shadowX' || k === 'shadowY' || k === 'shadowBlur' || k === 'shadowSpreadX' || k === 'shadowSpreadY' || k === 'fontSize' || k === 'ledStroke' || k === 'ledRadius' || k === 'ledHighlightH' || k === 'vAlign') text = v.toFixed(1);
-      else if (k && (k.startsWith(TV_KEY_PREFIX) || k.startsWith(LP_KEY_PREFIX) || k.startsWith(TT_KEY_PREFIX))) text = v.toFixed(2);
+      else if (k && (k.startsWith(TV_KEY_PREFIX) || k.startsWith(LP_KEY_PREFIX) || k.startsWith(TT_KEY_PREFIX) || k.startsWith(DB_KEY_PREFIX))) text = v.toFixed(2);
       else text = v.toString();
       i.parentElement.querySelector('.btw-v').textContent = text;
     });
@@ -3475,6 +3690,9 @@ body.fullscreen-mode .exit-fs-btn {
       const xk = k.slice(TT_KEY_PREFIX.length);
       const cur = ttCurrent();
       if (cur[xk] !== undefined) input.value = cur[xk];
+    } else if (k.startsWith(DB_KEY_PREFIX)) {
+      const dk = k.slice(DB_KEY_PREFIX.length);
+      if (dbState[dk] !== undefined) input.value = dbState[dk];
     } else if (state[k] !== undefined) {
       input.value = state[k];
     }
@@ -3488,7 +3706,36 @@ body.fullscreen-mode .exit-fs-btn {
   }
   applyLandscape();
   applyTeletext();
+  applyDesktopButtons();
+  renderDbAnchors();
   refreshReadouts();
+
+  // Manual anchor capture: + drop here button reads current viewport
+  // width + current d-btnPady value and adds (or overwrites if within
+  // 20px of an existing anchor's width).
+  const dropBtn = w.querySelector('#btwDropAnchor');
+  if (dropBtn) {
+    dropBtn.addEventListener('click', () => {
+      const wd = window.innerWidth;
+      const v = dbState.btnPady;
+      const idx = dbAnchors.findIndex(a => Math.abs(a.w - wd) < 20);
+      if (idx >= 0) dbAnchors[idx] = { w: wd, v };
+      else dbAnchors.push({ w: wd, v });
+      saveDbAnchors();
+      renderDbAnchors();
+    });
+  }
+  const anchorsEl = w.querySelector('#btwAnchors');
+  if (anchorsEl) {
+    anchorsEl.addEventListener('click', e => {
+      const btn = e.target.closest('button[data-w]');
+      if (!btn) return;
+      const wd = +btn.dataset.w;
+      dbAnchors = dbAnchors.filter(a => a.w !== wd);
+      saveDbAnchors();
+      renderDbAnchors();
+    });
+  }
 
   const persist = () => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
@@ -3517,6 +3764,13 @@ body.fullscreen-mode .exit-fs-btn {
         applyLandscape();
         refreshReadouts();
         persistLp();
+        return;
+      }
+      if (k.startsWith(DB_KEY_PREFIX)) {
+        dbState[k.slice(DB_KEY_PREFIX.length)] = v;
+        applyDesktopButtons();
+        refreshReadouts();
+        persistDb();
         return;
       }
       state[k] = v;
@@ -3580,6 +3834,33 @@ body.fullscreen-mode .exit-fs-btn {
   else if (isLandscapePhone || isTouchSmall) { defaultGroup = 'land';   defaultSection = 'lp'; }
   openGroup(defaultGroup);
   openSection(defaultSection);
+
+  // ── Mode toggle (MOBILE / DESKTOP) ────────────────────────────────
+  // Drives which accordion groups are visible AND which sub-set the
+  // teletext sliders edit. Default follows current viewport so the
+  // widget opens to relevant controls without a click.
+  const setMode = (mode) => {
+    w.dataset.mode = mode;
+    w.querySelectorAll('.btw-mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+    ttModeOverride = mode;
+    syncTtSliders();
+    applyTeletext();
+    refreshReadouts();
+    reserveAfterToggle();
+  };
+  w.querySelectorAll('.btw-mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => setMode(btn.dataset.mode));
+  });
+  setMode(isPortraitMobile ? 'mobile' : 'desktop');
+
+  // Live viewport-size readout in the mode bar — handy when tuning
+  // for specific widths ("at 1080 the height should be X").
+  const vpEl = w.querySelector('#btwVp');
+  const updateVp = () => {
+    if (vpEl) vpEl.textContent = window.innerWidth + ' × ' + window.innerHeight;
+  };
+  updateVp();
+  window.addEventListener('resize', updateVp);
 
   // ── EyeDropper buttons ────────────────────────────────────────────
   // Native browser API for picking an on-screen colour. Chromium-only
