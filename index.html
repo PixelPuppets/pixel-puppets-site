@@ -221,21 +221,18 @@ html, body {
   outline: none;
 }
 
-/* Brand-matched keyboard focus indicator. Uses :focus-visible so it
-   only shows on actual keyboard navigation (Tab key) — sighted mouse
-   users never see a focus ring. The amber/warm cream palette echoes
-   the chassis highlight so it reads as part of the brand rather than
-   a default browser blue ring. WCAG 2.4.7 (Focus Visible). */
+/* Keyboard focus indicator — gov.uk pattern. Bright yellow outline
+   plus a black bar underneath via box-shadow. Yellow gives high
+   contrast on dark backgrounds (chassis, channel buttons, video
+   surface); the black bar gives contrast on light backgrounds (the
+   cream page bg). Result is a focus ring that's clearly visible
+   regardless of where on the page focus lands. Uses :focus-visible
+   so mouse users never see it — only triggered by keyboard nav.
+   WCAG 2.4.7 (Focus Visible) + 2.4.13 (Focus Appearance, AAA). */
 :focus-visible {
-  outline: 2px solid #ffb15a;
-  outline-offset: 3px;
-  border-radius: 2px;
-}
-/* Channel buttons already have a subtle border-radius — match it on
-   the focus ring so the outline curves with the button shape. */
-.channel-btn:focus-visible {
-  outline: 2px solid #ffb15a;
-  outline-offset: 2px;
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  box-shadow: 0 -2px #ffdd00, 0 4px #0b0c0c;
 }
 /* The TV screen target for the skip link — when the user clicks
    "Skip to main content", focus lands inside the screen area. The
@@ -244,6 +241,7 @@ html, body {
    the screen container itself; the content inside is what matters. */
 #tv-screen:focus-visible {
   outline: none;
+  box-shadow: none;
 }
 
 .page {
@@ -2462,12 +2460,20 @@ body.fullscreen-mode .exit-fs-btn {
 </div>
 
 <script>
-// ─── Skip link click handler ─────────────────────────────────────────────
-// The skip link is a <button> (not <a href>) so it's always tab-focusable
-// in Safari regardless of the "Press Tab to highlight each item on a
-// webpage" preference (that filter only applies to <a> links). Click
-// handler scrolls + focuses the target; activates on click, Enter, or
-// Space (all native button behaviour).
+// ─── Skip link click handler + Safari Tab bootstrap ──────────────────────
+// Click handler scrolls + focuses the target; activates on click, Enter,
+// or Space (all native button behaviour).
+//
+// Safari Tab bootstrap: Safari's "Press Tab to highlight each item on a
+// webpage" preference is OFF by default and filters ALL non-form
+// interactive elements (links + buttons) out of the Tab order. So the
+// first Tab from the URL bar / page load doesn't focus our skip-link
+// button at all. To paper over that without breaking subsequent Tab
+// nav, we listen for the FIRST Tab keypress only — if focus is still
+// at body/html (nothing else focused yet), force-focus the skip link.
+// After that one fire, the listener is dormant for the rest of the
+// session so it can't interfere with normal Tab continuation through
+// the page (which is what broke things last time).
 (() => {
   document.querySelectorAll('.skip-link[data-skip-to]').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -2477,6 +2483,21 @@ body.fullscreen-mode .exit-fs-btn {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       target.focus();
     });
+  });
+
+  let firstTabHandled = false;
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab' || e.shiftKey || firstTabHandled) return;
+    firstTabHandled = true;  // Fire once per page load, then sit out.
+    const skip = document.querySelector('.skip-link');
+    if (!skip) return;
+    const ae = document.activeElement;
+    // Only force-focus the skip link if focus is still at the page root.
+    // If anything inside the page is already focused, leave Tab alone.
+    if (ae === document.body || ae === document.documentElement || ae === null) {
+      e.preventDefault();
+      skip.focus();
+    }
   });
 })();
 
