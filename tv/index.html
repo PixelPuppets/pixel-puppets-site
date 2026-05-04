@@ -3172,6 +3172,32 @@ body.fullscreen-mode .exit-fs-btn {
   }
   const ttIsMobile = () => window.matchMedia('(max-width: 720px)').matches;
 
+  // ── Auto-invalidate stored tune state when code defaults change ──
+  // Without this, localStorage masks new code defaults: you bake a
+  // tuned value, push, but your own browser keeps showing the old
+  // stored value because it's merged on top of the new default. The
+  // hash below covers every default object — if any value changes, the
+  // hash changes, all stored tune keys are wiped, and the *Initial
+  // vars get reset to fresh code defaults. End users (no localStorage)
+  // were always seeing the latest code; this just makes your view
+  // match theirs without manual cache-clears.
+  const _tuneSig = (() => {
+    const blob = JSON.stringify([defaults, tvDefaults, lpDefaults, dbDefaults, ttDefaultsMobile, ttDefaultsDesktop]);
+    let h = 5381;
+    for (let i = 0; i < blob.length; i++) h = ((h << 5) + h + blob.charCodeAt(i)) | 0;
+    return h.toString(36);
+  })();
+  const _tuneSigKey = 'pp-tune-sig';
+  if (localStorage.getItem(_tuneSigKey) !== _tuneSig) {
+    ['pp-btn-style','pp-tv-text','pp-landscape-style','pp-teletext','pp-desktop-buttons','pp-db-anchors'].forEach(k => localStorage.removeItem(k));
+    localStorage.setItem(_tuneSigKey, _tuneSig);
+    initial   = { ...defaults };
+    tvInitial = { ...tvDefaults };
+    lpInitial = { ...lpDefaults };
+    dbInitial = { ...dbDefaults };
+    ttInitial = { mobile: { ...ttDefaultsMobile }, desktop: { ...ttDefaultsDesktop } };
+  }
+
   const w = document.createElement('div');
   w.id = 'btn-style-widget';
   w.innerHTML = `
