@@ -3030,7 +3030,9 @@ body.fullscreen-mode .exit-fs-btn {
 // Hidden for end users — visit the page with `?tune` once to enable
 // (the flag persists via localStorage), or `?untune` to switch it back
 // off. State carries over between sessions so a future tune pass starts
-// where the last one left off.
+// where the last one left off. No token: worst case a curious visitor
+// flips it on and breaks their own session, which a refresh + ?untune
+// fixes — they can't affect anyone else's view of the site.
 (() => {
   // Run on every viewport so the teletext layout pass can apply on
   // desktop too. Inner apply() / applyTv() passes are still gated on
@@ -3041,14 +3043,8 @@ body.fullscreen-mode .exit-fs-btn {
   const isPortraitMobile = window.matchMedia('(max-width: 720px)').matches;
   const isLandscapePhone = window.matchMedia('(orientation: landscape) and (max-height: 500px) and (max-width: 1100px)').matches;
   const isTouchSmall     = window.matchMedia('(max-width: 1280px) and (pointer: coarse)').matches;
-  // Tune-widget access token. End users can't enable the widget by
-  // discovering `?tune` — they need the right value. Change this
-  // string if it ever leaks; doing so doesn't affect anyone whose
-  // localStorage.pp-tune flag is already set (their session stays
-  // enabled until they ?untune).
-  const TUNE_TOKEN = 'puppet';
   const params = new URL(location.href).searchParams;
-  if (params.get('tune') === TUNE_TOKEN) localStorage.setItem('pp-tune', '1');
+  if (params.has('tune'))   localStorage.setItem('pp-tune', '1');
   if (params.has('untune')) localStorage.removeItem('pp-tune');
   // apply() always runs so the page renders with tuned styling; the
   // widget UI itself is only inserted when tuneVisible is true.
