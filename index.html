@@ -3550,16 +3550,16 @@ body.fullscreen-mode .exit-fs-btn {
       desktop: { ...ttDefaultsDesktop },
     };
   }
-  // Teletext "mobile" applies whenever the user is on a phone-sized
-  // viewport — including landscape phone (which is wider than 720px
-  // but still fundamentally a phone screen). Desktop teletext values
-  // are tuned for actual desktop monitors (>1100px wide); using them
-  // on a landscape phone gives readable-on-laptop sizes that look
-  // wrong on a 932-wide handset. Match the same media condition the
-  // CSS landscape-phone band uses so the two stay in lockstep.
-  const ttIsMobile = () => window.matchMedia(
-    '(max-width: 720px), (orientation: landscape) and (max-height: 500px) and (max-width: 1100px)'
-  ).matches;
+  // Teletext "mobile" sub-set applies on portrait phone (max-width
+  // 720px). Landscape phone uses the desktop sub-set — at landscape
+  // phone width (~932px on iPhone 17 Pro Max) the chassis container
+  // is ~884px wide, and desktop teletext values (2.4cqw bodyFs) hit
+  // ~21px which fits the cramped landscape height. Mobile values
+  // (3.5cqw) on the same container would render at ~31px which
+  // overflows the screen. The teletext sub-set is intentionally
+  // tied to container width via cqw, so the right split is by
+  // container width rather than "is this a phone" device-class.
+  const ttIsMobile = () => window.matchMedia('(max-width: 720px)').matches;
 
   // ── Auto-invalidate stored tune state when code defaults change ──
   // Without this, localStorage masks new code defaults: you bake a
