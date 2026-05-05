@@ -4300,7 +4300,21 @@ body.fullscreen-mode .exit-fs-btn {
   w.querySelectorAll('.btw-mode-btn').forEach(btn => {
     btn.addEventListener('click', () => setMode(btn.dataset.mode));
   });
-  setMode(isPortraitMobile ? 'mobile' : 'desktop');
+  // Initial mode setup — ONLY when the tune widget is actually visible.
+  // setMode sets ttModeOverride which forces ttCurrent() to ignore the
+  // viewport-driven ttIsMobile() check forever after. For end users
+  // (widget hidden) this would freeze the teletext into whichever mode
+  // was active at first load, breaking rotation entirely. Gating the
+  // init call behind tuneVisible keeps ttModeOverride null for end
+  // users so ttCurrent naturally follows ttIsMobile() and rotation
+  // works. Tuners get the same behaviour they always had: widget
+  // opens to the relevant mode based on current viewport.
+  // Also use ttIsMobile() rather than isPortraitMobile so landscape
+  // phone gets MOBILE mode (matching the teletext sub-set ttCurrent
+  // would naturally pick), not DESKTOP.
+  if (tuneVisible) {
+    setMode(ttIsMobile() ? 'mobile' : 'desktop');
+  }
 
   // Live viewport-size readout in the mode bar — handy when tuning
   // for specific widths ("at 1080 the height should be X").
