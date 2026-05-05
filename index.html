@@ -4401,13 +4401,15 @@ body.fullscreen-mode .exit-fs-btn {
   });
 
   // iOS Safari belt-and-braces: matchMedia change events sometimes
-  // don't fire reliably on orientation flips, leaving inline styles
-  // from the previous orientation stuck on the page until reload.
-  // orientationchange + resize cover the gaps. Debounced so we don't
-  // spam apply() during continuous resize on desktop. Only re-runs
-  // when the matched breakpoint actually changed since last call —
-  // pure scroll / window-shrink within the same breakpoint shouldn't
-  // re-fire the heavy apply pass.
+  // don't fire reliably on orientation flips, AND when they do fire
+  // the viewport metrics can be reported with new dimensions while
+  // the layout reflow hasn't fully settled — so applyTeletext runs
+  // against a still-transitioning state and bakes in wrong sizes
+  // (text too big or too small for the new orientation).
+  // Two-stage fix: first run on the orientationchange event for
+  // the immediate response, then a settle pass via setTimeout once
+  // the layout has definitely finished reflowing. Only re-runs when
+  // the matched breakpoint actually changed.
   let lastBreakpointKey = null;
   const breakpointKey = () =>
     (portraitMQ.matches      ? 'P' : '_') +
@@ -4415,14 +4417,20 @@ body.fullscreen-mode .exit-fs-btn {
     (touchSmallMQ.matches    ? 'T' : '_');
   lastBreakpointKey = breakpointKey();
   let resizeRaf = null;
+  const settleAndReapply = () => {
+    const k = breakpointKey();
+    if (k === lastBreakpointKey) return;
+    lastBreakpointKey = k;
+    reapplyForCurrentMode();
+    // Settle pass — by 250ms post-rotation, iOS Safari has finished
+    // its viewport reflow and container queries are accurate.
+    // Re-running here catches any apply pass that ran on stale
+    // viewport metrics during the transition.
+    setTimeout(reapplyForCurrentMode, 250);
+  };
   const handleViewportShift = () => {
     if (resizeRaf) cancelAnimationFrame(resizeRaf);
-    resizeRaf = requestAnimationFrame(() => {
-      const k = breakpointKey();
-      if (k === lastBreakpointKey) return;
-      lastBreakpointKey = k;
-      reapplyForCurrentMode();
-    });
+    resizeRaf = requestAnimationFrame(settleAndReapply);
   };
   window.addEventListener('orientationchange', handleViewportShift);
   window.addEventListener('resize', handleViewportShift);
