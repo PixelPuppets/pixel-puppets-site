@@ -4390,6 +4390,33 @@ body.fullscreen-mode .exit-fs-btn {
   [portraitMQ, landscapePhoneMQ, touchSmallMQ].forEach(mq => {
     mq.addEventListener('change', reapplyForCurrentMode);
   });
+
+  // iOS Safari belt-and-braces: matchMedia change events sometimes
+  // don't fire reliably on orientation flips, leaving inline styles
+  // from the previous orientation stuck on the page until reload.
+  // orientationchange + resize cover the gaps. Debounced so we don't
+  // spam apply() during continuous resize on desktop. Only re-runs
+  // when the matched breakpoint actually changed since last call —
+  // pure scroll / window-shrink within the same breakpoint shouldn't
+  // re-fire the heavy apply pass.
+  let lastBreakpointKey = null;
+  const breakpointKey = () =>
+    (portraitMQ.matches      ? 'P' : '_') +
+    (landscapePhoneMQ.matches ? 'L' : '_') +
+    (touchSmallMQ.matches    ? 'T' : '_');
+  lastBreakpointKey = breakpointKey();
+  let resizeRaf = null;
+  const handleViewportShift = () => {
+    if (resizeRaf) cancelAnimationFrame(resizeRaf);
+    resizeRaf = requestAnimationFrame(() => {
+      const k = breakpointKey();
+      if (k === lastBreakpointKey) return;
+      lastBreakpointKey = k;
+      reapplyForCurrentMode();
+    });
+  };
+  window.addEventListener('orientationchange', handleViewportShift);
+  window.addEventListener('resize', handleViewportShift);
 })();
 
 </script>
