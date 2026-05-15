@@ -642,15 +642,7 @@ body.boundary-mode .boundary-box { display: block; }
   font-weight: 700;
   line-height: 0.88;
   letter-spacing: 0.04em;
-}
-/* Lead word (e.g. SHAMAZON above MATT) gets dropped to ~55% so a longer
-   first word and a short second word read as a balanced two-line block
-   instead of a wide-narrow stack. Scales with parent font-size so it
-   tracks the responsive cqi sizing. */
-.show-title .lead {
-  font-size: 0.55em;
-  letter-spacing: 0.04em;
-  /* Softer than pure black — desaturated dark navy reads as shadow without
+  /* Softer than pure black, desaturated dark navy reads as shadow without
      screaming against the warm yellow. 4-cardinal outline + hard offset. */
   text-shadow:
     -0.18cqi -0.18cqi 0 #262F37,
@@ -661,6 +653,16 @@ body.boundary-mode .boundary-box { display: block; }
      0.65cqi  0.65cqi 0 rgba(38, 47, 55, 0.45);
   pointer-events: none;
   user-select: none;
+}
+/* Lead word (e.g. SHAMAZON above MATT) gets dropped so a longer first word
+   and a short second word read as a balanced two-line block. Scales with
+   parent font-size so it tracks the responsive cqi sizing. Outline + other
+   inherited bits come down from .show-title above. display:inline-block
+   lets us add margin-bottom to open the gap above MATT. */
+.show-title .lead {
+  display: inline-block;
+  font-size: 0.7em;
+  margin-bottom: 0.15em;
 }
 .show-overlay .desc {
   font-family: 'Euclid', sans-serif;
