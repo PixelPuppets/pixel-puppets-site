@@ -642,6 +642,14 @@ body.boundary-mode .boundary-box { display: block; }
   font-weight: 700;
   line-height: 0.88;
   letter-spacing: 0.04em;
+}
+/* Lead word (e.g. SHAMAZON above MATT) gets dropped to ~55% so a longer
+   first word and a short second word read as a balanced two-line block
+   instead of a wide-narrow stack. Scales with parent font-size so it
+   tracks the responsive cqi sizing. */
+.show-title .lead {
+  font-size: 0.55em;
+  letter-spacing: 0.04em;
   /* Softer than pure black — desaturated dark navy reads as shadow without
      screaming against the warm yellow. 4-cardinal outline + hard offset. */
   text-shadow:
@@ -2283,7 +2291,7 @@ body.fullscreen-mode .exit-fs-btn {
           </div>
         </div>
 
-        <h2 class="show-title" id="overlayTitle">SHAMAZON<br>MATT</h2>
+        <h2 class="show-title" id="overlayTitle"><span class="lead">SHAMAZON</span><br>MATT</h2>
         <div class="show-overlay" id="showOverlay">
           <div class="desc" id="overlayDesc">
             <p>A live performance format built around real-time digital puppetry, surreal comedy, and audience interaction.</p>
@@ -2516,7 +2524,7 @@ body.fullscreen-mode .exit-fs-btn {
     home: {
       strap: 'ON AIR SOON',
       episode: 'PILOT PREVIEW',
-      title: 'SHAMAZON<br>MATT',
+      title: '<span class="lead">SHAMAZON</span><br>MATT',
       body: '<p>A live performance format built around real-time digital puppetry, surreal comedy, and audience interaction.</p>',
       video: 'assets/driving-into-people-web.mp4',
     },
