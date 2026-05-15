@@ -90,11 +90,11 @@
   "@context": "https://schema.org",
   "@type": "VideoObject",
   "name": "Pixel Puppets — Unreal Engine R&D footage",
-  "description": "Silent looping research-and-development video shot inside Unreal Engine. Opens on a house in the countryside looking out at a city in the distance, then a first-person view of the player entering a car and driving from countryside into city — an open-world get-into-a-car-and-drive dynamic. The lighting shifts from bright daylight to a darker neon city as the player arrives, then back to the warm countryside on the return drive. Children's-TV warm, friendly, brightly-lit aesthetic throughout, set against the city's neon contrast. In-engine R&D, not finished show content.",
+  "description": "Looping research-and-development clip shot inside Unreal Engine. Opens in third person with show lead Shamazon Matt running past a parked car in stylised countryside, then cuts to a first-person driving sequence where the player ploughs into pedestrians, scenery characters and roadside flower planters in a slapstick drive-into-people beat that prototypes a recurring comedy mechanic. Audio is in-engine SFX only (footsteps, engine, impacts), no narration. Warm children's-TV aesthetic. In-engine R&D, not finished show content.",
   "thumbnailUrl": "https://pixelpuppets.co/assets/tv-content.jpeg",
-  "contentUrl": "https://pixelpuppets.co/assets/episode-01-web.mp4",
-  "uploadDate": "2026-05-01",
-  "duration": "PT1M",
+  "contentUrl": "https://pixelpuppets.co/assets/driving-into-people-web.mp4",
+  "uploadDate": "2026-05-15",
+  "duration": "PT31S",
   "isFamilyFriendly": true,
   "inLanguage": "en-GB",
   "publisher": { "@type": "TheaterGroup", "name": "Pixel Puppets", "url": "https://pixelpuppets.co" }
@@ -2256,20 +2256,23 @@ body.fullscreen-mode .exit-fs-btn {
       <!-- Screen content (behind the chassis, visible through the cutout) -->
       <div class="screen-area screen" id="tv-screen" tabindex="-1">
         <video class="show" id="screenVideo"
-               src="assets/episode-01-web.mp4"
+               src="assets/driving-into-people-web.mp4"
                poster="assets/tv-content.jpeg"
                preload="metadata"
                aria-describedby="videoDesc"
                autoplay muted loop playsinline></video>
 
-        <!-- Silent video, so blind / low-vision visitors get a textual
-             description of what the home channel is showing. The video
-             is R&D inside Unreal Engine — describing it here gives
-             screen reader users the same "look at this" moment a
-             sighted visitor gets when the looping clip plays. WCAG
-             1.2.5 (Audio Description) adapted for silent video. -->
+        <!-- Looping R&D video, so blind / low-vision visitors get a
+             textual description of what the home channel is showing.
+             The video is R&D inside Unreal Engine. Describing it here
+             gives screen reader users the same "look at this" moment a
+             sighted visitor gets when the looping clip plays. Audio is
+             in-engine SFX only (no dialogue), so no caption track is
+             needed; the chassis volume slider controls playback level.
+             WCAG 1.2.5 (Audio Description) adapted for a clip with no
+             spoken narration. -->
         <p id="videoDesc" class="sr-only">
-          The home channel plays a silent looping video showing research and development inside Unreal Engine. The shot opens on a house in the countryside looking out at a city in the distance. A first-person view shows the player walking up to and entering a car, then driving from the countryside into the city — demonstrating an open-world get-into-a-car-and-drive dynamic. As the player arrives, the lighting state shifts from bright daylight to a darker night-time city full of neon. The drive then continues back out of the city to the countryside. Throughout, the world has the warm, friendly, brightly-lit aesthetic of children's TV, with the city's neon-noir contrasting against the gentle countryside. This is in-engine R&D footage, not finished show content.
+          The home channel plays a looping research-and-development clip from inside Unreal Engine. It opens in third person with the show's lead character, Shamazon Matt, running along a stone path past a parked yellow car in a stylised countryside. The view then switches to a first-person driving sequence inside a chunky cartoon vehicle, picking up speed through warm rolling hills with a fairytale castle on the horizon. As the drive continues, the player ploughs into pedestrians, scenery characters and roadside flower planters, sending them tumbling into the air in a slapstick drive-into-people beat that prototypes a recurring comedy mechanic. Audio is in-engine SFX only (footsteps, engine noise and impacts), no narration. The world holds the warm, friendly, brightly-lit aesthetic of children's TV throughout. This is in-engine R&D footage, not finished show content.
         </p>
 
         <div class="now-playing" id="nowPlaying">
@@ -2331,10 +2334,11 @@ body.fullscreen-mode .exit-fs-btn {
           <div class="time" id="timeDisplay" aria-hidden="true">0:00 / 0:00</div>
           <div class="icon-cluster">
             <!-- CC + fullscreen are decorative chassis affordances rather
-                 than essential controls. The home video is silent (no
-                 caption track to toggle) and screen-reader / keyboard
-                 users have native browser shortcuts (F for fullscreen,
-                 Esc to exit) so we don't need to compete with those.
+                 than essential controls. The home video has in-engine
+                 SFX but no dialogue, so there's no caption track to
+                 toggle, and screen-reader / keyboard users have native
+                 browser shortcuts (F for fullscreen, Esc to exit) so
+                 we don't need to compete with those.
                  aria-hidden + tabindex=-1 keeps them clickable for
                  sighted mouse users but out of the assistive-tech and
                  Tab-order paths. -->
@@ -2514,7 +2518,7 @@ body.fullscreen-mode .exit-fs-btn {
       episode: 'PILOT PREVIEW',
       title: 'PIXEL<br>PUPPETS',
       body: '<p>A live performance format built around real-time digital puppetry, surreal comedy, and audience interaction.</p>',
-      video: 'assets/episode-01-web.mp4',
+      video: 'assets/driving-into-people-web.mp4',
     },
     rehearsals: {
       strap: 'CH. 03',
@@ -3015,8 +3019,9 @@ body.fullscreen-mode .exit-fs-btn {
 // ─── Drag the VOLUME slider thumb ─────────────────────────────────────────
 // Horizontal drag along the track. Starts at MIN, holds whatever position
 // the user lets go at, and drives video.volume / video.muted in lockstep.
-// (The current pilot video has no audio track, so the volume change is a
-// no-op until we re-encode with audio — but the wiring is here.)
+// Starts at MIN so the video can autoplay (browsers block autoplay of
+// videos with audible sound); the user drags the slider up to hear the
+// in-engine SFX.
 (() => {
   // Map slider position (0.08 = MIN, 0.92 = MAX) → 0..1 volume.
   const MIN_REL = 0.08, MAX_REL = 0.92;
