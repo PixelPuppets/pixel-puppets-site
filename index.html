@@ -835,7 +835,8 @@ body.boundary-mode .boundary-box { display: block; }
   opacity: 0.85;
 }
 .player-controls .fullscreen-btn,
-.player-controls .cc-btn {
+.player-controls .cc-btn,
+.player-controls .mute-btn {
   background: none;
   border: 0;
   color: inherit;
@@ -847,6 +848,19 @@ body.boundary-mode .boundary-box { display: block; }
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
 .player-controls .fullscreen-btn { font-size: 14px; }
+.player-controls .mute-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.player-controls .mute-btn svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+.player-controls .mute-btn .mute-icon-muted { display: none; }
+.player-controls .mute-btn.is-muted .mute-icon-on { display: none; }
+.player-controls .mute-btn.is-muted .mute-icon-muted { display: block; }
 .player-controls .cc-btn {
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -864,7 +878,8 @@ body.boundary-mode .boundary-box { display: block; }
   text-decoration-thickness: 1px;
 }
 .player-controls .fullscreen-btn:hover,
-.player-controls .cc-btn:hover {
+.player-controls .cc-btn:hover,
+.player-controls .mute-btn:hover {
   opacity: 1;
   transform: scale(1.08);
 }
@@ -2343,15 +2358,25 @@ body.fullscreen-mode .exit-fs-btn {
           </div>
           <div class="time" id="timeDisplay" aria-hidden="true">0:00 / 0:00</div>
           <div class="icon-cluster">
-            <!-- CC + fullscreen are decorative chassis affordances rather
-                 than essential controls. The home video has in-engine
-                 SFX but no dialogue, so there's no caption track to
-                 toggle, and screen-reader / keyboard users have native
-                 browser shortcuts (F for fullscreen, Esc to exit) so
-                 we don't need to compete with those.
-                 aria-hidden + tabindex=-1 keeps them clickable for
-                 sighted mouse users but out of the assistive-tech and
-                 Tab-order paths. -->
+            <!-- Mute toggle: real functional control, in the tab order
+                 and announced to screen readers. On desktop the chassis
+                 volume slider also drives muted state; this button is
+                 the only volume affordance on mobile (knob row is
+                 display:none under 720px). Click toggles v.muted; if
+                 we're unmuting from a vol=0 slider state we also bump
+                 volume to 1 so the user actually hears something. -->
+            <button class="mute-btn is-muted" id="muteBtn" type="button" aria-label="Unmute">
+              <svg class="mute-icon-on" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm10.5 3a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 13.5 12zM11 3.23v2.06A7 7 0 0 1 16 12a7 7 0 0 1-5 6.71v2.06A9 9 0 0 0 18 12a9 9 0 0 0-7-8.77z"/>
+              </svg>
+              <svg class="mute-icon-muted" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3z"/>
+                <path stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none" d="M15 9l6 6m0-6l-6 6"/>
+              </svg>
+            </button>
+            <!-- CC toggles the title/description overlay card. Kept as
+                 part of the chassis controls, real action even if it
+                 isn't captions in the strict sense. -->
             <button class="cc-btn on" id="ccBtn" aria-hidden="true" tabindex="-1">CC</button>
             <button class="fullscreen-btn" id="fullscreenBtn" aria-hidden="true" tabindex="-1">⛶</button>
           </div>
@@ -3362,6 +3387,33 @@ body.fullscreen-mode .exit-fs-btn {
   }
 
   // ---- Captions toggle ----
+  // Mute toggle. Real control (not aria-hidden). Click flips v.muted;
+  // if we're unmuting from a vol=0 state (slider at MIN, the default on
+  // load), also bump volume to 1 so the user actually hears something.
+  // The button's visible state syncs off `volumechange` so it stays in
+  // step with the chassis volume slider on desktop too.
+  (function muteToggle() {
+    const btn = document.getElementById('muteBtn');
+    const v = document.getElementById('screenVideo');
+    if (!btn || !v) return;
+    const sync = () => {
+      const muted = v.muted || v.volume <= 0.001;
+      btn.classList.toggle('is-muted', muted);
+      btn.setAttribute('aria-label', muted ? 'Unmute' : 'Mute');
+      btn.setAttribute('aria-pressed', String(muted));
+    };
+    sync();
+    v.addEventListener('volumechange', sync);
+    btn.addEventListener('click', () => {
+      if (v.muted || v.volume <= 0.001) {
+        v.muted = false;
+        if (v.volume <= 0.001) v.volume = 1;
+      } else {
+        v.muted = true;
+      }
+    });
+  })();
+
   // CC button toggles body.captions-off, which hides the show-overlay
   // (the title + description card on the bottom of the screen).
   (function captions() {
